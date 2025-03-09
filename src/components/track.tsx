@@ -37,11 +37,25 @@ const Track: React.FC<TrackProps> = ({
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [localLikeCount, setLocalLikeCount] = useState(likeCount);
+    const [localPlayCount, setLocalPlayCount] = useState(playCount);
     const [userLiked, setUserLiked] = useState(userLikedTrack);
+    const [hasPlayed, setHasPlayed] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
-    const togglePlayPause = () => {
+    const togglePlayPause = async () => {
         if (audioRef.current) {
+            if (!isPlaying) {
+                if (!hasPlayed) {
+                    try {
+                        await api.post('/TrackPlay', { trackId: id });
+                        setLocalPlayCount((prevCount) => prevCount + 1);
+                        setHasPlayed(true);
+                    } catch (error) {
+                        console.error('Error updating play count:', error);
+                    }
+                }
+            }
+
             isPlaying ? audioRef.current.pause() : audioRef.current.play();
             setIsPlaying(!isPlaying);
         }
@@ -254,11 +268,11 @@ const Track: React.FC<TrackProps> = ({
                     size="small"
                     sx={{ minWidth: { xs: '40%', sm: 'auto' }, py: { xs: 1, sm: 0.5 } }}
                 >
-                    {playCount >= 1000000
-                        ? `${(playCount / 1000000).toFixed(1)}m`
-                        : playCount >= 1000
-                            ? `${(playCount / 1000).toFixed(1)}k`
-                            : playCount || 0}
+                    {localPlayCount >= 1000000
+                        ? `${(localPlayCount / 1000000).toFixed(1)}m`
+                        : localPlayCount >= 1000
+                            ? `${(localPlayCount / 1000).toFixed(1)}k`
+                            : localPlayCount || 0}
                 </Button>
                 <Button
                     startIcon={<FavoriteIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
