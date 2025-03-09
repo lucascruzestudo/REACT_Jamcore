@@ -1,17 +1,39 @@
-import { createTheme } from '@mui/material/styles'
+import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#E93434',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#1789FC',
+    },
+    background: {
+      default: '#FFFFFF',
+    },
+    success: {
+      main: '#4CAF50',
+    },
+    error: {
+      main: '#F44336',
     },
   },
   typography: {
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: 'Gabarito, Roboto, Arial, sans-serif',
+    h1: {
+      fontSize: '2.5rem',
+      fontWeight: 600,
+    },
   },
-})
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+        },
+      },
+    },
+  },
+});
 
-export default theme
+export default theme;

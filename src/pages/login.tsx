@@ -1,41 +1,44 @@
-
 import { useState } from 'react'
 import { useAuthStore } from '../store/auth'
 import { useNavigate } from 'react-router-dom'
-import { Button, IconButton, InputAdornment, TextField } from '@mui/material'
+import { Button, IconButton, InputAdornment, TextField, Typography, Box, Link } from '@mui/material'
 import { motion } from 'framer-motion'
-import styles from './login.styles'
+import styles from '../styles'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
-
-import toastService from '../services/toastservice'
+import AlertCard from '../components/alertcard'
 
 const Login = () => {
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState<{ username: string; password: string }>({ username: '', password: '' })
+  const [loginError, setLoginError] = useState<string>('')
+  const [successMessage, setSuccessMessage] = useState<string>('')
   const login = useAuthStore((state) => state.login)
   const navigate = useNavigate()
 
   const handleLogin = async () => {
     setErrors({ username: '', password: '' })
+    setLoginError('')
     
     if (!username) {
-      setErrors((prev) => ({ ...prev, username: 'Nome de usuário é obrigatório' }))
+      setErrors((prev) => ({ ...prev, username: 'informe seu nome de usuário' }))
     }
     if (!password) {
-      setErrors((prev) => ({ ...prev, password: 'Senha é obrigatória' }))
+      setErrors((prev) => ({ ...prev, password: 'informe sua senha' }))
     }
 
     if (!username || !password) return
 
     const success = await login(username, password)
     if (success) {
-      navigate('/dashboard')
-      toastService.success('Login realizado com sucesso!')
+      setSuccessMessage('autenticado com sucesso, vamos lá!')
+      setTimeout(() => {
+        navigate('/dashboard')
+      }, 2000)
     } else {
-      toastService.error('Login falhou! Verifique suas credenciais.')
+      setLoginError('opa, o login falhou... verifique suas credenciais.')
     }
   }
 
@@ -48,22 +51,21 @@ const Login = () => {
     >
       <img src="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-static//jamcorelogored.png" alt="Logo" style={styles.logo as React.CSSProperties} />
       <div style={styles.form as React.CSSProperties}>
+        {loginError && <AlertCard message={loginError} type="error" />}
+        {successMessage && <AlertCard message={successMessage} type="success" />}
         <TextField 
           fullWidth 
-          label="Nome de usuário" 
+          label="nome de usuário" 
           variant="standard" 
           sx={styles.textField}
           value={username} 
           onChange={(e) => setUsername(e.target.value)} 
           error={!!errors.username}
           helperText={errors.username}
-          FormHelperTextProps={{
-            sx: styles.helperText,
-          }}
         />
         <TextField 
           fullWidth 
-          label="Senha" 
+          label="senha" 
           type={showPassword ? 'text' : 'password'}
           variant="standard"
           sx={styles.textField}
@@ -71,32 +73,30 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)} 
           error={!!errors.password}
           helperText={errors.password}
-          FormHelperTextProps={{
-            sx: styles.helperText,
-          }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label="toggle password visibility"
-                  onClick={() => setShowPassword(!showPassword)}
-                  edge="end"
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }
           }}
         />
-        <Button 
-          fullWidth 
-          variant="contained" 
-          color="primary" 
-          sx={styles.button}
-          onClick={handleLogin}
-        >
-          Entrar
-        </Button>
+        <Box display="flex" alignItems="center" justifyContent="space-between" width="100%" mt={2}>
+          <Button variant="contained" color="primary" onClick={handleLogin}>
+            entrar na jam
+          </Button>
+          <Link href="/password-recovery" variant="body2" color="primary" underline="hover">
+            esqueci minha senha
+          </Link>
+        </Box>
+
+        <Typography variant="body2" sx={{ mt: 4 }}>
+          não possui conta? <Link href="/register" color="primary" underline="hover">inscrever-se</Link>
+        </Typography>
       </div>
     </motion.div>
   )

@@ -6,43 +6,49 @@ interface Styles {
   form: SxProps<Theme>;
   textField: SxProps<Theme>;
   button: SxProps<Theme>;
-  errorText: SxProps<Theme>;
   helperText: SxProps<Theme>;
 }
 
 const styles: Styles = {
   root: {
     backgroundColor: 'white',
-    height: '100vh',
+    minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 2,
+    textAlign: 'center',
   },
   logo: {
     marginBottom: 24,
-    width: '200px',
+    width: '50%',
+    maxWidth: '200px',
   },
   form: {
-    width: '100%',
+    width: '90%',
     maxWidth: '400px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 2,
   },
   textField: {
     marginBottom: 2,
+    width: '100%',
   },
   button: {
-    marginTop: 4,
+    marginTop: 3,
+    padding: '12px 0',
     backgroundColor: '#E93434',
     color: 'white',
-  },
-  errorText: {
-    color: '#E93434',
+    fontSize: '1rem',
+    width: '100%',
   },
   helperText: {
-    color: 'blue',
+    color: '#666666',
     marginTop: '4px',
-  },
+  }
 };
+
 
 export default styles;
