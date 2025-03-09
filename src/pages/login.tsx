@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuthStore } from '../store/auth'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { Button, IconButton, InputAdornment, TextField, Typography, Box, Link } from '@mui/material'
 import { motion } from 'framer-motion'
 import styles from '../styles'
@@ -35,7 +35,7 @@ const Login = () => {
     if (success) {
       setSuccessMessage('autenticado com sucesso, vamos lá!')
       setTimeout(() => {
-        navigate('/dashboard')
+        navigate('/feed')
       }, 2000)
     } else {
       setLoginError('opa, o login falhou... verifique suas credenciais.')
@@ -89,13 +89,13 @@ const Login = () => {
           <Button variant="contained" color="primary" onClick={handleLogin}>
             entrar na jam
           </Button>
-          <Link href="/password-recovery" variant="body2" color="primary" underline="hover">
+          <Link component={RouterLink} to="/password-recovery" variant="body2" color="primary" underline="hover">
             esqueci minha senha
           </Link>
         </Box>
 
         <Typography variant="body2" sx={{ mt: 4 }}>
-          não possui conta? <Link href="/register" color="primary" underline="hover">inscrever-se</Link>
+          não possui conta? <Link component={RouterLink} to="/register" color="primary" underline="hover">inscrever-se</Link>
         </Typography>
       </div>
     </motion.div>
