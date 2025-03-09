@@ -5,8 +5,11 @@ import PauseIcon from '@mui/icons-material/Pause';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import LinkIcon from '@mui/icons-material/Link';
+import api from '../services/api'
 
 interface TrackProps {
+    key: string;
+    id: string;
     title: string;
     tags: string[];
     audioFileUrl: string;
@@ -15,9 +18,11 @@ interface TrackProps {
     createdAt: string;
     likeCount: number;
     playCount: number;
+    userLikedTrack: boolean;
 }
 
 const Track: React.FC<TrackProps> = ({
+    id,
     imageUrl,
     title,
     audioFileUrl,
@@ -25,11 +30,14 @@ const Track: React.FC<TrackProps> = ({
     tags,
     createdAt,
     likeCount,
-    playCount
+    playCount,
+    userLikedTrack,
 }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [localLikeCount, setLocalLikeCount] = useState(likeCount);
+    const [userLiked, setUserLiked] = useState(userLikedTrack);
     const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const togglePlayPause = () => {
@@ -39,7 +47,17 @@ const Track: React.FC<TrackProps> = ({
         }
     };
 
-    const updateTime = (event: Event, newValue: number | number[]) => {
+    const toggleLike = async () => {
+        try {
+            await api.put(`/TrackLike`, { trackId: id });
+            setUserLiked(!userLiked);
+            setLocalLikeCount((prevCount) => (userLiked ? prevCount - 1 : prevCount + 1));
+        } catch (error) {
+            console.error('Error liking/unliking track:', error);
+        }
+    };
+
+    const updateTime = (_event: Event, newValue: number | number[]) => {
         if (audioRef.current && typeof newValue === 'number') {
             audioRef.current.currentTime = newValue;
             setCurrentTime(newValue);
@@ -154,8 +172,8 @@ const Track: React.FC<TrackProps> = ({
                             })()}
                             <Box
                                 sx={{
-                                    display: 'flex',
-                                    gap: 1,
+                                    display: 'inline-block',
+                                    ...(tags.length > 1 && { gap: 1 }),
                                 }}
                             >
                                 <Box
@@ -245,15 +263,22 @@ const Track: React.FC<TrackProps> = ({
                 <Button
                     startIcon={<FavoriteIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
                     variant="text"
-                    color="secondary"
+                    color={userLiked ? 'primary' : 'secondary'}
                     size="small"
                     sx={{ minWidth: { xs: '40%', sm: 'auto' }, py: { xs: 1, sm: 0.5 } }}
+                    onClick={() => {
+                        if (userLikedTrack) {
+                            toggleLike()
+                        } else {
+                            toggleLike()
+                        }
+                    }}
                 >
-                    {likeCount >= 1000000
-                        ? `${(likeCount / 1000000).toFixed(1)}m`
-                        : likeCount >= 1000
-                            ? `${(likeCount / 1000).toFixed(1)}k`
-                            : likeCount || 0}
+                    {localLikeCount >= 1000000
+                        ? `${(localLikeCount / 1000000).toFixed(1)}m`
+                        : localLikeCount >= 1000
+                            ? `${(localLikeCount / 1000).toFixed(1)}k`
+                            : localLikeCount || 0}
                 </Button>
                 <Button
                     startIcon={<ShareIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}

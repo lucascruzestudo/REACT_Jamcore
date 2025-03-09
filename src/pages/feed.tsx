@@ -1,40 +1,73 @@
+import { useEffect, useState } from 'react'
+import { Button, Container, Typography } from '@mui/material'
 import Track from '../components/track'
 import { useAuthStore } from '../store/auth'
-import { Button, Container, Typography } from '@mui/material'
+import api from '../services/api'
 
 export default function Feed() {
   const logout = useAuthStore((state) => state.logout)
 
+  const [tracks, setTracks] = useState<any[]>([])
+  const [pageNumber] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasNextPage, setHasNextPage] = useState(true)
+
+  const fetchTracks = async (pageNumber: number) => {
+    if (isLoading || !hasNextPage) return
+    setIsLoading(true)
+
+    try {
+      const response = await api.get('Track', {
+        params: {
+          pageNumber,
+          pageSize: 10,
+        },
+      })
+
+      if (pageNumber === 1) {
+        setTracks(response.data.data.tracks.items)
+      } else {
+        setTracks((prevTracks) => [...prevTracks, ...response.data.data.tracks.items])
+      }
+
+      setHasNextPage(response.data.data.tracks.hasNextPage)
+    } catch (error) {
+      console.error('Error fetching tracks:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchTracks(pageNumber)
+  }, [pageNumber])
+
   return (
     <Container maxWidth="sm">
       <Typography variant="h4" gutterBottom>
-        Bem-vindo ao Dashboard!
+        escute as jams mais recentes
       </Typography>
       <Button variant="contained" color="secondary" onClick={logout}>
-        Sair
+        sair
       </Button>
 
-      <Track
-        imageUrl="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-tracks//track_233cb71c-78f0-491f-a2ce-188f1b233322_image.jpg"
-        title="DO A CRIME"
-        audioFileUrl="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-tracks//track_233cb71c-78f0-491f-a2ce-188f1b233322_audio.mp3"
-        playCount={10000}
-        username="SYCHO"
-        tags={['trap', 'rap', 'hip-hop']}
-        likeCount={1000}
-        createdAt="2025-01-01"
-      />
+      {tracks.map((track) => (
+        <Track
+          key={track.id}
+          id={track.id}
+          imageUrl={track.imageUrl}
+          title={track.title}
+          audioFileUrl={track.audioFileUrl}
+          playCount={track.playCount}
+          username={track.username}
+          tags={track.tags}
+          likeCount={track.likeCount}
+          createdAt={track.createdAt}
+          userLikedTrack={track.userLikedTrack}
+        />
+      ))}
 
-      <Track
-        imageUrl="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-tracks/track_68a8de33-4025-4e4a-8c77-bbb9531e5a16_image.jpg"
-        title="SOUDIERE - CANT UNDERSTAND"
-        audioFileUrl="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-tracks/track_68a8de33-4025-4e4a-8c77-bbb9531e5a16_audio.mp3"
-        playCount={200}
-        username="SYCHO"
-        tags={['trap', 'rap', 'hip-hop']}
-        likeCount={15}
-        createdAt="2025-03-09"
-      />
+      {isLoading && <Typography>Carregando...</Typography>}
     </Container>
   )
 }

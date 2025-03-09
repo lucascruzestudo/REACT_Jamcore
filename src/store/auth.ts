@@ -14,7 +14,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     login: async (login, password) => {
       try {
         const response = await api.post('Authentication/Login', { login, password })
-        const token = response.data
+        const token = response.data.data.token
   
         Cookies.set('token', token, { expires: 7 })
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`
