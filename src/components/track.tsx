@@ -1,30 +1,29 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, Typography, IconButton, Slider, Button, Divider } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import PauseIcon from '@mui/icons-material/Pause';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ShareIcon from '@mui/icons-material/Share';
 import LinkIcon from '@mui/icons-material/Link';
 
 interface TrackProps {
+    title: string;
+    tags: string[];
+    audioFileUrl: string;
     imageUrl: string;
-    songName: string;
-    audioUrl: string;
-    authorName: string;
-    genre: string;
-    releaseDate: string;
+    username: string;
+    createdAt: string;
     likeCount: number;
     playCount: number;
 }
 
 const Track: React.FC<TrackProps> = ({
     imageUrl,
-    songName,
-    audioUrl,
-    authorName,
-    genre,
-    releaseDate,
+    title,
+    audioFileUrl,
+    username,
+    tags,
+    createdAt,
     likeCount,
     playCount
 }) => {
@@ -93,7 +92,7 @@ const Track: React.FC<TrackProps> = ({
                 >
                     <img
                         src={imageUrl}
-                        alt={songName}
+                        alt={title}
                         style={{
                             width: '100%',
                             height: '100%',
@@ -115,20 +114,37 @@ const Track: React.FC<TrackProps> = ({
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box>
                             <Typography variant="body2" color="textSecondary" noWrap>
-                                {authorName || 'SYCHO'}
+                                {username || 'null'}
                             </Typography>
-                            <Typography variant="body1" noWrap>
-                                {songName || 'Música (placeholder)'}
+                            <Typography
+                                variant="body1"
+                                noWrap
+                                sx={{
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                }}
+                            >
+                                {title || 'null'}
                             </Typography>
                         </Box>
                         <Box textAlign="right">
                             {(() => {
-                                const date = new Date(releaseDate);
+                                const date = new Date(createdAt);
                                 const today = new Date();
                                 const diffTime = Math.abs(today.getTime() - date.getTime());
-                                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                                const diffSeconds = Math.ceil(diffTime / 1000);
+                                const diffMinutes = Math.ceil(diffSeconds / 60);
+                                const diffHours = Math.ceil(diffMinutes / 60);
+                                const diffDays = Math.ceil(diffHours / 24);
 
-                                if (diffDays < 30) {
+                                if (diffSeconds < 60) {
+                                    return <Typography variant="body2" color="textSecondary" noWrap>{`${diffSeconds} segundos atrás`}</Typography>
+                                } else if (diffMinutes < 60) {
+                                    return <Typography variant="body2" color="textSecondary" noWrap>{`${diffMinutes} minutos atrás`}</Typography>
+                                } else if (diffHours < 24) {
+                                    return <Typography variant="body2" color="textSecondary" noWrap>{`${diffHours} horas atrás`}</Typography>
+                                } else if (diffDays < 30) {
                                     return <Typography variant="body2" color="textSecondary" noWrap>{`${diffDays} dias atrás`}</Typography>
                                 } else if (diffDays < 365) {
                                     return <Typography variant="body2" color="textSecondary" noWrap>{`${Math.ceil(diffDays / 30)} meses atrás`}</Typography>
@@ -138,16 +154,38 @@ const Track: React.FC<TrackProps> = ({
                             })()}
                             <Box
                                 sx={{
-                                    backgroundColor: '#eee',
-                                    borderRadius: '8px',
-                                    padding: '2px 8px',
-                                    display: 'inline-block',
-                                    fontSize: '0.75rem',
+                                    display: 'flex',
+                                    gap: 1,
                                 }}
                             >
-                                <Typography variant="body2" color="textPrimary" noWrap>
-                                    #{genre || 'phonk'}
-                                </Typography>
+                                <Box
+                                    sx={{
+                                        backgroundColor: '#eee',
+                                        borderRadius: '8px',
+                                        padding: '2px 8px',
+                                        display: 'inline-block',
+                                        fontSize: '0.75rem',
+                                    }}
+                                >
+                                    <Typography variant="body2" color="textPrimary" noWrap>
+                                        #{tags[0]}
+                                    </Typography>
+                                </Box>
+                                {tags.length > 1 && (
+                                    <Box
+                                        sx={{
+                                            backgroundColor: '#eee',
+                                            borderRadius: '8px',
+                                            padding: '2px 8px',
+                                            display: 'inline-block',
+                                            fontSize: '0.75rem',
+                                        }}
+                                    >
+                                        <Typography variant="body2" color="textPrimary" noWrap>
+                                            +{tags.length - 1}
+                                        </Typography>
+                                    </Box>
+                                )}
                             </Box>
                         </Box>
                     </Box>
@@ -198,11 +236,11 @@ const Track: React.FC<TrackProps> = ({
                     size="small"
                     sx={{ minWidth: { xs: '40%', sm: 'auto' }, py: { xs: 1, sm: 0.5 } }}
                 >
-                    {playCount >= 1000000 
-                      ? `${(playCount / 1000000).toFixed(1)}m` 
-                      : playCount >= 1000 
-                      ? `${(playCount / 1000).toFixed(1)}k` 
-                      : playCount || 0}
+                    {playCount >= 1000000
+                        ? `${(playCount / 1000000).toFixed(1)}m`
+                        : playCount >= 1000
+                            ? `${(playCount / 1000).toFixed(1)}k`
+                            : playCount || 0}
                 </Button>
                 <Button
                     startIcon={<FavoriteIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
@@ -211,11 +249,11 @@ const Track: React.FC<TrackProps> = ({
                     size="small"
                     sx={{ minWidth: { xs: '40%', sm: 'auto' }, py: { xs: 1, sm: 0.5 } }}
                 >
-                    {likeCount >= 1000000 
-                      ? `${(likeCount / 1000000).toFixed(1)}m` 
-                      : likeCount >=1000 
-                      ? `${(likeCount / 1000).toFixed(1)}k` 
-                      : likeCount || 0}
+                    {likeCount >= 1000000
+                        ? `${(likeCount / 1000000).toFixed(1)}m`
+                        : likeCount >= 1000
+                            ? `${(likeCount / 1000).toFixed(1)}k`
+                            : likeCount || 0}
                 </Button>
                 <Button
                     startIcon={<ShareIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
@@ -238,7 +276,7 @@ const Track: React.FC<TrackProps> = ({
                 </Button>
             </Box>
 
-            <audio ref={audioRef} src={audioUrl} />
+            <audio ref={audioRef} src={audioFileUrl} />
         </Box>
     );
 };
