@@ -43,7 +43,7 @@ export default function Feed() {
   }, [pageNumber])
 
   return (
-    <Container maxWidth="sm">
+    <Container>
       <Typography variant="h4" gutterBottom>
         escute as jams mais recentes
       </Typography>
@@ -51,22 +51,24 @@ export default function Feed() {
         sair
       </Button>
 
-      {tracks.map((track) => (
-        <Track
-          key={track.id}
-          id={track.id}
-          imageUrl={track.imageUrl}
-          title={track.title}
-          audioFileUrl={track.audioFileUrl}
-          playCount={track.playCount}
-          username={track.username}
-          tags={track.tags}
-          likeCount={track.likeCount}
-          createdAt={track.createdAt}
-          userLikedTrack={track.userLikedTrack}
-          originalDuration={track.duration}
-        />
-      ))}
+      <Container sx={{ display: 'flex', flexDirection: 'column', gap: 4}}>
+        {tracks.map((track) => (
+          <Track
+            key={track.id}
+            id={track.id}
+            imageUrl={track.imageUrl}
+            title={track.title}
+            audioFileUrl={track.audioFileUrl}
+            playCount={track.playCount}
+            username={track.username}
+            tags={track.tags}
+            likeCount={track.likeCount}
+            createdAt={track.createdAt}
+            userLikedTrack={track.userLikedTrack}
+            originalDuration={track.duration}
+          />
+        ))}
+      </Container>
 
       {isLoading && <Typography>Carregando...</Typography>}
     </Container>

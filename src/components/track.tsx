@@ -7,6 +7,7 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import LinkIcon from '@mui/icons-material/Link';
 import api from '../services/api'
 import { useTrack } from '../contexts/trackcontext';
+import TrackCover from './trackcover';
 
 interface TrackProps {
     key: string;
@@ -41,6 +42,15 @@ const Track: React.FC<TrackProps> = ({
     const [localPlayCount, setLocalPlayCount] = useState(playCount);
     const [userLiked, setUserLiked] = useState(userLikedTrack);
     const [hasPlayed, setHasPlayed] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+
+    const handleOpenModal = () => {
+        setModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setModalOpen(false);
+    };
 
     const toggleLike = async () => {
         try {
@@ -63,9 +73,9 @@ const Track: React.FC<TrackProps> = ({
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                maxWidth: 600,
-                m: '10px auto',
-                p: 2,
+                maxWidth: { xs: 600, sm: 700 },
+                width: { xs: '100%', sm: 700 },
+                m: 'auto',
                 backgroundColor: 'white',
             }}
         >
@@ -84,7 +94,10 @@ const Track: React.FC<TrackProps> = ({
                         justifyContent: 'center',
                         alignItems: 'center',
                         mb: { xs: 2, sm: 0 },
+                        cursor: 'pointer',
+                        border: '1px solid #ccc'
                     }}
+                    onClick={handleOpenModal}
                 >
                     <img
                         src={imageUrl}
@@ -121,7 +134,7 @@ const Track: React.FC<TrackProps> = ({
                                         textOverflow: 'ellipsis',
                                         whiteSpace: 'nowrap',
                                         wordBreak: 'break-word',
-                                        maxWidth: { xs: '25ch', sm: '32ch' }
+                                        maxWidth: {  xs: '26ch', sm: '45ch'}
                                     }}
                                 >
                                     {title || 'null'}
@@ -236,8 +249,8 @@ const Track: React.FC<TrackProps> = ({
                     display: 'flex',
                     justifyContent: 'space-around',
                     alignItems: 'center',
-                    gap: 2, // Adiciona espaço entre os botões
-                    flexWrap: 'nowrap', // Impede a quebra de linha
+                    gap: 2,
+                    flexWrap: 'nowrap',
                     width: '100%',
                 }}
             >
@@ -290,7 +303,14 @@ const Track: React.FC<TrackProps> = ({
                     copiar link
                 </Button>
             </Box>
+            <TrackCover
+                open={modalOpen}
+                onClose={handleCloseModal}
+                imageUrl={imageUrl}
+                title={title}
+            />
         </Box>
+        
     );
 };
 
