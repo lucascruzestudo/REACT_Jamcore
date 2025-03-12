@@ -64,6 +64,7 @@ export default function Feed() {
           likeCount={track.likeCount}
           createdAt={track.createdAt}
           userLikedTrack={track.userLikedTrack}
+          originalDuration={track.duration}
         />
       ))}
 

@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Box, Typography, IconButton, Slider, Button, Divider } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, IconButton, Slider, Button, Divider, Tooltip } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import LinkIcon from '@mui/icons-material/Link';
 import api from '../services/api'
+import { useTrack } from '../contexts/trackcontext';
 
 interface TrackProps {
     key: string;
@@ -19,6 +20,7 @@ interface TrackProps {
     likeCount: number;
     playCount: number;
     userLikedTrack: boolean;
+    originalDuration: string;
 }
 
 const Track: React.FC<TrackProps> = ({
@@ -32,34 +34,13 @@ const Track: React.FC<TrackProps> = ({
     likeCount,
     playCount,
     userLikedTrack,
+    originalDuration
 }) => {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
+    const { isPlaying, currentTime, duration, togglePlayPause, updateTime, trackId } = useTrack();
     const [localLikeCount, setLocalLikeCount] = useState(likeCount);
     const [localPlayCount, setLocalPlayCount] = useState(playCount);
     const [userLiked, setUserLiked] = useState(userLikedTrack);
     const [hasPlayed, setHasPlayed] = useState(false);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-
-    const togglePlayPause = async () => {
-        if (audioRef.current) {
-            if (!isPlaying) {
-                if (!hasPlayed) {
-                    try {
-                        await api.post('/TrackPlay', { trackId: id });
-                        setLocalPlayCount((prevCount) => prevCount + 1);
-                        setHasPlayed(true);
-                    } catch (error) {
-                        console.error('Error updating play count:', error);
-                    }
-                }
-            }
-
-            isPlaying ? audioRef.current.pause() : audioRef.current.play();
-            setIsPlaying(!isPlaying);
-        }
-    };
 
     const toggleLike = async () => {
         try {
@@ -71,27 +52,11 @@ const Track: React.FC<TrackProps> = ({
         }
     };
 
-    const updateTime = (_event: Event, newValue: number | number[]) => {
-        if (audioRef.current && typeof newValue === 'number') {
-            audioRef.current.currentTime = newValue;
-            setCurrentTime(newValue);
+    const updateSliderTime = (_event: Event, newValue: number | number[]) => {
+        if (typeof newValue === 'number') {
+            updateTime(newValue);
         }
     };
-
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (audio) {
-            audio.addEventListener('loadedmetadata', () => setDuration(audio.duration));
-            audio.addEventListener('timeupdate', () => setCurrentTime(audio.currentTime));
-        }
-
-        return () => {
-            if (audio) {
-                audio.removeEventListener('loadedmetadata', () => setDuration(audio.duration));
-                audio.removeEventListener('timeupdate', () => setCurrentTime(audio.currentTime));
-            }
-        };
-    }, []);
 
     return (
         <Box
@@ -101,7 +66,6 @@ const Track: React.FC<TrackProps> = ({
                 maxWidth: 600,
                 m: '10px auto',
                 p: 2,
-                border: '2px solid #ccc',
                 backgroundColor: 'white',
             }}
         >
@@ -148,17 +112,21 @@ const Track: React.FC<TrackProps> = ({
                             <Typography variant="body2" color="textSecondary" noWrap>
                                 {username || 'null'}
                             </Typography>
-                            <Typography
-                                variant="body1"
-                                noWrap
-                                sx={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    whiteSpace: 'nowrap'
-                                }}
-                            >
-                                {title || 'null'}
-                            </Typography>
+                            <Tooltip title={title || 'null'} arrow>
+                                <Typography
+                                    variant="body1"
+                                    noWrap
+                                    sx={{
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        wordBreak: 'break-word',
+                                        maxWidth: { xs: '25ch', sm: '32ch' }
+                                    }}
+                                >
+                                    {title || 'null'}
+                                </Typography>
+                            </Tooltip>
                         </Box>
                         <Box textAlign="right">
                             {(() => {
@@ -171,19 +139,20 @@ const Track: React.FC<TrackProps> = ({
                                 const diffDays = Math.ceil(diffHours / 24);
 
                                 if (diffSeconds < 60) {
-                                    return <Typography variant="body2" color="textSecondary" noWrap>{`${diffSeconds} segundos atrás`}</Typography>
+                                    return <Typography variant="body2" color="textSecondary" noWrap>{diffSeconds === 1 ? `${diffSeconds} segundo atrás` : `${diffSeconds} segundos atrás`}</Typography>
                                 } else if (diffMinutes < 60) {
-                                    return <Typography variant="body2" color="textSecondary" noWrap>{`${diffMinutes} minutos atrás`}</Typography>
+                                    return <Typography variant="body2" color="textSecondary" noWrap>{diffMinutes === 1 ? `${diffMinutes} minuto atrás` : `${diffMinutes} minutos atrás`}</Typography>
                                 } else if (diffHours < 24) {
-                                    return <Typography variant="body2" color="textSecondary" noWrap>{`${diffHours} horas atrás`}</Typography>
+                                    return <Typography variant="body2" color="textSecondary" noWrap>{diffHours === 1 ? `${diffHours} hora atrás` : `${diffHours} horas atrás`}</Typography>
                                 } else if (diffDays < 30) {
-                                    return <Typography variant="body2" color="textSecondary" noWrap>{`${diffDays} dias atrás`}</Typography>
+                                    return <Typography variant="body2" color="textSecondary" noWrap>{diffDays === 1 ? `${diffDays} dia atrás` : `${diffDays} dias atrás`}</Typography>
                                 } else if (diffDays < 365) {
-                                    return <Typography variant="body2" color="textSecondary" noWrap>{`${Math.ceil(diffDays / 30)} meses atrás`}</Typography>
+                                    return <Typography variant="body2" color="textSecondary" noWrap>{diffDays === 30 ? `${Math.ceil(diffDays / 30)} mês atrás` : `${Math.ceil(diffDays / 30)} meses atrás`}</Typography>
                                 } else {
-                                    return <Typography variant="body2" color="textSecondary" noWrap>{`${Math.ceil(diffDays / 365)} anos atrás`}</Typography>
+                                    return <Typography variant="body2" color="textSecondary" noWrap>{diffDays === 365 ? `${Math.ceil(diffDays / 365)} ano atrás` : `${Math.ceil(diffDays / 365)} anos atrás`}</Typography>
                                 }
                             })()}
+
                             <Box
                                 sx={{
                                     display: 'inline-block',
@@ -209,43 +178,52 @@ const Track: React.FC<TrackProps> = ({
                                             backgroundColor: '#eee',
                                             borderRadius: '8px',
                                             padding: '2px 8px',
+                                            marginLeft: '4px',
                                             display: 'inline-block',
                                             fontSize: '0.75rem',
                                         }}
                                     >
-                                        <Typography variant="body2" color="textPrimary" noWrap>
-                                            +{tags.length - 1}
-                                        </Typography>
+                                        <Tooltip title={tags.slice(1).join(', ')} arrow>
+                                            <Typography variant="body2" color="textPrimary" noWrap>
+                                                +{tags.length - 1}
+                                            </Typography>
+                                        </Tooltip>
                                     </Box>
                                 )}
                             </Box>
                         </Box>
                     </Box>
 
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            mt: 2,
-                        }}
-                    >
-                        <IconButton onClick={togglePlayPause}>
-                            {isPlaying ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
+                        <IconButton onClick={async () => {
+                            togglePlayPause(audioFileUrl, id);
+                            if (!hasPlayed) {
+                                setLocalPlayCount((prevCount) => prevCount + 1);
+                                setHasPlayed(true);
+                            }
+                        }}>
+                            {isPlaying && id === trackId ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
                         </IconButton>
 
                         <Slider
-                            value={currentTime}
+                            value={id === trackId ? currentTime : 0}
                             min={0}
-                            max={duration}
-                            onChange={updateTime}
+                            max={id === trackId ? duration : (() => {
+                                const timeParts = originalDuration.split(':').map(Number);
+                                return timeParts.reduce((acc, part) => acc * 60 + part, 0);
+                            })()}
+                            onChange={updateSliderTime}
                             valueLabelDisplay="auto"
                             valueLabelFormat={(value) => `${Math.floor(value / 60)}:${Math.floor(value % 60).toString().padStart(2, '0')}`}
                             sx={{ flex: 1, mx: 1 }}
+                            disabled={id !== trackId}
                         />
 
                         <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.75rem', pl: 2 }}>
-                            {`${Math.floor(currentTime / 60)}:${Math.floor(currentTime % 60).toString().padStart(2, '0')} / ${Math.floor(duration / 60)}:${Math.floor(duration % 60).toString().padStart(2, '0')}`}
+                            {id === trackId
+                                ? `${Math.floor(currentTime / 60)}:${Math.floor(currentTime % 60).toString().padStart(2, '0')} / ${originalDuration}`
+                                : `00:00 / ${originalDuration}`
+                            }
                         </Typography>
                     </Box>
                 </Box>
@@ -256,9 +234,11 @@ const Track: React.FC<TrackProps> = ({
             <Box
                 sx={{
                     display: 'flex',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center',
-                    gap: { xs: 1, sm: 2 }
+                    justifyContent: 'space-around',
+                    alignItems: 'center',
+                    gap: 2, // Adiciona espaço entre os botões
+                    flexWrap: 'nowrap', // Impede a quebra de linha
+                    width: '100%',
                 }}
             >
                 <Button
@@ -266,7 +246,7 @@ const Track: React.FC<TrackProps> = ({
                     variant="text"
                     color="secondary"
                     size="small"
-                    sx={{ minWidth: { xs: '40%', sm: 'auto' }, py: { xs: 1, sm: 0.5 } }}
+                    sx={{ py: { xs: 1, sm: 0.5 } }}
                 >
                     {localPlayCount >= 1000000
                         ? `${(localPlayCount / 1000000).toFixed(1)}m`
@@ -275,17 +255,19 @@ const Track: React.FC<TrackProps> = ({
                             : localPlayCount || 0}
                 </Button>
                 <Button
-                    startIcon={<FavoriteIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
+                    startIcon={
+                        userLiked ? (
+                            <FavoriteIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />
+                        ) : (
+                            <FavoriteBorderIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />
+                        )
+                    }
                     variant="text"
                     color={userLiked ? 'primary' : 'secondary'}
                     size="small"
-                    sx={{ minWidth: { xs: '40%', sm: 'auto' }, py: { xs: 1, sm: 0.5 } }}
+                    sx={{ py: { xs: 1, sm: 0.5 } }}
                     onClick={() => {
-                        if (userLikedTrack) {
-                            toggleLike()
-                        } else {
-                            toggleLike()
-                        }
+                        toggleLike();
                     }}
                 >
                     {localLikeCount >= 1000000
@@ -295,27 +277,19 @@ const Track: React.FC<TrackProps> = ({
                             : localLikeCount || 0}
                 </Button>
                 <Button
-                    startIcon={<ShareIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
-                    variant="text"
-                    color="secondary"
-                    size="small"
-                    sx={{ minWidth: { xs: '100%', sm: 'auto' }, py: { xs: 1, sm: 0.5 } }}
-                >
-                    compartilhar
-                </Button>
-                <Button
                     startIcon={<LinkIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
                     variant="text"
                     color="secondary"
                     size="small"
-                    sx={{ minWidth: { xs: '100%', sm: 'auto' }, py: { xs: 1, sm: 0.5 } }}
-                    onClick={() => navigator.clipboard.writeText(window.location.href)}
+                    sx={{ py: { xs: 1, sm: 0.5 } }}
+                    onClick={() => {
+                        const url = window.location.href.split('/').slice(0, 3).join('/') + `/track/${id}`;
+                        navigator.clipboard.writeText(url);
+                    }}
                 >
                     copiar link
                 </Button>
             </Box>
-
-            <audio ref={audioRef} src={audioFileUrl} />
         </Box>
     );
 };
