@@ -134,7 +134,7 @@ const Track: React.FC<TrackProps> = ({
                                         textOverflow: 'ellipsis',
                                         whiteSpace: 'nowrap',
                                         wordBreak: 'break-word',
-                                        maxWidth: {  xs: '26ch', sm: '45ch'}
+                                        maxWidth: { xs: '26ch', sm: '45ch' }
                                     }}
                                 >
                                     {title || 'null'}
@@ -208,7 +208,11 @@ const Track: React.FC<TrackProps> = ({
                     </Box>
 
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
-                        <IconButton onClick={async () => {
+                        <IconButton onKeyDown={(event) => {
+                            if (event.key === ' ') {
+                                event.preventDefault();
+                            }
+                        }} onClick={async () => {
                             togglePlayPause(audioFileUrl, id);
                             if (!hasPlayed) {
                                 setLocalPlayCount((prevCount) => prevCount + 1);
@@ -310,7 +314,7 @@ const Track: React.FC<TrackProps> = ({
                 title={title}
             />
         </Box>
-        
+
     );
 };
 
