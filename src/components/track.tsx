@@ -37,7 +37,7 @@ const Track: React.FC<TrackProps> = ({
     userLikedTrack,
     originalDuration
 }) => {
-    const { isPlaying, currentTime, duration, togglePlayPause, updateTime, trackId } = useTrack();
+    const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack } = useTrack();
     const [localLikeCount, setLocalLikeCount] = useState(likeCount);
     const [localPlayCount, setLocalPlayCount] = useState(playCount);
     const [userLiked, setUserLiked] = useState(userLikedTrack);
@@ -50,6 +50,21 @@ const Track: React.FC<TrackProps> = ({
 
     const handleCloseModal = () => {
         setModalOpen(false);
+    };
+
+    const trackData = {
+        key: id,
+        id,
+        title,
+        tags,
+        audioFileUrl,
+        imageUrl,
+        username,
+        createdAt,
+        likeCount,
+        playCount,
+        userLikedTrack,
+        originalDuration
     };
 
     const toggleLike = async () => {
@@ -213,19 +228,19 @@ const Track: React.FC<TrackProps> = ({
                                 event.preventDefault();
                             }
                         }} onClick={async () => {
-                            togglePlayPause(audioFileUrl, id);
+                            togglePlayPause(trackData);
                             if (!hasPlayed) {
                                 setLocalPlayCount((prevCount) => prevCount + 1);
                                 setHasPlayed(true);
                             }
                         }}>
-                            {isPlaying && id === trackId ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
+                            {isPlaying && id === currentTrack?.id ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
                         </IconButton>
 
                         <Slider
-                            value={id === trackId ? currentTime : 0}
+                            value={id === currentTrack?.id ? currentTime : 0}
                             min={0}
-                            max={id === trackId ? duration : (() => {
+                            max={id === currentTrack?.id ? duration : (() => {
                                 const timeParts = originalDuration.split(':').map(Number);
                                 return timeParts.reduce((acc, part) => acc * 60 + part, 0);
                             })()}
@@ -233,11 +248,11 @@ const Track: React.FC<TrackProps> = ({
                             valueLabelDisplay="auto"
                             valueLabelFormat={(value) => `${Math.floor(value / 60)}:${Math.floor(value % 60).toString().padStart(2, '0')}`}
                             sx={{ flex: 1, mx: 1 }}
-                            disabled={id !== trackId}
+                            disabled={id !== currentTrack?.id}
                         />
 
                         <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.75rem', pl: 2 }}>
-                            {id === trackId
+                            {id === currentTrack?.id
                                 ? `${Math.floor(currentTime / 60)}:${Math.floor(currentTime % 60).toString().padStart(2, '0')} / ${originalDuration}`
                                 : `00:00 / ${originalDuration}`
                             }

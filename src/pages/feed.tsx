@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Button, Container, Typography } from '@mui/material'
+import { Container, Divider, Typography } from '@mui/material'
 import Track from '../components/track'
-import { useAuthStore } from '../store/auth'
 import api from '../services/api'
 
 export default function Feed() {
-  const logout = useAuthStore((state) => state.logout)
 
   const [tracks, setTracks] = useState<any[]>([])
   const [pageNumber] = useState(1)
@@ -44,12 +42,13 @@ export default function Feed() {
 
   return (
     <Container>
-      <Typography variant="h4" gutterBottom>
-        escute as jams mais recentes
+      <Divider sx={{ marginTop: 1, borderColor: 'transparent' }}/>
+
+      <Typography variant="h5" sx={{ color: '#666'}}>
+        escute as jams mais recentes:
       </Typography>
-      <Button variant="contained" color="secondary" onClick={logout}>
-        sair
-      </Button>
+
+      <Divider sx={{ marginTop: 3, borderColor: 'transparent' }}/>
 
       <Container sx={{ display: 'flex', flexDirection: 'column', gap: 4}}>
         {tracks.map((track) => (
