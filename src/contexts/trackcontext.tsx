@@ -32,7 +32,6 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             try {
                 audioRef.current.play();
             } catch (error: any) {
-                //ignore
             }
             try {
                 api.post('/TrackPlay', { trackId: trackId });
@@ -73,6 +72,27 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     }, []);
 
+    useEffect(() => {
+        const handleSpaceKeyPress = (event: KeyboardEvent) => {
+            if (event.code === 'Space') {
+                if (audioRef.current) {
+                    if (isPlaying) {
+                        audioRef.current.pause();
+                    } else {
+                        audioRef.current.play();
+                    }
+                    setIsPlaying(!isPlaying);
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleSpaceKeyPress);
+
+        return () => {
+            window.removeEventListener('keydown', handleSpaceKeyPress);
+        };
+    }, [isPlaying]);
+
     return (
         <TrackContext.Provider value={{ isPlaying, currentTime, duration, trackUrl, trackId, togglePlayPause, updateTime, setCurrentTime }}>
             {children}
@@ -88,4 +108,3 @@ export const useTrack = (): TrackContextType => {
     }
     return context;
 };
-
