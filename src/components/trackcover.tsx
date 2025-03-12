@@ -18,7 +18,7 @@ const TrackCover: React.FC<TrackCoverProps> = ({ open, onClose, imageUrl, title 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.1 }}
             style={{
                 position: 'fixed',
                 top: 0,
@@ -34,10 +34,10 @@ const TrackCover: React.FC<TrackCoverProps> = ({ open, onClose, imageUrl, title 
             onClick={onClose}
         >
             <motion.div
-                initial={{ scale: 0.8 }}
+                initial={{ scale: 0.9 }}
                 animate={{ scale: 1 }}
-                exit={{ scale: 0.8 }}
-                transition={{ stiffness: 50, damping: 25 }}
+                exit={{ scale: 0.9 }}
+                transition={{ stiffness: 75, damping: 50 }}
                 style={{
                     backgroundColor: 'white',
                     padding: 2,
