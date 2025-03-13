@@ -26,7 +26,6 @@ const Footer: React.FC = () => {
     };
 
     const handleSkipNext = () => {
-        // Implement skip next functionality
     };
 
     if (!currentTrack) {
@@ -61,7 +60,7 @@ const Footer: React.FC = () => {
                     gap: { xs: 1, sm: 0 },
                 }}
             >
-                {/* First Row: Controls and Slider */}
+                
                 <Box
                     sx={{
                         display: 'flex',
@@ -69,22 +68,22 @@ const Footer: React.FC = () => {
                         justifyContent: 'center',
                         flexDirection: 'row',
                         flexShrink: 0,
-                        gap: { xs: 0.5, sm: 1 }, // Reduce gap on small screens
+                        gap: { xs: 0.5, sm: 1 },
                     }}
                 >
                     <Button
                         onClick={handleSkipPrevious}
                         variant="text"
                         color="secondary"
-                        sx={{ minWidth: 'auto', padding: { xs: '6px', sm: '8px' } }} // Reduce padding on small screens
+                        sx={{ minWidth: 'auto', padding: { xs: '6px', sm: '8px' } }}
                     >
-                        <SkipPrevious sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' } }} /> {/* Reduce icon size on small screens */}
+                        <SkipPrevious sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' } }} /> 
                     </Button>
                     <Button
                         onClick={handlePlayPause}
                         variant="text"
                         color="secondary"
-                        sx={{ minWidth: 'auto', padding: { xs: '6px', sm: '8px' } }} // Reduce padding on small screens
+                        sx={{ minWidth: 'auto', padding: { xs: '6px', sm: '8px' } }}
                         onKeyDown={(event) => {
                             if (event.key === ' ') {
                                 event.preventDefault();
@@ -102,9 +101,9 @@ const Footer: React.FC = () => {
                         onClick={handleSkipNext}
                         variant="text"
                         color="secondary"
-                        sx={{ minWidth: 'auto', padding: { xs: '6px', sm: '8px' } }} // Reduce padding on small screens
+                        sx={{ minWidth: 'auto', padding: { xs: '6px', sm: '8px' } }}
                     >
-                        <SkipNext sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' } }} /> {/* Reduce icon size on small screens */}
+                        <SkipNext sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' } }} /> 
                     </Button>
                     <Slider
                         value={currentTime}
@@ -114,15 +113,15 @@ const Footer: React.FC = () => {
                         onChange={handleTimeChange}
                         valueLabelDisplay="auto"
                         valueLabelFormat={(value) => `${Math.floor(value / 60)}:${Math.floor(value % 60)}`}
-                        sx={{ width: { xs: '120px', sm: '200px' }, marginRight: 1 }} // Reduce slider width on small screens
+                        sx={{ width: { xs: '120px', sm: '200px' }, marginRight: 1 }}
                         size="small"
                     />
-                    {/* Fixed-width container for duration text */}
-                    <Box sx={{ width: '80px', textAlign: 'center' }}> {/* Reduce width on small screens */}
+                    
+                    <Box sx={{ width: '80px', textAlign: 'center' }}> 
                         <Typography
                             variant="body2"
                             color="textSecondary"
-                            sx={{ fontSize: { xs: '0.55rem', sm: '0.65rem' } }} // Reduce font size on small screens
+                            sx={{ fontSize: { xs: '0.55rem', sm: '0.65rem' } }}
                         >
                             {Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')} /{' '}
                             {currentTrack.originalDuration}
@@ -130,9 +129,8 @@ const Footer: React.FC = () => {
                     </Box>
                 </Box>
 
-                <Divider orientation="vertical" flexItem sx={{ height: '100%', mx: { xs: 0, sm: 2 } }} />
+                <Divider orientation="vertical" flexItem sx={{ height: '100%', mx: { xs: 0, sm: 8 } }} />
 
-                {/* Second Row: Avatar and Track Info */}
                 <Box
                     sx={{
                         display: 'flex',
@@ -148,14 +146,14 @@ const Footer: React.FC = () => {
                     <Avatar
                         src={currentTrack.imageUrl}
                         alt={currentTrack.title}
-                        sx={{ width: { xs: 30, sm: 40 }, height: { xs: 30, sm: 40 }, borderRadius: '2px', flexShrink: 0 }} // Reduce avatar size on small screens
+                        sx={{ width: { xs: 30, sm: 40 }, height: { xs: 30, sm: 40 }, borderRadius: '2px', flexShrink: 0 }}
                     />
                     <Box sx={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
                         <Typography
                             variant="body2"
                             color="textSecondary"
                             sx={{
-                                fontSize: { xs: '0.55rem', sm: '0.65rem' }, // Reduce font size on small screens
+                                fontSize: { xs: '0.55rem', sm: '0.65rem' },
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
@@ -166,7 +164,7 @@ const Footer: React.FC = () => {
                         <Typography
                             variant="h6"
                             sx={{
-                                fontSize: { xs: '0.75rem', sm: '0.875rem' }, // Reduce font size on small screens
+                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
                                 whiteSpace: 'nowrap',
                                 overflow: 'hidden',
                                 textOverflow: 'ellipsis',
