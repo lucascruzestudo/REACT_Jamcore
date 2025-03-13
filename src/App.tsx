@@ -15,7 +15,7 @@ function AppContent() {
       {location.pathname !== '/login' && (
         <>
           <Navbar />
-          <div style={{ paddingTop: '80px' }}></div>
+          <div style={{ paddingTop: '20px' }}></div>
         </>
       )}
       <Routes>

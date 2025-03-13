@@ -26,6 +26,7 @@ interface TrackContextType {
     setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
     currentTrack: Track | null;
     setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+    setCurrentTrack: React.Dispatch<React.SetStateAction<Track | null>>;
 }
 
 const TrackContext = createContext<TrackContextType | undefined>(undefined);
@@ -111,8 +112,14 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         };
     }, [isPlaying]);
 
+    useEffect(() => {
+        if (audioRef.current && !isPlaying) {
+            audioRef.current.pause();
+        }
+    }, [isPlaying]);
+
     return (
-        <TrackContext.Provider value={{ isPlaying, currentTime, duration, currentTrack, togglePlayPause, updateTime, setCurrentTime, setIsPlaying }}>
+        <TrackContext.Provider value={{ isPlaying, currentTime, duration, currentTrack, togglePlayPause, updateTime, setCurrentTime, setIsPlaying, setCurrentTrack }}>
             {children}
             <audio ref={audioRef} />
         </TrackContext.Provider>
