@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Box, Button, Typography, Slider, Avatar, Divider } from '@mui/material';
 import { useTrack } from '../contexts/trackcontext';
-import { PlayArrow, Pause, SkipPrevious, SkipNext } from '@mui/icons-material';
+import { PlayArrow, Pause, SkipPrevious, SkipNext, VolumeUp } from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Footer: React.FC = () => {
-    const { currentTrack, isPlaying, currentTime, duration, togglePlayPause, updateTime, setIsPlaying } = useTrack();
+    const { currentTrack, isPlaying, currentTime, duration, togglePlayPause, updateTime, setIsPlaying, setVolume, volume } = useTrack();
+    const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+    const volumeSliderRef = useRef<HTMLDivElement>(null);
 
     const handlePlayPause = () => {
         if (currentTrack) {
@@ -18,6 +21,12 @@ const Footer: React.FC = () => {
         }
     };
 
+    const handleVolumeChange = (_event: Event, newValue: number | number[]) => {
+        if (typeof newValue === 'number') {
+            setVolume(newValue);
+        }
+    };
+
     const handleSkipPrevious = () => {
         if (currentTrack) {
             updateTime(0);
@@ -26,7 +35,21 @@ const Footer: React.FC = () => {
     };
 
     const handleSkipNext = () => {
+        // Implement skip next functionality
     };
+
+    const handleClickOutside = (event: MouseEvent) => {
+        if (volumeSliderRef.current && !volumeSliderRef.current.contains(event.target as Node)) {
+            setShowVolumeSlider(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     if (!currentTrack) {
         return null;
@@ -53,57 +76,50 @@ const Footer: React.FC = () => {
                 sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
+                    justifyContent: 'space-between',
                     width: '100%',
                     maxWidth: '1000px',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    gap: { xs: 1, sm: 0 },
+                    gap: 2,
+                    padding: '0 16px',
                 }}
             >
-                
+
                 <Box
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
+                        gap: 2,
+                        flex: 1,
                         justifyContent: 'center',
-                        flexDirection: 'row',
-                        flexShrink: 0,
-                        gap: { xs: 0.5, sm: 1 },
                     }}
                 >
                     <Button
                         onClick={handleSkipPrevious}
                         variant="text"
                         color="secondary"
-                        sx={{ minWidth: 'auto', padding: { xs: '6px', sm: '8px' } }}
+                        sx={{ minWidth: 'auto', padding: '8px' }}
                     >
-                        <SkipPrevious sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' } }} /> 
+                        <SkipPrevious sx={{ fontSize: '1.1rem' }} />
                     </Button>
                     <Button
                         onClick={handlePlayPause}
                         variant="text"
                         color="secondary"
-                        sx={{ minWidth: 'auto', padding: { xs: '6px', sm: '8px' } }}
-                        onKeyDown={(event) => {
-                            if (event.key === ' ') {
-                                event.preventDefault();
-                            }
-                        }}
+                        sx={{ minWidth: 'auto', padding: '8px' }}
                     >
                         {isPlaying ? (
-                            <Pause sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' } }} /> 
+                            <Pause sx={{ fontSize: '1.1rem' }} />
                         ) : (
-                            <PlayArrow sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' } }} />
+                            <PlayArrow sx={{ fontSize: '1.1rem' }} />
                         )}
-
                     </Button>
                     <Button
                         onClick={handleSkipNext}
                         variant="text"
                         color="secondary"
-                        sx={{ minWidth: 'auto', padding: { xs: '6px', sm: '8px' } }}
+                        sx={{ minWidth: 'auto', padding: '8px' }}
                     >
-                        <SkipNext sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' } }} /> 
+                        <SkipNext sx={{ fontSize: '1.1rem' }} />
                     </Button>
                     <Slider
                         value={currentTime}
@@ -113,66 +129,117 @@ const Footer: React.FC = () => {
                         onChange={handleTimeChange}
                         valueLabelDisplay="auto"
                         valueLabelFormat={(value) => `${Math.floor(value / 60)}:${Math.floor(value % 60)}`}
-                        sx={{ width: { xs: '120px', sm: '200px' }, marginRight: 1 }}
+                        sx={{ width: '200px', marginRight: 1, '& .MuiSlider-thumb': { display: 'none' } }}
                         size="small"
                     />
-                    
-                    <Box sx={{ width: '80px', textAlign: 'center' }}> 
-                        <Typography
-                            variant="body2"
-                            color="textSecondary"
-                            sx={{ fontSize: { xs: '0.55rem', sm: '0.65rem' } }}
-                        >
-                            {Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')} /{' '}
-                            {currentTrack.originalDuration}
-                        </Typography>
-                    </Box>
-                </Box>
+                    <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ fontSize: '0.65rem', minWidth: '80px', textAlign: 'center' }}
+                    >
+                        {Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')} /{' '}
+                        {currentTrack.originalDuration}
+                    </Typography>
 
-                <Divider orientation="vertical" flexItem sx={{ height: '100%', mx: { xs: 0, sm: 8 } }} />
-
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        flexDirection: 'row',
-                        gap: 1,
-                        mt: { xs: 1, sm: 0 },
-                        flex: 1,
-                        minWidth: 0,
-                    }}
-                >
-                    <Avatar
-                        src={currentTrack.imageUrl}
-                        alt={currentTrack.title}
-                        sx={{ width: { xs: 30, sm: 40 }, height: { xs: 30, sm: 40 }, borderRadius: '2px', flexShrink: 0 }}
-                    />
-                    <Box sx={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                        <Typography
-                            variant="body2"
-                            color="textSecondary"
-                            sx={{
-                                fontSize: { xs: '0.55rem', sm: '0.65rem' },
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                            }}
+                    <Box
+                        sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}
+                        onMouseEnter={() => setShowVolumeSlider(true)}
+                        onMouseLeave={() => setShowVolumeSlider(false)}
+                        ref={volumeSliderRef}
+                    >
+                        <Button
+                            onClick={() => setShowVolumeSlider(!showVolumeSlider)}
+                            variant="text"
+                            color="secondary"
+                            sx={{ minWidth: 'auto', padding: '8px' }}
                         >
-                            {currentTrack.username}
-                        </Typography>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                            }}
-                        >
-                            {currentTrack.title}
-                        </Typography>
+                            <VolumeUp sx={{ fontSize: '1.1rem' }} />
+                        </Button>
+                        <AnimatePresence>
+                            {showVolumeSlider && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    transition={{ duration: 0.2 }}
+                                    style={{
+                                        position: 'absolute',
+                                        bottom: '100%',
+                                        left: '5%',
+                                        transform: 'translateX(-50%)',
+                                        backgroundColor: '#eee',
+                                        border: '1px solid #ccc',
+                                        borderRadius: '4px',
+                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                                        paddingTop: '12px',
+                                    }}
+                                >
+                                    <Slider
+                                        orientation="vertical"
+                                        defaultValue={volume}
+                                        max={1}
+                                        step={0.01}
+                                        aria-labelledby="vertical-slider"
+                                        onChange={handleVolumeChange}
+                                        size="small"
+                                        color="secondary"
+                                        sx={{
+                                            height: '100px',
+                                            '& .MuiSlider-thumb': {
+                                                width: 8,
+                                                height: 8,
+                                            },
+                                        }}
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </Box>
+
+                    <Divider orientation="vertical" flexItem sx={{ mx: 1}} />
+
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 2,
+                            flex: 1,
+                            minWidth: 0,
+                        }}
+                    >
+                        <Avatar
+                            src={currentTrack.imageUrl}
+                            alt={currentTrack.title}
+                            sx={{ width: 40, height: 40, borderRadius: '2px', flexShrink: 0 }}
+                        />
+                        <Box sx={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                            <Typography
+                                variant="body2"
+                                color="textSecondary"
+                                sx={{
+                                    fontSize: '0.65rem',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                }}
+                            >
+                                {currentTrack.username}
+                            </Typography>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontSize: '0.875rem',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                }}
+                            >
+                                {currentTrack.title}
+                            </Typography>
+                        </Box>
+                    </Box>
+
+
                 </Box>
             </Box>
         </Box>

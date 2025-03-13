@@ -21,9 +21,11 @@ interface TrackContextType {
     isPlaying: boolean;
     currentTime: number;
     duration: number;
+    volume: number;
     togglePlayPause: (track: Track) => void;
     updateTime: (newTime: number) => void;
     setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
+    setVolume: React.Dispatch<React.SetStateAction<number>>;
     currentTrack: Track | null;
     setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
     setCurrentTrack: React.Dispatch<React.SetStateAction<Track | null>>;
@@ -35,6 +37,7 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(1);
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
 
@@ -118,8 +121,14 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     }, [isPlaying]);
 
+    useEffect(() => {
+        if (audioRef.current) {
+            audioRef.current.volume = volume;
+        }
+    }, [volume]);
+
     return (
-        <TrackContext.Provider value={{ isPlaying, currentTime, duration, currentTrack, togglePlayPause, updateTime, setCurrentTime, setIsPlaying, setCurrentTrack }}>
+        <TrackContext.Provider value={{ isPlaying, currentTime, duration, volume, currentTrack, togglePlayPause, updateTime, setCurrentTime, setVolume, setIsPlaying, setCurrentTrack }}>
             {children}
             <audio ref={audioRef} />
         </TrackContext.Provider>
