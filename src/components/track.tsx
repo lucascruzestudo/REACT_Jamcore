@@ -247,7 +247,11 @@ const Track: React.FC<TrackProps> = ({
                             onChange={updateSliderTime}
                             valueLabelDisplay="auto"
                             valueLabelFormat={(value) => `${Math.floor(value / 60)}:${Math.floor(value % 60).toString().padStart(2, '0')}`}
-                            sx={{ flex: 1, mx: 1 }}
+                            sx={{
+                                flex: 1, mx: 1, '& .MuiSlider-thumb': {
+                                    display: 'none',
+                                },
+                            }}
                             disabled={id !== currentTrack?.id}
                         />
 
