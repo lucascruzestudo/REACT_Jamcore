@@ -39,10 +39,15 @@ export default function Feed() {
 
   return (
     <Container>
-      <Divider sx={{ marginTop: 1, borderColor: 'transparent' }} />
+      <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
 
       <Typography variant="h5" sx={{ color: '#666' }}>
-        olá @{user.username},
+        olá <Typography
+          variant="inherit"
+          sx={{ display: 'inline', color: 'primary.main' }}
+        >
+          @{user.username}
+        </Typography>
       </Typography>
       <Typography variant="h5" sx={{ color: '#666' }}>
         escute as jams mais recentes:
@@ -81,6 +86,9 @@ export default function Feed() {
       )}
 
       {isError && <div>Error: {error.message}</div>}
+
+      <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
+
     </Container>
   );
 }

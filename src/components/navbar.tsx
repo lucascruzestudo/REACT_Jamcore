@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <AppBar position="static" sx={{ boxShadow: 'none' }}>
+    <AppBar position="fixed" sx={{ boxShadow: 'none' }}>
       <Toolbar>
         <Box>
           <Typography variant="h6" noWrap component="div">
@@ -66,6 +66,7 @@ const Navbar: React.FC = () => {
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
           >
+            {user ? <MenuItem>@{user.username}</MenuItem> : null}
             <MenuItem onClick={() => { handleMenuClose(); navigate('/profile'); }}>perfil</MenuItem>
             <MenuItem onClick={() => { setIsPlaying(false); setCurrentTrack(null); logout(); logoutUser(); handleMenuClose(); }}>sair</MenuItem>
           </Menu>
