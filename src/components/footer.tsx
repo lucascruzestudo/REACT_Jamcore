@@ -72,6 +72,10 @@ const Footer: React.FC = () => {
                 justifyContent: 'center',
                 height: 'auto',
                 borderTop: '1px solid #ccc',
+                '@media (max-width: 600px)': {
+                    flexDirection: 'column',
+                    padding: '8px',
+                },
             }}
         >
             <Box
@@ -83,9 +87,12 @@ const Footer: React.FC = () => {
                     maxWidth: '1000px',
                     gap: 2,
                     padding: '0 16px',
+                    '@media (max-width: 600px)': {
+                        flexDirection: 'column',
+                        gap: 1,
+                    },
                 }}
             >
-
                 <Box
                     sx={{
                         display: 'flex',
@@ -93,6 +100,10 @@ const Footer: React.FC = () => {
                         gap: 2,
                         flex: 1,
                         justifyContent: 'center',
+                        '@media (max-width: 600px)': {
+                            width: '100%',
+                            justifyContent: 'space-between',
+                        },
                     }}
                 >
                     <Button
@@ -197,50 +208,54 @@ const Footer: React.FC = () => {
                             )}
                         </AnimatePresence>
                     </Box>
+                </Box>
 
-                    <Divider orientation="vertical" flexItem sx={{ mx: 1}} />
+                <Divider orientation="vertical" flexItem sx={{ mx: 1, '@media (max-width: 600px)': { display: 'none' } }} />
 
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 2,
-                            flex: 1,
-                            minWidth: 0,
-                        }}
-                    >
-                        <Avatar
-                            src={currentTrack.imageUrl}
-                            alt={currentTrack.title}
-                            sx={{ width: 40, height: 40, borderRadius: '2px', flexShrink: 0, border: '1px solid #ccc'}}
-                        />
-                        <Box sx={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                            <Typography
-                                variant="body2"
-                                color="textSecondary"
-                                sx={{
-                                    fontSize: '0.65rem',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                }}
-                            >
-                                {currentTrack.username}
-                            </Typography>
-                            <Typography
-                                variant="h6"
-                                onClick={() => navigate(`/track/${currentTrack.id}`)}
-                                sx={{
-                                    fontSize: '0.8rem',
-                                    whiteSpace: 'nowrap',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                {currentTrack.title}
-                            </Typography>
-                        </Box>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        flex: 1,
+                        minWidth: 0,
+                        cursor: 'pointer',
+                        '@media (max-width: 600px)': {
+                            width: '100%',
+                            justifyContent: 'center',
+                        },
+                    }}
+                    onClick={() => navigate(`/track/${currentTrack.id}`)}
+                >
+                    <Avatar
+                        src={currentTrack.imageUrl}
+                        alt={currentTrack.title}
+                        sx={{ width: 40, height: 40, borderRadius: '2px', flexShrink: 0, border: '1px solid #ccc'}}
+                    />
+                    <Box sx={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                        <Typography
+                            variant="body2"
+                            color="textSecondary"
+                            sx={{
+                                fontSize: '0.65rem',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                            }}
+                        >
+                            {currentTrack.username}
+                        </Typography>
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontSize: '0.8rem',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                            }}
+                        >
+                            {currentTrack.title}
+                        </Typography>
                     </Box>
                 </Box>
             </Box>
