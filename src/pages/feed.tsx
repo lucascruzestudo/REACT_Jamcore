@@ -1,57 +1,51 @@
-import { useEffect, useState } from 'react'
-import { Container, Divider, Typography } from '@mui/material'
-import Track from '../components/track'
-import api from '../services/api'
-import Loader from '../components/loader'
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { Container, Divider, Typography } from '@mui/material';
+import Track from '../components/track';
+import api from '../services/api';
+import Loader from '../components/loader';
 
 export default function Feed() {
+  const fetchTracks = async ({ pageParam = 1 }) => {
+    const response = await api.get('Track', {
+      params: {
+        pageNumber: pageParam,
+        pageSize: 10,
+      },
+    });
+    return response.data.data.tracks;
+  };
 
-  const [tracks, setTracks] = useState<any[]>([])
-  const [pageNumber] = useState(1)
-  const [isLoading, setIsLoading] = useState(false)
-  const [hasNextPage, setHasNextPage] = useState(true)
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['tracks'],
+    queryFn: fetchTracks,
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasNextPage ? lastPage.pageNumber + 1 : undefined;
+    },
+    initialPageParam: 1,
+    refetchInterval: 300000,
+  });
 
-  const fetchTracks = async (pageNumber: number) => {
-    if (isLoading || !hasNextPage) return
-    setIsLoading(true)
-
-    try {
-      const response = await api.get('Track', {
-        params: {
-          pageNumber,
-          pageSize: 10,
-        },
-      })
-
-      if (pageNumber === 1) {
-        setTracks(response.data.data.tracks.items)
-      } else {
-        setTracks((prevTracks) => [...prevTracks, ...response.data.data.tracks.items])
-      }
-
-      setHasNextPage(response.data.data.tracks.hasNextPage)
-    } catch (error) {
-      console.error('Error fetching tracks:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchTracks(pageNumber)
-  }, [pageNumber])
+  const tracks = data?.pages.flatMap((page) => page.items) || [];
 
   return (
     <Container>
-      <Divider sx={{ marginTop: 1, borderColor: 'transparent' }}/>
+      <Divider sx={{ marginTop: 1, borderColor: 'transparent' }} />
 
-      <Typography variant="h5" sx={{ color: '#666'}}>
+      <Typography variant="h5" sx={{ color: '#666' }}>
         escute as jams mais recentes:
       </Typography>
 
-      <Divider sx={{ marginTop: 3, borderColor: 'transparent' }}/>
+      <Divider sx={{ marginTop: 3, borderColor: 'transparent' }} />
 
-      <Container sx={{ display: 'flex', flexDirection: 'column', gap: 4}}>
+      <Container sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {tracks.map((track) => (
           <Track
             key={track.id}
@@ -72,6 +66,16 @@ export default function Feed() {
 
       {isLoading && <Loader />}
 
+      {hasNextPage && (
+        <button
+          onClick={() => fetchNextPage()}
+          disabled={isFetchingNextPage}
+        >
+          {isFetchingNextPage ? 'Carregando mais...' : 'Carregar mais'}
+        </button>
+      )}
+
+      {isError && <div>Error: {error.message}</div>}
     </Container>
-  )
+  );
 }

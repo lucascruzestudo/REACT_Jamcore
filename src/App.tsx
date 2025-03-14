@@ -6,6 +6,10 @@ import Feed from './pages/feed.tsx'
 import { TrackProvider } from './contexts/trackcontext.tsx'
 import Navbar from './components/navbar.tsx'
 import Footer from './components/footer.tsx'
+import { UserProvider } from './contexts/usercontext.tsx'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+export const queryClient = new QueryClient();
 
 function AppContent() {
   const location = useLocation()
@@ -32,11 +36,16 @@ function AppContent() {
 
 export default function App() {
   return (
-    <TrackProvider>
-      <Router>
-        <AppContent />
-        <ToastContainer />
-      </Router>
-    </TrackProvider>
+    <QueryClientProvider client={queryClient}>
+      <UserProvider>
+        <TrackProvider>
+          <Router>
+            <AppContent />
+            <ToastContainer />
+          </Router>
+        </TrackProvider>
+      </UserProvider>
+
+    </QueryClientProvider>
   )
 }
