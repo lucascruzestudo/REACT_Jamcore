@@ -8,6 +8,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import api from '../services/api'
 import { useTrack } from '../contexts/trackcontext';
 import TrackCover from './trackcover';
+import { useNavigate } from 'react-router-dom';
 
 interface TrackProps {
     key: string;
@@ -43,6 +44,11 @@ const Track: React.FC<TrackProps> = ({
     const [userLiked, setUserLiked] = useState(userLikedTrack);
     const [hasPlayed, setHasPlayed] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
+    const navigate = useNavigate();
+
+    const handleNavigateToTrack = () => {
+        navigate(`/track/${id}`);
+    };
 
     const handleOpenModal = () => {
         setModalOpen(true);
@@ -141,19 +147,27 @@ const Track: React.FC<TrackProps> = ({
                                 {username || 'null'}
                             </Typography>
                             <Tooltip title={title || 'null'} arrow>
-                                <Typography
-                                    variant="body1"
-                                    noWrap
+                                <Box
                                     sx={{
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap',
-                                        wordBreak: 'break-word',
-                                        maxWidth: { xs: '26ch', sm: '45ch' }
+                                        cursor: 'pointer',
+                                        '&:hover': { textDecoration: 'underline' },
                                     }}
+                                    onClick={handleNavigateToTrack}
                                 >
-                                    {title || 'null'}
-                                </Typography>
+                                    <Typography
+                                        variant="body1"
+                                        noWrap
+                                        sx={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap',
+                                            wordBreak: 'break-word',
+                                            maxWidth: { xs: '26ch', sm: '45ch' },
+                                        }}
+                                    >
+                                        {title || 'null'}
+                                    </Typography>
+                                </Box>
                             </Tooltip>
                         </Box>
                         <Box textAlign="right">

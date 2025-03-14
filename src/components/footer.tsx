@@ -3,8 +3,10 @@ import { Box, Button, Typography, Slider, Avatar, Divider } from '@mui/material'
 import { useTrack } from '../contexts/trackcontext';
 import { PlayArrow, Pause, SkipPrevious, SkipNext, VolumeUp } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const Footer: React.FC = () => {
+    const navigate = useNavigate();
     const { currentTrack, isPlaying, currentTime, duration, togglePlayPause, updateTime, setIsPlaying, setVolume, volume } = useTrack();
     const [showVolumeSlider, setShowVolumeSlider] = useState(false);
     const volumeSliderRef = useRef<HTMLDivElement>(null);
@@ -227,19 +229,19 @@ const Footer: React.FC = () => {
                             </Typography>
                             <Typography
                                 variant="h6"
+                                onClick={() => navigate(`/track/${currentTrack.id}`)}
                                 sx={{
-                                    fontSize: '0.875rem',
+                                    fontSize: '0.8rem',
                                     whiteSpace: 'nowrap',
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
+                                    cursor: 'pointer',
                                 }}
                             >
                                 {currentTrack.title}
                             </Typography>
                         </Box>
                     </Box>
-
-
                 </Box>
             </Box>
         </Box>

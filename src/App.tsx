@@ -10,6 +10,7 @@ import { UserProvider } from './contexts/usercontext.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProfilePage from './pages/profile.tsx'
 import { useEffect } from 'react'
+import TrackPage from './pages/trackpage.tsx'
 
 export const queryClient = new QueryClient();
 
@@ -24,14 +25,16 @@ function AppContent() {
           <div style={{ paddingTop: '20px' }}></div>
         </>
       )}
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/feed" element={<Feed />} />
-          <Route path="/profile" element={<ProfilePage />} />
-        </Route>
-      </Routes>
+
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route element={<PrivateRoute />}>
+            <Route path="/feed" element={<Feed />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/track/:trackid" element={<TrackPage />} />
+          </Route>
+        </Routes>
       <Footer />
     </>
   )
