@@ -8,6 +8,7 @@ import Navbar from './components/navbar.tsx'
 import Footer from './components/footer.tsx'
 import { UserProvider } from './contexts/usercontext.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ProfilePage from './pages/profile.tsx'
 
 export const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route element={<PrivateRoute />}>
           <Route path="/feed" element={<Feed />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Routes>
       <Footer />

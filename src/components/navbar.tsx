@@ -6,12 +6,11 @@ import { useAuthStore } from '../store/auth';
 import { useTrack } from '../contexts/trackcontext';
 import { useUser } from '../contexts/usercontext';
 
-
 const Navbar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const logout = useAuthStore((state) => state.logout)
-  const { setCurrentTrack, setIsPlaying } = useTrack()
-  const { user, logoutUser } = useUser()
+  const logout = useAuthStore((state) => state.logout);
+  const { setCurrentTrack, setIsPlaying } = useTrack();
+  const { user, logoutUser, userProfile } = useUser();
   const navigate = useNavigate();
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -23,23 +22,19 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <AppBar position="static" sx={{ boxShadow: 'none'}}>
+    <AppBar position="static" sx={{ boxShadow: 'none' }}>
       <Toolbar>
         <Box>
           <Typography variant="h6" noWrap component="div">
-          <Link to="/feed" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-            <img src="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-static//jamcorelogo.png" alt="Logo" style={{ width: 'auto', height: '30px' }} />
-          </Link>
+            <Link to="/feed" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+              <img src="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-static//jamcorelogo.png" alt="Logo" style={{ width: 'auto', height: '30px' }} />
+            </Link>
           </Typography>
         </Box>
 
         <Box sx={{ flexGrow: 2, display: 'flex', justifyContent: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', borderRadius: 1, p: '2px 4px' }}>
-            <InputBase
-              placeholder="pesquisar"
-              inputProps={{ 'aria-label': 'search' }}
-              sx={{ ml: 1, flex: 1 }}
-            />
+            <InputBase placeholder="pesquisar" inputProps={{ 'aria-label': 'search' }} sx={{ ml: 1, flex: 1 }} />
             <IconButton type="submit" aria-label="search">
               <SearchIcon />
             </IconButton>
@@ -59,7 +54,10 @@ const Navbar: React.FC = () => {
             aria-haspopup="true"
             onClick={handleMenuOpen}
           >
-            <Avatar alt={user?.username || 'você'} src={user?.profilePictureUrl || ''} />
+            <Avatar
+              alt={user?.username || 'você'}
+              src={`${user?.profilePictureUrl}?t=${userProfile?.updatedAt || new Date().getTime()}` || '/default-avatar.png'}
+            />
           </IconButton>
           <Menu
             id="profile-menu"

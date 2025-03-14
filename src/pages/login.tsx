@@ -15,6 +15,7 @@ const Login = () => {
   const [errors, setErrors] = useState<{ username: string; password: string }>({ username: '', password: '' })
   const [loginError, setLoginError] = useState<string>('')
   const [successMessage, setSuccessMessage] = useState<string>('')
+  const [loading, setLoading] = useState(false)
   const login = useAuthStore((state) => state.login)
   const navigate = useNavigate()
 
@@ -31,7 +32,11 @@ const Login = () => {
 
     if (!username || !password) return
 
+    setLoading(true)
+
     const success = await login(username, password)
+    setLoading(false)
+
     if (success) {
       setSuccessMessage('autenticado com sucesso, vamos lá!')
       setTimeout(() => {
@@ -86,8 +91,13 @@ const Login = () => {
           }}
         />
         <Box display="flex" alignItems="center" justifyContent="space-between" width="100%" mt={2}>
-          <Button variant="contained" color="primary" onClick={handleLogin}>
-            entrar na jam
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={handleLogin} 
+            disabled={loading}
+          >
+            {loading ? 'entrando...' : 'entrar'}
           </Button>
           <Link component={RouterLink} to="/password-recovery" variant="body2" color="primary" underline="hover">
             esqueci minha senha

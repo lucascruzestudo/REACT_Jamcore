@@ -3,8 +3,10 @@ import { Container, Divider, Typography } from '@mui/material';
 import Track from '../components/track';
 import api from '../services/api';
 import Loader from '../components/loader';
+import { useUser } from "../contexts/usercontext";
 
 export default function Feed() {
+  const { user } = useUser();
   const fetchTracks = async ({ pageParam = 1 }) => {
     const response = await api.get('Track', {
       params: {
@@ -39,6 +41,9 @@ export default function Feed() {
     <Container>
       <Divider sx={{ marginTop: 1, borderColor: 'transparent' }} />
 
+      <Typography variant="h5" sx={{ color: '#666' }}>
+        olá @{user.username},
+      </Typography>
       <Typography variant="h5" sx={{ color: '#666' }}>
         escute as jams mais recentes:
       </Typography>

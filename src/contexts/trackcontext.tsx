@@ -103,7 +103,9 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     useEffect(() => {
         if (location.pathname !== '/login') {
             const handleSpaceKeyPress = (event: KeyboardEvent) => {
-                if (event.code === 'Space') {
+                const isInputFocused = document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement;
+
+                if (event.code === 'Space' && !isInputFocused) {
                     if (audioRef.current) {
                         if (isPlaying) {
                             audioRef.current.pause();
