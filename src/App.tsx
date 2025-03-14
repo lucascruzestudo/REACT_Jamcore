@@ -9,6 +9,7 @@ import Footer from './components/footer.tsx'
 import { UserProvider } from './contexts/usercontext.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProfilePage from './pages/profile.tsx'
+import { useEffect } from 'react'
 
 export const queryClient = new QueryClient();
 
@@ -37,6 +38,20 @@ function AppContent() {
 }
 
 export default function App() {
+  
+  useEffect(() => {
+    const handleKeyDown = (event: any) => {
+      if (event.key === " " && event.target === document.body) {
+        event.preventDefault();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <UserProvider>
