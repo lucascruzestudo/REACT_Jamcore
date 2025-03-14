@@ -83,13 +83,19 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (audio) {
             const handleMetadata = () => setDuration(audio.duration);
             const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+            const handleEnded = () => {
+                setIsPlaying(false);
+                setCurrentTime(0);
+            };
 
             audio.addEventListener('loadedmetadata', handleMetadata);
             audio.addEventListener('timeupdate', handleTimeUpdate);
+            audio.addEventListener('ended', handleEnded);
 
             return () => {
                 audio.removeEventListener('loadedmetadata', handleMetadata);
                 audio.removeEventListener('timeupdate', handleTimeUpdate);
+                audio.removeEventListener('ended', handleEnded);
             };
         }
     }, []);
