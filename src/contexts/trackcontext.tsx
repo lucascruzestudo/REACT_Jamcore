@@ -95,25 +95,27 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, []);
 
     useEffect(() => {
-        const handleSpaceKeyPress = (event: KeyboardEvent) => {
-            if (event.code === 'Space') {
-                if (audioRef.current) {
-                    if (isPlaying) {
-                        audioRef.current.pause();
-                    } else {
-                        audioRef.current.play();
+        if (location.pathname !== '/login') {
+            const handleSpaceKeyPress = (event: KeyboardEvent) => {
+                if (event.code === 'Space') {
+                    if (audioRef.current) {
+                        if (isPlaying) {
+                            audioRef.current.pause();
+                        } else {
+                            audioRef.current.play();
+                        }
+                        setIsPlaying(!isPlaying);
                     }
-                    setIsPlaying(!isPlaying);
                 }
-            }
-        };
+            };
 
-        window.addEventListener('keydown', handleSpaceKeyPress);
+            window.addEventListener('keydown', handleSpaceKeyPress);
 
-        return () => {
-            window.removeEventListener('keydown', handleSpaceKeyPress);
-        };
-    }, [isPlaying]);
+            return () => {
+                window.removeEventListener('keydown', handleSpaceKeyPress);
+            };
+        }
+    }, [isPlaying, location.pathname]);
 
     useEffect(() => {
         if (audioRef.current && !isPlaying) {

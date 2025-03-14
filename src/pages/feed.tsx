@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Container, Divider, Typography } from '@mui/material'
 import Track from '../components/track'
 import api from '../services/api'
+import Loader from '../components/loader'
 
 export default function Feed() {
 
@@ -69,7 +70,8 @@ export default function Feed() {
         ))}
       </Container>
 
-      {isLoading && <Typography>Carregando...</Typography>}
+      {isLoading && <Loader />}
+
     </Container>
   )
 }
