@@ -210,7 +210,7 @@ const Footer: React.FC = () => {
                         <Avatar
                             src={currentTrack.imageUrl}
                             alt={currentTrack.title}
-                            sx={{ width: 40, height: 40, borderRadius: '2px', flexShrink: 0 }}
+                            sx={{ width: 40, height: 40, borderRadius: '2px', flexShrink: 0, border: '1px solid #ccc'}}
                         />
                         <Box sx={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
                             <Typography

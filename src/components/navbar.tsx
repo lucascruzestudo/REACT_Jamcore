@@ -56,7 +56,7 @@ const Navbar: React.FC = () => {
           >
             <Avatar
               alt={user?.username || 'você'}
-              src={`${user?.profilePictureUrl}?t=${userProfile?.updatedAt || new Date().getTime()}` || '/default-avatar.png'}
+              src={user?.profilePictureUrl || userProfile?.profilePictureUrl || '/default-avatar.png'}
             />
           </IconButton>
           <Menu
@@ -66,7 +66,7 @@ const Navbar: React.FC = () => {
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
           >
-            {user ? <MenuItem>@{user.username}</MenuItem> : null}
+            {user ? <MenuItem>{user.username}</MenuItem> : null}
             <MenuItem onClick={() => { handleMenuClose(); navigate('/profile'); }}>perfil</MenuItem>
             <MenuItem onClick={() => { setIsPlaying(false); setCurrentTrack(null); logout(); logoutUser(); handleMenuClose(); }}>sair</MenuItem>
           </Menu>

@@ -6,7 +6,7 @@ import Loader from '../components/loader';
 import { useUser } from "../contexts/usercontext";
 
 export default function Feed() {
-  const { user } = useUser();
+  const { user, userProfile } = useUser();
   const fetchTracks = async ({ pageParam = 1 }) => {
     const response = await api.get('Track', {
       params: {
@@ -42,12 +42,13 @@ export default function Feed() {
       <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
 
       <Typography variant="h5" sx={{ color: '#666' }}>
-        olá <Typography
+        olá, <Typography
           variant="inherit"
           sx={{ display: 'inline', color: 'primary.main' }}
         >
-          @{user.username}
-        </Typography>
+          {userProfile &&userProfile?.displayName !== "" ? `${userProfile.displayName}` : `${user.username}`}
+          </Typography>
+        .
       </Typography>
       <Typography variant="h5" sx={{ color: '#666' }}>
         escute as jams mais recentes:
