@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, IconButton, Slider, Button, Divider, Tooltip, Grid } from '@mui/material';
+import { Box, Typography, IconButton, Slider, Button, Divider, Tooltip, Grid, TextField } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -7,7 +7,10 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import LinkIcon from '@mui/icons-material/Link';
 import api from '../services/api';
 import { useTrack } from '../contexts/trackcontext';
+import { useUser } from '../contexts/usercontext';
 import TrackCover from './trackcover';
+import CommentComponent from './comment';
+import { AddComment, Comment, DeleteOutline } from '@mui/icons-material';
 
 interface DetailedTrackProps {
     key: string;
@@ -23,7 +26,15 @@ interface DetailedTrackProps {
     userLikedTrack: boolean;
     originalDuration: string;
     description: string;
-    comments: { username: string; comment: string; createdAt: string }[];
+    comments: {
+        id: string;
+        text: string;
+        userId: string;
+        username: string;
+        displayName: string;
+        userProfilePictureUrl: string;
+        createdAt: string;
+    }[];
 }
 
 const DetailedTrack: React.FC<DetailedTrackProps> = ({
@@ -47,6 +58,10 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
     const [userLiked, setUserLiked] = useState(userLikedTrack);
     const [hasPlayed, setHasPlayed] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
+    const [newComment, setNewComment] = useState('');
+    const [localComments, setLocalComments] = useState(comments);
+    const [isCommenting, setIsCommenting] = useState(false);
+    const { user, userProfile } = useUser();
 
     const handleOpenModal = () => {
         setModalOpen(true);
@@ -87,6 +102,53 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
         }
     };
 
+    const handleCommentSubmit = async () => {
+        if (newComment.trim() === '') return;
+
+        setIsCommenting(true);
+
+        try {
+            const response = await api.post('/TrackComment', {
+                trackId: id,
+                comment: newComment
+            });
+
+            console.log(response);
+
+            const newCommentData = {
+                id: response.data.data.id,
+                text: newComment,
+                userId: user?.id || userProfile?.userId || '',
+                username: userProfile?.displayName || user?.displayName || '',
+                userProfilePictureUrl: userProfile?.profilePictureUrl || user?.profilePictureUrl || '',
+                createdAt: new Date().toISOString(),
+                displayName: userProfile?.displayName || user?.username || ''
+            };
+
+            setLocalComments([newCommentData, ...localComments]);
+            setNewComment('');
+        } catch (error) {
+            console.error('Error posting comment:', error);
+        } finally {
+            setIsCommenting(false);
+        }
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+        try {
+            await api.delete('/TrackComment', {
+                data: {
+                    trackId: id,
+                    commentId: commentId
+                }
+            });
+
+            setLocalComments(localComments.filter(comment => comment.id !== commentId));
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+        }
+    };
+
     return (
         <Box sx={{ p: 3, maxWidth: 1000, width: '100%', m: 'auto', backgroundColor: 'white' }}>
             <Grid container spacing={3}>
@@ -118,7 +180,6 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 <Grid item xs={12} md={8}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
                         <Box>
-
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Box>
                                     <Typography variant="subtitle1" color="textSecondary">
@@ -199,7 +260,6 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                                 <>
                                     <Divider sx={{ my: 2 }} />
 
-
                                     <Box
                                         sx={{
                                             maxHeight: '150px',
@@ -259,7 +319,6 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 </Typography>
             </Box>
 
-
             <Divider sx={{ my: 1, borderColor: 'transparent' }} />
 
             <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center', gap: 2, flexWrap: 'nowrap', width: '100%' }}>
@@ -313,29 +372,64 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 </Button>
             </Box>
 
-
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 4 }} />
 
             <Typography variant="h6" gutterBottom>
-                Comentários
+                comentários
             </Typography>
-            {comments.length > 0 ? (
-                comments.map((comment, index) => (
-                    <Box key={index} sx={{ mb: 2 }}>
-                        <Typography variant="subtitle2" color="textSecondary">
-                            {comment.username} - {new Date(comment.createdAt).toLocaleDateString()}
-                        </Typography>
-                        <Typography variant="body1">
-                            {comment.comment}
-                        </Typography>
-                    </Box>
-                ))
+
+            <Divider sx={{ my: 1, borderColor: 'transparent' }} />
+
+            <Box sx={{ mb: 1 }}>
+                <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={10}>
+                        <TextField
+                            fullWidth
+                            variant="outlined"
+                            placeholder="Adicionar um comentário..."
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                        />
+                    </Grid>
+                    <Grid item xs={2}>
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            color="primary"
+                            disabled={isCommenting}
+                            sx={{
+                                height: '56px',
+                                backgroundColor: isCommenting ? '#ccc' : 'primary.main',
+                            }}
+                            onClick={handleCommentSubmit}
+                        >
+                            {isCommenting ? <Comment /> : <AddComment />}
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Box>
+
+            <Divider sx={{ my: 2, borderColor: 'transparent' }} />
+
+            {localComments.length > 0 ? (
+                localComments
+                    .slice()
+                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .map((comment, index) => (
+                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+                            <CommentComponent comment={comment} />
+                            {comment.userId === user.id && (
+                                <IconButton onClick={() => handleDeleteComment(comment.id)}>
+                                    <DeleteOutline />
+                                </IconButton>
+                            )}
+                        </Box>
+                    ))
             ) : (
                 <Typography variant="body1" color="textSecondary">
-                    Nenhum comentário disponível.
+                    nenhum comentário...
                 </Typography>
             )}
-
 
             <TrackCover
                 open={modalOpen}

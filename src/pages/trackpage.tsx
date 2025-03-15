@@ -64,7 +64,7 @@ export default function TrackPage() {
                     userLikedTrack={track.userLikedTrack}
                     originalDuration={track.duration}
                     description={track.description}
-                    comments={[]}
+                    comments={track.comments}
                 />
             )}
             <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />

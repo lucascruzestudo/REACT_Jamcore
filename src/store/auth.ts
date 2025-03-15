@@ -32,8 +32,7 @@ export const useAuthStore = create<AuthState>((set) => {
         const user = response.data.data;
 
         Cookies.set('token', token, { expires: 7 });
-        const { id, ...userWithoutId } = user;
-        localStorage.setItem('user', JSON.stringify(userWithoutId));
+        localStorage.setItem('user', JSON.stringify(user));
 
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
