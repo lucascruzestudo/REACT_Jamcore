@@ -101,24 +101,28 @@ const ProfilePage: React.FC = () => {
         return !hasChanges;
     };
 
-
-
     return (
         <Container>
             <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
-            <Typography variant="h5" sx={{ color: '#666' }}>
+            <Typography
+                variant="h5"
+                sx={{
+                    color: '#666',
+                    textAlign: { xs: 'center', md: 'left' },
+                }}
+            >
                 seu perfil
             </Typography>
 
             {isLoading ? (
                 <Loader />
             ) : (
-                <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2, display: 'flex', gap: 4, alignItems: 'center' }}>
+                <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, alignItems: 'center' }}>
                     <Box
                         sx={{
                             position: 'relative',
-                            width: 200,
-                            height: 200,
+                            width: { xs: 150, md: 200 },
+                            height: { xs: 150, md: 200 },
                             borderRadius: '50%',
                             overflow: 'hidden',
                             '&:hover .upload-button': {
@@ -163,11 +167,11 @@ const ProfilePage: React.FC = () => {
                         )}
                     </Box>
 
-                    <Divider orientation="vertical" flexItem />
+                    <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
 
-                    <Box sx={{ flex: 1 }}>
+                    <Box sx={{ flex: 1, width: '100%' }}>
                         <form onSubmit={handleSubmit(onSubmit)}>
-                            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, mb: 2 }}>
                                 <Controller
                                     name="displayName"
                                     control={control}
