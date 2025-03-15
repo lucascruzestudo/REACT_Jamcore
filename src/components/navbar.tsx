@@ -97,7 +97,7 @@ const Navbar: React.FC = () => {
           >
             <Avatar
               alt={user?.username || 'você'}
-              src={user?.profilePictureUrl || userProfile?.profilePictureUrl || '/default-avatar.png'}
+              src={`${userProfile?.profilePictureUrl}?t=${userProfile?.updatedAt}` || user?.profilePictureUrl || '/default-avatar.png'}
             />
           </IconButton>
           <Menu
