@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { AppBar, Toolbar, IconButton, Typography, InputBase, Menu, MenuItem, Avatar, Box } from '@mui/material';
+import React, { useState, useRef, useEffect } from 'react';
+import { AppBar, Toolbar, IconButton, Typography, InputBase, Menu, MenuItem, Avatar, Box, useMediaQuery, Theme } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
@@ -8,10 +8,13 @@ import { useUser } from '../contexts/usercontext';
 
 const Navbar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const logout = useAuthStore((state) => state.logout);
   const { setCurrentTrack, setIsPlaying } = useTrack();
   const { user, logoutUser, userProfile } = useUser();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -21,32 +24,73 @@ const Navbar: React.FC = () => {
     setAnchorEl(null);
   };
 
+  const handleSearchClick = () => {
+    setShowSearch(true);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearch(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <AppBar position="fixed" sx={{ boxShadow: 'none' }}>
-      <Toolbar>
-        <Box>
-          <Typography variant="h6" noWrap component="div">
-            <Link to="/feed" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-              <img src="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-static//jamcorelogo.png" alt="Logo" style={{ width: 'auto', height: '30px' }} />
-            </Link>
-          </Typography>
-        </Box>
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        {!showSearch && (
+          <Box>
+            <Typography variant="h6" noWrap component="div">
+              <Link to="/feed" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+                <img src="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-static//jamcorelogo.png" alt="Logo" style={{ width: 'auto', height: '30px' }} />
+              </Link>
+            </Typography>
+          </Box>
+        )}
 
-        <Box sx={{ flexGrow: 2, display: 'flex', justifyContent: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', borderRadius: 1, p: '2px 4px' }}>
-            <InputBase placeholder="pesquisar" inputProps={{ 'aria-label': 'search' }} sx={{ ml: 1, flex: 1 }} />
-            <IconButton type="submit" aria-label="search">
+        {showSearch && (
+          <Box ref={searchRef} sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', mx: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', borderRadius: 1, p: '2px 4px', width: '100%', maxWidth: '400px' }}>
+              <InputBase placeholder="pesquisar" inputProps={{ 'aria-label': 'search' }} sx={{ ml: 1, flex: 1 }} />
+              <IconButton type="submit" aria-label="search">
+                <SearchIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        )}
+
+        {!isMobile && (
+          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', mx: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', borderRadius: 1, p: '2px 4px', width: '100%', maxWidth: '400px' }}>
+              <InputBase placeholder="pesquisar" inputProps={{ 'aria-label': 'search' }} sx={{ ml: 1, flex: 1 }} />
+              <IconButton type="submit" aria-label="search">
+                <SearchIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        )}
+
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {isMobile && (
+            <IconButton color="inherit" aria-label="search" onClick={handleSearchClick}>
               <SearchIcon />
             </IconButton>
-          </Box>
-        </Box>
+          )}
 
-        <Box>
-          <Link to="/upload" style={{ color: 'inherit', textDecoration: 'none' }}>
-            <IconButton color="inherit" aria-label="upload">
-              <Typography display="block">criar jam</Typography>
-            </IconButton>
-          </Link>
+          {!showSearch && (
+            <Link to="/upload" style={{ color: 'inherit', textDecoration: 'none' }}>
+              <IconButton color="inherit" aria-label="upload">
+                <Typography display="block">criar jam</Typography>
+              </IconButton>
+            </Link>
+          )}
+
           <IconButton
             color="inherit"
             aria-label="profile"
