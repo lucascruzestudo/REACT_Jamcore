@@ -189,7 +189,7 @@ const Footer: React.FC = () => {
                                 >
                                     <Slider
                                         orientation="vertical"
-                                        defaultValue={volume}
+                                        value={volume}
                                         max={1}
                                         step={0.01}
                                         aria-labelledby="vertical-slider"

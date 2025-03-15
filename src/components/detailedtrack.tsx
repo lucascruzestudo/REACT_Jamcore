@@ -343,6 +343,9 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 imageUrl={imageUrl}
                 title={title}
             />
+
+            <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
+
         </Box>
     );
 };
