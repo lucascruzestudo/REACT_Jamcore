@@ -43,7 +43,7 @@ const Navbar: React.FC = () => {
 
   return (
     <AppBar position="fixed" sx={{ boxShadow: 'none' }}>
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
+      <Toolbar sx={{ justifyContent: 'space-between', height: '64px' }}>
         {!showSearch && (
           <Box>
             <Typography variant="h6" noWrap component="div">
@@ -58,9 +58,6 @@ const Navbar: React.FC = () => {
           <Box ref={searchRef} sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', mx: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', borderRadius: 1, p: '2px 4px', width: '100%', maxWidth: '400px' }}>
               <InputBase placeholder="pesquisar" inputProps={{ 'aria-label': 'search' }} sx={{ ml: 1, flex: 1 }} />
-              <IconButton type="submit" aria-label="search">
-                <SearchIcon />
-              </IconButton>
             </Box>
           </Box>
         )}
