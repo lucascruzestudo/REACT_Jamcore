@@ -14,7 +14,7 @@ export default function Feed() {
     const response = await api.get('Track', {
       params: {
         pageNumber: pageParam,
-        pageSize: 10,
+        pageSize: 6,
       },
     });
     return response.data.data.tracks;
@@ -63,7 +63,7 @@ export default function Feed() {
 
   return (
     <Container>
-      <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
+      <Divider sx={{ marginTop: 12, borderColor: 'transparent' }} />
 
       <Typography variant="h5" sx={{ color: '#666' }}>
         olá,{' '}
@@ -99,6 +99,7 @@ export default function Feed() {
             createdAt={track.createdAt}
             userLikedTrack={track.userLikedTrack}
             originalDuration={track.duration}
+            updatedAt={track.updatedAt}
           />
         ))}
       </Container>

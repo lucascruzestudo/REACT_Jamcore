@@ -15,6 +15,7 @@ interface Track {
     playCount: number;
     userLikedTrack: boolean;
     originalDuration: string;
+    updatedAt: string;
 }
 
 interface TrackContextType {

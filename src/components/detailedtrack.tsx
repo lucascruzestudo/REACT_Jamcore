@@ -10,7 +10,7 @@ import { useTrack } from '../contexts/trackcontext';
 import { useUser } from '../contexts/usercontext';
 import TrackCover from './trackcover';
 import CommentComponent from './comment';
-import { AddComment, Comment, DeleteOutline } from '@mui/icons-material';
+import { AddComment, Comment, DeleteOutline, Edit } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 interface DetailedTrackProps {
@@ -36,7 +36,9 @@ interface DetailedTrackProps {
         displayName: string;
         userProfilePictureUrl: string;
         createdAt: string;
+        userProfileUpdatedAt: string;
     }[];
+    updatedAt: string;
 }
 
 const DetailedTrack: React.FC<DetailedTrackProps> = ({
@@ -53,7 +55,8 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
     userLikedTrack,
     originalDuration,
     description,
-    comments
+    comments,
+    updatedAt
 }) => {
     const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack } = useTrack();
     const [localLikeCount, setLocalLikeCount] = useState(likeCount);
@@ -66,7 +69,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
     const [isCommenting, setIsCommenting] = useState(false);
     const { user, userProfile } = useUser();
     const navigate = useNavigate();
-
+    const isUploader = user?.id === userId;
     const handleOpenModal = () => {
         setModalOpen(true);
     };
@@ -88,7 +91,8 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
         likeCount,
         playCount,
         userLikedTrack,
-        originalDuration
+        originalDuration,
+        updatedAt
     };
 
     const toggleLike = async () => {
@@ -127,7 +131,8 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 username: userProfile?.displayName || user?.displayName || '',
                 userProfilePictureUrl: userProfile?.profilePictureUrl || user?.profilePictureUrl || '/jamcoredefaultpicture.jpg',
                 createdAt: new Date().toISOString(),
-                displayName: userProfile?.displayName || user?.username || ''
+                displayName: userProfile?.displayName || user?.username || '',
+                userProfileUpdatedAt: userProfile?.updatedAt || user?.updatedAt || ''
             };
 
             setLocalComments([newCommentData, ...localComments]);
@@ -172,7 +177,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                         onClick={handleOpenModal}
                     >
                         <img
-                            src={imageUrl}
+                            src={`${imageUrl}?t=${updatedAt || createdAt}`}
                             alt={title}
                             style={{
                                 width: '100%',
@@ -392,6 +397,18 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 >
                     copiar link
                 </Button>
+                {isUploader && (
+                    <Button
+                        startIcon={<Edit sx={{ fontSize: { xs: 16, sm: 20 } }} />}
+                        variant="text"
+                        color="secondary"
+                        size="small"
+                        sx={{ py: { xs: 1, sm: 0.5 } }}
+                        onClick={() => navigate(`/track/${id}/edit`)}
+                    >
+                        editar
+                    </Button>
+                )}
             </Box>
 
             <Divider sx={{ my: 4 }} />
@@ -456,7 +473,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
             <TrackCover
                 open={modalOpen}
                 onClose={handleCloseModal}
-                imageUrl={imageUrl}
+                imageUrl={`${imageUrl}?t=${trackData.updatedAt || trackData.createdAt}`}
                 title={title}
             />
 

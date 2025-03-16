@@ -24,6 +24,7 @@ interface TrackProps {
     playCount: number;
     userLikedTrack: boolean;
     originalDuration: string;
+    updatedAt: string;
 }
 
 const Track: React.FC<TrackProps> = ({
@@ -38,7 +39,8 @@ const Track: React.FC<TrackProps> = ({
     likeCount,
     playCount,
     userLikedTrack,
-    originalDuration
+    originalDuration,
+    updatedAt
 }) => {
     const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack } = useTrack();
     const [localLikeCount, setLocalLikeCount] = useState(likeCount);
@@ -73,10 +75,9 @@ const Track: React.FC<TrackProps> = ({
         likeCount,
         playCount,
         userLikedTrack,
-        originalDuration
+        originalDuration,
+        updatedAt
     };
-
-    console.log(trackData);
 
     const toggleLike = async () => {
         try {
@@ -126,7 +127,7 @@ const Track: React.FC<TrackProps> = ({
                     onClick={handleOpenModal}
                 >
                     <img
-                        src={imageUrl}
+                        src={`${imageUrl}?t=${updatedAt || createdAt}`}
                         alt={title}
                         style={{
                             width: '100%',

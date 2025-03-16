@@ -228,7 +228,7 @@ const Footer: React.FC = () => {
                     onClick={() => navigate(`/track/${currentTrack.id}`)}
                 >
                     <Avatar
-                        src={currentTrack.imageUrl}
+                        src={`${currentTrack.imageUrl}?t=${currentTrack.updatedAt || currentTrack.createdAt}`}
                         alt={currentTrack.title}
                         sx={{ width: 40, height: 40, borderRadius: '2px', flexShrink: 0, border: '1px solid #ccc'}}
                     />

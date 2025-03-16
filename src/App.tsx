@@ -8,13 +8,13 @@ import Navbar from './components/navbar.tsx'
 import Footer from './components/footer.tsx'
 import { UserProvider } from './contexts/usercontext.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ProfilePage from './pages/profile.tsx'
 import { useEffect } from 'react'
 import TrackPage from './pages/trackpage.tsx'
 import CreateTrackPage from './pages/createtrack.tsx'
 import UserProfilePage from './pages/user.tsx'
 import Register from './pages/register.tsx'
 import ConfirmAccount from './pages/confirmaccount.tsx'
+import UpdateTrackPage from './pages/updatetrack.tsx'
 
 export const queryClient = new QueryClient();
 
@@ -37,10 +37,10 @@ function AppContent() {
           <Route path='/confirmaccount/:token' element={<ConfirmAccount />} />
           <Route element={<PrivateRoute />}>
             <Route path="/feed" element={<Feed />} />
-            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/track/:trackid" element={<TrackPage />} />
             <Route path="/user/:id" element={<UserProfilePage />} />
             <Route path="/track/create" element={<CreateTrackPage />} />
+            <Route path="/track/:trackid/edit" element={<UpdateTrackPage />} />
             <Route path="*" element={<Navigate to="/feed" replace />} />
           </Route>
         </Routes>

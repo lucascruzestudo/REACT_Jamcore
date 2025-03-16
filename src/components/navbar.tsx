@@ -109,7 +109,7 @@ const Navbar: React.FC = () => {
             onClose={handleMenuClose}
           >
             {user ? <MenuItem>{user.username}</MenuItem> : null}
-            <MenuItem onClick={() => { handleMenuClose(); navigate('/profile'); }}>perfil</MenuItem>
+            <MenuItem onClick={() => { handleMenuClose(); navigate('/user/' + user?.id); }}>perfil</MenuItem>
             <MenuItem onClick={() => { setIsPlaying(false); setCurrentTrack(null); logout(); logoutUser(); handleMenuClose(); }}>sair</MenuItem>
           </Menu>
         </Box>
