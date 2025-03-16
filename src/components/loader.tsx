@@ -20,7 +20,7 @@ const Loader = ({ centered }: LoaderProps) => (
     }}
   >
     <img
-      src="/public/loader.gif"
+      src="/loader.gif"
       alt="carregando..."
       style={{
         width: centered ? '1.5%' : '2%',
