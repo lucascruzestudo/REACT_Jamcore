@@ -201,19 +201,21 @@ const Track: React.FC<TrackProps> = ({
                                     ...(tags.length > 1 && { gap: 1 }),
                                 }}
                             >
-                                <Box
-                                    sx={{
-                                        backgroundColor: '#eee',
-                                        borderRadius: '8px',
-                                        padding: '2px 8px',
-                                        display: 'inline-block',
-                                        fontSize: '0.75rem',
-                                    }}
-                                >
-                                    <Typography variant="body2" color="textPrimary" noWrap>
-                                        #{tags[0]}
-                                    </Typography>
-                                </Box>
+                                {tags.length > 0 && (
+                                    <Box
+                                        sx={{
+                                            backgroundColor: '#eee',
+                                            borderRadius: '8px',
+                                            padding: '2px 8px',
+                                            display: 'inline-block',
+                                            fontSize: '0.75rem',
+                                        }}
+                                    >
+                                        <Typography variant="body2" color="textPrimary" noWrap>
+                                            #{tags[0]}
+                                        </Typography>
+                                    </Box>
+                                )}
                                 {tags.length > 1 && (
                                     <Box
                                         sx={{

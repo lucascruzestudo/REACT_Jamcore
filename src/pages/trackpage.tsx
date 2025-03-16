@@ -27,7 +27,7 @@ export default function TrackPage() {
             <Container>
                 <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
                 <Box sx={{ textAlign: 'center' }}>
-                    <Loader></Loader>
+                    <Loader centered></Loader>
                 </Box>
                 <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
             </Container>
