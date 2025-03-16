@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
           <Box>
             <Typography variant="h6" noWrap component="div">
               <Link to="/feed" style={{ color: 'inherit', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-                <img src="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-static//jamcorelogo.png" alt="Logo" style={{ width: 'auto', height: '30px' }} />
+                <img src="/public/jamcorelogo.png" alt="Logo" style={{ width: 'auto', height: '30px' }} />
               </Link>
             </Typography>
           </Box>

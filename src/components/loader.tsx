@@ -1,12 +1,9 @@
-import { Box, Divider, LinearProgress } from "@mui/material";
+import { Box } from "@mui/material";
 
-const Loader = () => {
-  return (
-    <Box sx={{ width: '10%', margin: 'auto' }}>
-      <Divider sx={{ my: 2, borderColor: 'transparent' }}></Divider>
-      <LinearProgress color="secondary"/>
-    </Box>
-  );
-};
+const Loader = () => (
+  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%', mt: 4 }}>
+    <img src="/public/loader.gif" alt="Loading..." style={{ width: '2%' }} />
+  </Box>
+);
 
 export default Loader;

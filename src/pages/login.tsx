@@ -54,7 +54,7 @@ const Login = () => {
       animate={{ opacity: 1 }} 
       transition={{ duration: 1 }}
     >
-      <img src="https://bgceohesbgirgijwxbhn.supabase.co/storage/v1/object/public/jamcore-static//jamcorelogored.png" alt="Logo" style={styles.logo as React.CSSProperties} />
+      <img src="/public/jamcorelogored.png" alt="Logo" style={styles.logo as React.CSSProperties} />
       <div style={styles.form as React.CSSProperties}>
         {loginError && <AlertCard message={loginError} type="error" />}
         {successMessage && <AlertCard message={successMessage} type="success" />}
