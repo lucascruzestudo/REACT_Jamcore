@@ -83,6 +83,14 @@ const CreateTrackPage: React.FC = () => {
     const handleAudioChange = (files: FileList | null) => {
         if (files && files[0]) {
             const file = files[0];
+
+            const isMP3 = file.name.toLowerCase().endsWith('.mp3') && file.type === 'audio/mpeg';
+            const isValidSize = file.size <= 10 * 1024 * 1024;
+            if (!isMP3 || !isValidSize) {
+                alert("O arquivo deve estar no formato MP3 e ter no máximo 10MB devido as limitações de espaco do servidor.");
+                return;
+            }
+
             const { title } = watch();
             if (!title) {
                 const fileName = file.name.split('.').slice(0, -1).join('.');
@@ -150,7 +158,7 @@ const CreateTrackPage: React.FC = () => {
 
     return (
         <Container>
-            <Divider sx={{ marginTop: 12, borderColor: 'transparent' }} />
+            <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
             <Typography variant="h5" sx={{ marginTop: 4, marginBottom: 2 }}>
                 criar jam
             </Typography>
@@ -176,13 +184,13 @@ const CreateTrackPage: React.FC = () => {
                 onDrop={handleDrop}
             >
                 <CloudUploadIcon sx={{ color: '#ccc' }} />
-                <Typography variant="body1" component="label" sx={{ cursor: 'pointer', display: 'block' }}>
-                    Arraste e solte o arquivo de áudio aqui ou clique para selecionar
+                <Typography variant="body1" component="label" sx={{ cursor: 'pointer', display: 'block', color: 'secondary.main' }}>
+                    Arraste e solte o arquivo de áudio aqui ou clique para selecionar (.mp3, máximo 10MB)
                     <input
                         type="file"
                         hidden
                         onChange={(e) => handleAudioChange(e.target.files)}
-                        accept="audio/*"
+                        accept="audio/mp3"
                     />
                 </Typography>
                 {audioFileName && (
