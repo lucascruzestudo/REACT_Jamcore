@@ -57,6 +57,7 @@ export default function TrackPage() {
                     tags={track.tags}
                     audioFileUrl={track.audioFileUrl}
                     imageUrl={track.imageUrl}
+                    userId={track.userId}
                     username={track.username}
                     createdAt={track.createdAt}
                     likeCount={track.likeCount}

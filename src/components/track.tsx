@@ -18,6 +18,7 @@ interface TrackProps {
     audioFileUrl: string;
     imageUrl: string;
     username: string;
+    userId: string;
     createdAt: string;
     likeCount: number;
     playCount: number;
@@ -31,6 +32,7 @@ const Track: React.FC<TrackProps> = ({
     title,
     audioFileUrl,
     username,
+    userId,
     tags,
     createdAt,
     likeCount,
@@ -66,12 +68,15 @@ const Track: React.FC<TrackProps> = ({
         audioFileUrl,
         imageUrl,
         username,
+        userId,
         createdAt,
         likeCount,
         playCount,
         userLikedTrack,
         originalDuration
     };
+
+    console.log(trackData);
 
     const toggleLike = async () => {
         try {
@@ -143,32 +148,44 @@ const Track: React.FC<TrackProps> = ({
                 >
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box>
-                            <Typography variant="body2" color="textSecondary" noWrap>
-                                {username || 'null'}
-                            </Typography>
-                            <Tooltip title={title || 'null'} arrow>
-                                <Box
+                            <Box
+                                sx={{
+                                    cursor: 'pointer',
+                                }}
+                                onClick={() => navigate(`/user/${userId}`)}
+                            >
+                                <Typography
+                                    variant="body2"
+                                    color="textSecondary"
+                                    noWrap
                                     sx={{
-                                        cursor: 'pointer',
-                                        '&:hover': { textDecoration: 'underline' },
+                                        '&:hover': { fontWeight: '500' },
                                     }}
-                                    onClick={handleNavigateToTrack}
                                 >
-                                    <Typography
-                                        variant="body1"
-                                        noWrap
-                                        sx={{
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap',
-                                            wordBreak: 'break-word',
-                                            maxWidth: { xs: '26ch', sm: '45ch' },
-                                        }}
-                                    >
-                                        {title || 'null'}
-                                    </Typography>
-                                </Box>
-                            </Tooltip>
+                                    {username || 'null'}
+                                </Typography>
+                            </Box>
+                            <Box
+                                sx={{
+                                    cursor: 'pointer',
+                                }}
+                                onClick={handleNavigateToTrack}
+                            >
+                                <Typography
+                                    variant="body1"
+                                    noWrap
+                                    sx={{
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        wordBreak: 'break-word',
+                                        maxWidth: { xs: '26ch', sm: '45ch' },
+                                        '&:hover': { fontWeight: '500' },
+                                    }}
+                                >
+                                    {title || 'null'}
+                                </Typography>
+                            </Box>
                         </Box>
                         <Box textAlign="right">
                             {(() => {

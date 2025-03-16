@@ -11,6 +11,7 @@ import { useUser } from '../contexts/usercontext';
 import TrackCover from './trackcover';
 import CommentComponent from './comment';
 import { AddComment, Comment, DeleteOutline } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 interface DetailedTrackProps {
     key: string;
@@ -20,6 +21,7 @@ interface DetailedTrackProps {
     audioFileUrl: string;
     imageUrl: string;
     username: string;
+    userId: string;
     createdAt: string;
     likeCount: number;
     playCount: number;
@@ -42,6 +44,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
     imageUrl,
     title,
     audioFileUrl,
+    userId,
     username,
     tags,
     createdAt,
@@ -62,6 +65,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
     const [localComments, setLocalComments] = useState(comments);
     const [isCommenting, setIsCommenting] = useState(false);
     const { user, userProfile } = useUser();
+    const navigate = useNavigate();
 
     const handleOpenModal = () => {
         setModalOpen(true);
@@ -78,6 +82,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
         tags,
         audioFileUrl,
         imageUrl,
+        userId,
         username,
         createdAt,
         likeCount,
@@ -182,10 +187,27 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                         <Box>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <Box>
-                                    <Typography variant="subtitle1" color="textSecondary">
-                                        {username || 'null'}
-                                    </Typography>
-                                    <Typography variant="h5">
+                                    <Box
+                                        sx={{
+                                            cursor: 'pointer',
+                                        }}
+                                        onClick={() => navigate(`/user/${userId}`)}
+                                    >
+                                        <Typography
+                                            variant="body2"
+                                            color="textSecondary"
+                                            noWrap
+                                            sx={{
+                                                '&:hover': { fontWeight: '500' },
+                                            }}
+                                        >
+                                            {username || 'null'}
+                                        </Typography>
+                                    </Box>
+                                    <Typography variant="h5" sx={{
+                                        cursor: 'pointer',
+                                        '&:hover': { fontWeight: '500' },
+                                    }}>
                                         {title || 'null'}
                                     </Typography>
                                 </Box>
@@ -266,7 +288,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                                             overflowY: 'auto'
                                         }}
                                     >
-                                        <Typography variant="body1">
+                                        <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
                                             {description || 'No description available.'}
                                         </Typography>
                                     </Box>

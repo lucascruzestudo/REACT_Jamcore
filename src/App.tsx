@@ -12,6 +12,7 @@ import ProfilePage from './pages/profile.tsx'
 import { useEffect } from 'react'
 import TrackPage from './pages/trackpage.tsx'
 import CreateTrackPage from './pages/createtrack.tsx'
+import UserProfilePage from './pages/user.tsx'
 
 export const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ function AppContent() {
             <Route path="/feed" element={<Feed />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/track/:trackid" element={<TrackPage />} />
+            <Route path="/user/:id" element={<UserProfilePage />} />
             <Route path="/track/create" element={<CreateTrackPage />} />
             <Route path="*" element={<Navigate to="/feed" replace />} />
           </Route>

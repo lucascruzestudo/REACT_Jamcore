@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react';
 
 export default function Feed() {
   const { user, userProfile } = useUser();
-  const loaderRef = useRef(null); // Ref for the loader element
+  const loaderRef = useRef(null);
 
   const fetchTracks = async ({ pageParam = 1 }) => {
     const response = await api.get('Track', {
@@ -40,7 +40,6 @@ export default function Feed() {
 
   const tracks = data?.pages.flatMap((page) => page.items) || [];
 
-  // Infinite scroll logic
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -48,7 +47,7 @@ export default function Feed() {
           fetchNextPage();
         }
       },
-      { threshold: 1.0 } // Trigger when the loader is fully visible
+      { threshold: 1.0 }
     );
 
     if (loaderRef.current) {
@@ -94,6 +93,7 @@ export default function Feed() {
             audioFileUrl={track.audioFileUrl}
             playCount={track.playCount}
             username={track.username}
+            userId={track.userId}
             tags={track.tags}
             likeCount={track.likeCount}
             createdAt={track.createdAt}
@@ -105,7 +105,6 @@ export default function Feed() {
 
       {isLoading && <Loader />}
 
-      {/* Loader at the bottom for infinite scroll */}
       {hasNextPage && (
         <div ref={loaderRef} style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
           <Loader />
