@@ -13,6 +13,8 @@ import { useEffect } from 'react'
 import TrackPage from './pages/trackpage.tsx'
 import CreateTrackPage from './pages/createtrack.tsx'
 import UserProfilePage from './pages/user.tsx'
+import Register from './pages/register.tsx'
+import ConfirmAccount from './pages/confirmaccount.tsx'
 
 export const queryClient = new QueryClient();
 
@@ -21,7 +23,7 @@ function AppContent() {
 
   return (
     <>
-      {location.pathname !== '/login' && (
+      {location.pathname !== '/login' && location.pathname !== '/register' && !location.pathname.startsWith('/confirmaccount/') && (
         <>
           <Navbar />
           <div style={{ paddingTop: '20px' }}></div>
@@ -31,6 +33,8 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path='/confirmaccount/:token' element={<ConfirmAccount />} />
           <Route element={<PrivateRoute />}>
             <Route path="/feed" element={<Feed />} />
             <Route path="/profile" element={<ProfilePage />} />

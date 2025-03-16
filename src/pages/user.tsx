@@ -117,7 +117,7 @@ const UserProfilePage: React.FC = () => {
                     }}
                 >
                     <Avatar
-                        src={userProfile.profilePictureUrl ? `${userProfile.profilePictureUrl}?t=${new Date().getTime()}` : ""}
+                        src={userProfile.profilePictureUrl ? `${userProfile.profilePictureUrl}?t=${new Date().getTime()}` : '/jamcoredefaultpicture.jpg'}
                         alt="foto de perfil"
                         sx={{ width: '100%', height: '100%' }}
                     />

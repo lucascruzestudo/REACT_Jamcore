@@ -133,7 +133,7 @@ const ProfilePage: React.FC = () => {
                         onMouseLeave={() => setHover(false)}
                     >
                         <Avatar
-                            src={imagePreview ? imagePreview : userProfile?.profilePictureUrl ? `${userProfile?.profilePictureUrl}?t=${userProfile?.updatedAt}` : ""}
+                            src={imagePreview ? imagePreview : userProfile?.profilePictureUrl ? `${userProfile?.profilePictureUrl}?t=${userProfile?.updatedAt}` : '/jamcoredefaultpicture.jpg'}
                             alt="Foto do Perfil"
                             sx={{ width: '100%', height: '100%' }}
                         />

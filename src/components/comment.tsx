@@ -16,7 +16,7 @@ interface Comment {
 const CommentComponent: React.FC<CommentComponentProps> = ({ comment }) => {
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Avatar src={comment.userProfilePictureUrl} alt={comment.displayName || comment.username || ''} sx={{ width: 40, height: '100%', mr: 2 }} />
+            <Avatar src={comment.userProfilePictureUrl ? comment.userProfilePictureUrl : '/jamcoredefaultpicture.jpg'} alt={comment.displayName || comment.username || ''} sx={{ width: 40, height: '100%', mr: 2 }} />
             <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Typography variant="subtitle2" noWrap>

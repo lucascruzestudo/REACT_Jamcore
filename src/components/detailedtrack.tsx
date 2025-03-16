@@ -125,7 +125,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 text: newComment,
                 userId: user?.id || userProfile?.userId || '',
                 username: userProfile?.displayName || user?.displayName || '',
-                userProfilePictureUrl: userProfile?.profilePictureUrl || user?.profilePictureUrl || '',
+                userProfilePictureUrl: userProfile?.profilePictureUrl || user?.profilePictureUrl || '/jamcoredefaultpicture.jpg',
                 createdAt: new Date().toISOString(),
                 displayName: userProfile?.displayName || user?.username || ''
             };

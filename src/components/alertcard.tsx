@@ -22,13 +22,11 @@ const styles = {
 const AlertCard: FC<AlertCardProps> = ({ message, type }) => {
   const [isVisible, setIsVisible] = useState(true)
 
-  // Use effect to hide the alert after 3 seconds and remove it from the DOM
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false)
-    }, 3000)
+    }, 6000)
 
-    // Cleanup the timeout when the component is unmounted or message changes
     return () => clearTimeout(timer)
   }, [message])
 
@@ -36,12 +34,12 @@ const AlertCard: FC<AlertCardProps> = ({ message, type }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          key={message}  // Use the message as a unique key to reset animation
-          initial={{ opacity: 0 }}  // Initial state: invisible
-          animate={{ opacity: 1 }}   // Animate to visible
-          exit={{ opacity: 0 }}      // Fade out before removal
-          transition={{ duration: 0.5 }} // Duration for both fade-in and fade-out
-          style={{ pointerEvents: 'none' }} // Ensures the element can't be interacted with while fading
+          key={message}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          style={{ pointerEvents: 'none' }}
         >
           <Box
             sx={{
