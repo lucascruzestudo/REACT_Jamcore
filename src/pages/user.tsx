@@ -8,6 +8,7 @@ import Track from '../components/track';
 
 interface UserProfile {
     userId: string;
+    username: string;
     displayName: string;
     bio: string;
     location: string;
@@ -31,6 +32,8 @@ const UserProfilePage: React.FC = () => {
         },
         enabled: !!id,
     });
+
+    console.log(userProfile);
 
     const fetchUserTracks = async ({ pageParam = 1 }) => {
         const response = await api.get(`Track/byuser/${id}`, {
@@ -129,7 +132,7 @@ const UserProfilePage: React.FC = () => {
                     <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, mb: 2 }}>
                         <Box sx={{ flex: 1 }}>
                             <TextField
-                                value={userProfile.displayName}
+                                value={userProfile.displayName || userProfile.username || ' '}
                                 fullWidth
                                 margin="normal"
                                 variant="outlined"
@@ -153,7 +156,7 @@ const UserProfilePage: React.FC = () => {
                         </Box>
                         <Box sx={{ flex: 1 }}>
                             <TextField
-                                value={userProfile.location}
+                                value={userProfile.location || ' '}
                                 fullWidth
                                 margin="normal"
                                 variant="outlined"
@@ -179,7 +182,7 @@ const UserProfilePage: React.FC = () => {
 
                     <Box sx={{ mt: 2 }}>
                         <TextField
-                            value={userProfile.bio}
+                            value={userProfile.bio || ' '}
                             fullWidth
                             margin="normal"
                             variant="outlined"
@@ -209,7 +212,7 @@ const UserProfilePage: React.FC = () => {
             <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
 
             <Typography variant="h5" sx={{ color: '#666', mt: 4 }}>
-                jams do usuário
+                jams
             </Typography>
 
             <Container sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 4 }}>

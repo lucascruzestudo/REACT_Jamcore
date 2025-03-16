@@ -97,7 +97,7 @@ const Navbar: React.FC = () => {
           >
             <Avatar
               alt={user?.username || 'você'}
-              src={`${userProfile?.profilePictureUrl}?t=${userProfile?.updatedAt}` || user?.profilePictureUrl || '/jamcoredefaultpicture.jpg'}
+              src={userProfile?.profilePictureUrl && userProfile?.updatedAt ? `${userProfile?.profilePictureUrl}?t=${userProfile?.updatedAt}` : user?.profilePictureUrl ? user?.profilePictureUrl : '/jamcoredefaultpicture.jpg'}
               style={{height: '100%'}}
             />
           </IconButton>
