@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AppBar, Toolbar, IconButton, Typography, InputBase, Menu, MenuItem, Avatar, Box, useMediaQuery, Theme } from '@mui/material';
+import { AppBar, Toolbar, IconButton, Typography, InputBase, Menu, MenuItem, Avatar, Box, useMediaQuery, Theme, Button } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
@@ -81,10 +81,10 @@ const Navbar: React.FC = () => {
           )}
 
           {!showSearch && (
-            <Link to="/upload" style={{ color: 'inherit', textDecoration: 'none' }}>
-              <IconButton color="inherit" aria-label="upload">
+            <Link to="/track/create" style={{ color: 'inherit', textDecoration: 'none' }}>
+              <Button variant="text" color="inherit">
                 <Typography display="block">criar jam</Typography>
-              </IconButton>
+              </Button>
             </Link>
           )}
 
