@@ -15,6 +15,7 @@ import UserProfilePage from './pages/user.tsx'
 import Register from './pages/register.tsx'
 import ConfirmAccount from './pages/confirmaccount.tsx'
 import UpdateTrackPage from './pages/updatetrack.tsx'
+import { TrackInteractionProvider } from './contexts/trackinteractioncontext.tsx'
 
 export const queryClient = new QueryClient();
 
@@ -30,27 +31,27 @@ function AppContent() {
         </>
       )}
 
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path='/confirmaccount/:token' element={<ConfirmAccount />} />
-          <Route element={<PrivateRoute />}>
-            <Route path="/feed" element={<Feed />} />
-            <Route path="/track/:trackid" element={<TrackPage />} />
-            <Route path="/user/:id" element={<UserProfilePage />} />
-            <Route path="/track/create" element={<CreateTrackPage />} />
-            <Route path="/track/:trackid/edit" element={<UpdateTrackPage />} />
-            <Route path="*" element={<Navigate to="/feed" replace />} />
-          </Route>
-        </Routes>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path='/confirmaccount/:token' element={<ConfirmAccount />} />
+        <Route element={<PrivateRoute />}>
+          <Route path="/feed" element={<Feed />} />
+          <Route path="/track/:trackid" element={<TrackPage />} />
+          <Route path="/user/:id" element={<UserProfilePage />} />
+          <Route path="/track/create" element={<CreateTrackPage />} />
+          <Route path="/track/:trackid/edit" element={<UpdateTrackPage />} />
+          <Route path="*" element={<Navigate to="/feed" replace />} />
+        </Route>
+      </Routes>
       <Footer />
     </>
   )
 }
 
 export default function App() {
-  
+
   useEffect(() => {
     const handleKeyDown = (event: any) => {
       if (event.key === " " && event.target === document.body) {
@@ -68,10 +69,12 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <UserProvider>
         <TrackProvider>
-          <Router>
-            <AppContent />
-            <ToastContainer />
-          </Router>
+          <TrackInteractionProvider>
+            <Router>
+              <AppContent />
+              <ToastContainer />
+            </Router>
+          </TrackInteractionProvider>
         </TrackProvider>
       </UserProvider>
 
