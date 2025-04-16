@@ -443,7 +443,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
             <TextField
               fullWidth
               variant="outlined"
-              placeholder="Adicionar um comentário..."
+              placeholder="adicionar um comentário..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
             />
