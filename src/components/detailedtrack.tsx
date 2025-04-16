@@ -23,6 +23,7 @@ import TrackCover from './trackcover';
 import CommentComponent from './comment';
 import { useNavigate } from 'react-router-dom';
 import { useTrackInteraction } from '../hooks/useTrackInteraction';
+import { useCommentContext } from '../contexts/commentcontext';
 
 interface DetailedTrackProps {
   key: string;
@@ -76,13 +77,19 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
     initialPlayCount: playCount,
     initialUserLiked: userLikedTrack,
   });
+  const { getComments, addComment, removeComment } = useCommentContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [newComment, setNewComment] = useState('');
-  const [localComments, setLocalComments] = useState(comments);
   const [isCommenting, setIsCommenting] = useState(false);
   const { user, userProfile } = useUser();
   const navigate = useNavigate();
   const isUploader = user?.id === userId;
+
+  // Combina comentários da API com os do contexto, evitando duplicatas
+  const localComments = [
+    ...getComments(id),
+    ...comments.filter((apiComment) => !getComments(id).some((ctxComment) => ctxComment.id === apiComment.id)),
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -137,7 +144,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
         userProfileUpdatedAt: userProfile?.updatedAt || user?.updatedAt || '',
       };
 
-      setLocalComments([newCommentData, ...localComments]);
+      addComment(id, newCommentData);
       setNewComment('');
     } catch (error) {
       console.error('Error posting comment:', error);
@@ -155,7 +162,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
         },
       });
 
-      setLocalComments(localComments.filter((comment) => comment.id !== commentId));
+      removeComment(id, commentId);
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
@@ -266,19 +273,21 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                   })()}
 
                   <Box sx={{ display: 'inline-block', ...(tags.length > 1 && { gap: 1 }) }}>
-                    <Box
-                      sx={{
-                        backgroundColor: '#eee',
-                        borderRadius: '8px',
-                        padding: '2px 8px',
-                        display: 'inline-block',
-                        fontSize: '0.75rem',
-                      }}
-                    >
-                      <Typography variant="body2" color="textPrimary" noWrap>
-                        #{tags[0]}
-                      </Typography>
-                    </Box>
+                    {tags.length > 0 && (
+                      <Box
+                        sx={{
+                          backgroundColor: '#eee',
+                          borderRadius: '8px',
+                          padding: '2px 8px',
+                          display: 'inline-block',
+                          fontSize: '0.75rem',
+                        }}
+                      >
+                        <Typography variant="body2" color="textPrimary" noWrap>
+                          #{tags[0]}
+                        </Typography>
+                      </Box>
+                    )}
                     {tags.length > 1 && (
                       <Box
                         sx={{
@@ -301,12 +310,12 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 </Box>
               </Box>
 
-              {!description ? null : (
+              {description && (
                 <>
                   <Divider sx={{ my: 2 }} />
                   <Box sx={{ maxHeight: '150px', overflowY: 'auto' }}>
                     <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-                      {description || 'No description available.'}
+                      {description}
                     </Typography>
                   </Box>
                 </>
@@ -324,7 +333,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
               event.preventDefault();
             }
           }}
-          onClick={async () => {
+          onClick={() => {
             togglePlayPause(trackData);
             incrementPlay();
           }}
@@ -399,7 +408,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
           {localLikeCount >= 1000000
             ? `${(localLikeCount / 1000000).toFixed(1)}m`
             : localLikeCount >= 1000
-              ? `${(localPlayCount / 1000).toFixed(1)}k`
+              ? `${(localLikeCount / 1000).toFixed(1)}k`
               : localLikeCount || 0}
         </Button>
         <Button
@@ -469,19 +478,16 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
       <Divider sx={{ my: 2, borderColor: 'transparent' }} />
 
       {localComments.length > 0 ? (
-        localComments
-          .slice()
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-          .map((comment, index) => (
-            <Box key={index} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
-              <CommentComponent comment={comment} />
-              {comment.userId === user?.id && (
-                <IconButton onClick={() => handleDeleteComment(comment.id)}>
-                  <DeleteOutline />
-                </IconButton>
-              )}
-            </Box>
-          ))
+        localComments.map((comment) => (
+          <Box key={comment.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+            <CommentComponent comment={comment} />
+            {comment.userId === user?.id && (
+              <IconButton onClick={() => handleDeleteComment(comment.id)}>
+                <DeleteOutline />
+              </IconButton>
+            )}
+          </Box>
+        ))
       ) : (
         <Typography variant="body1" color="textSecondary">
           nenhum comentário...

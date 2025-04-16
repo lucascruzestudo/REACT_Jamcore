@@ -16,6 +16,7 @@ import Register from './pages/register.tsx'
 import ConfirmAccount from './pages/confirmaccount.tsx'
 import UpdateTrackPage from './pages/updatetrack.tsx'
 import { TrackInteractionProvider } from './contexts/trackinteractioncontext.tsx'
+import { CommentProvider } from './contexts/commentcontext.tsx'
 
 export const queryClient = new QueryClient();
 
@@ -70,10 +71,12 @@ export default function App() {
       <UserProvider>
         <TrackProvider>
           <TrackInteractionProvider>
-            <Router>
-              <AppContent />
-              <ToastContainer />
-            </Router>
+            <CommentProvider>
+              <Router>
+                <AppContent />
+                <ToastContainer />
+              </Router>
+            </CommentProvider>
           </TrackInteractionProvider>
         </TrackProvider>
       </UserProvider>
