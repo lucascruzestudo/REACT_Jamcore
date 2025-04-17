@@ -8,7 +8,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import { useTrack } from '../contexts/trackcontext';
 import TrackCover from './trackcover';
 import { useNavigate } from 'react-router-dom';
-import { useTrackInteraction } from '../hooks/useTrackInteraction';
+import { useTrackInteraction } from '../hooks/usetrackinteraction';
 
 interface TrackProps {
   key: string;
