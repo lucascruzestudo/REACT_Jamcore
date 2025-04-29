@@ -23,7 +23,7 @@ const Loader = ({ centered }: LoaderProps) => (
       src="/loader.gif"
       alt="carregando..."
       style={{
-        width: centered ? '1.5%' : '2%',
+        width: centered ? '3%' : '5%',
       }}
     />
   </Box>

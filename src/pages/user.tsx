@@ -8,6 +8,7 @@ import { useParams } from "react-router-dom";
 import api from "../services/api";
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import CompactTrack from "../components/compacttrack";
+import UserComments from "../components/usercomments";
 
 interface UserProfile {
     id: string;
@@ -153,9 +154,6 @@ const UserProfilePage: React.FC = () => {
     };
 
     const isCurrentUser = user?.id === userProfile?.id;
-    console.log(userProfile);
-    console.log(user);
-    console.log('isCurrentUser', isCurrentUser);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -403,31 +401,49 @@ const UserProfilePage: React.FC = () => {
             <Divider sx={{ marginTop: 4, borderColor: 'transparent' }} />
 
             <Typography variant="h5" sx={{ color: '#666', mt: 4 }}>
-                jams
+                comentários recentes
             </Typography>
 
-            <Container sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 4 }}>
-                {tracks.map((track) => (
-                    <CompactTrack
-                        key={track.id}
-                        id={track.id}
-                        imageUrl={track.imageUrl}
-                        title={track.title}
-                        audioFileUrl={track.audioFileUrl}
-                        playCount={track.playCount}
-                        username={track.username}
-                        userId={track.userId}
-                        tags={track.tags}
-                        likeCount={track.likeCount}
-                        createdAt={track.createdAt}
-                        userLikedTrack={track.userLikedTrack}
-                        originalDuration={track.duration}
-                        updatedAt={track.updatedAt}
-                    />
-                ))}
-            </Container>
+            <UserComments userId={id!} />
 
-            {isTracksLoading && <Loader />}
+            <Divider sx={{ marginTop: 4, borderColor: 'transparent' }} />
+
+            <Typography variant="h5" sx={{ color: '#666', mt: 4 }}>
+                jams do usuário
+            </Typography>
+
+            {isTracksLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Loader />
+                </Box>
+            ) : tracks.length > 0 ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 4 }}>
+                    {tracks.map((track) => (
+                        <CompactTrack
+                            key={track.id}
+                            id={track.id}
+                            imageUrl={track.imageUrl}
+                            title={track.title}
+                            audioFileUrl={track.audioFileUrl}
+                            playCount={track.playCount}
+                            username={track.username}
+                            userId={track.userId}
+                            tags={track.tags}
+                            likeCount={track.likeCount}
+                            createdAt={track.createdAt}
+                            userLikedTrack={track.userLikedTrack}
+                            originalDuration={track.duration}
+                            updatedAt={track.updatedAt}
+                        />
+                    ))}
+                </Box>
+            ) : null}
+
+            {!isTracksLoading && tracks.length === 0 && (
+                <Typography sx={{ color: 'text.secondary', textAlign: 'left', mt: 3 }}>
+                    nenhuma jam por aqui.
+                </Typography>
+            )}
 
             {hasNextPage && (
                 <div ref={loaderRef} style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
@@ -438,6 +454,7 @@ const UserProfilePage: React.FC = () => {
             {isTracksError && <div>Error: {tracksError.message}</div>}
 
             <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
+
         </Container>
     );
 };

@@ -6,7 +6,7 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useTrack } from '../contexts/trackcontext';
 import { useNavigate } from 'react-router-dom';
-import { useTrackInteraction } from '../hooks/useTrackInteraction';
+import { useTrackInteraction } from '../hooks/usetrackinteraction';
 
 interface TrackProps {
   key: string;

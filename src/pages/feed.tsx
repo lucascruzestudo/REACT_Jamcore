@@ -1,6 +1,8 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { Container, Divider, Typography } from '@mui/material';
+import { Container, Divider, Typography, Grid, Box } from '@mui/material';
 import Track from '../components/track';
+import RecentTracks from '../components/userplays';
+import RecentLikes from '../components/userlikes';
 import api from '../services/api';
 import Loader from '../components/loader';
 import { useUser } from "../contexts/usercontext";
@@ -62,8 +64,8 @@ export default function Feed() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
-    <Container>
-      <Divider sx={{ marginTop: 12, borderColor: 'transparent' }} />
+    <Container sx={{ mt: 12 }}>
+      <Divider sx={{ borderColor: 'transparent' }} />
 
       <Typography variant="h5" sx={{ color: '#666' }}>
         olá,{' '}
@@ -81,40 +83,58 @@ export default function Feed() {
         escute as jams mais recentes:
       </Typography>
 
-      <Divider sx={{ marginTop: 3, borderColor: 'transparent' }} />
+      <Divider sx={{ mt: 3, borderColor: 'transparent' }} />
 
-      <Container sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {tracks.map((track) => (
-          <Track
-            key={track.id}
-            id={track.id}
-            imageUrl={track.imageUrl}
-            title={track.title}
-            audioFileUrl={track.audioFileUrl}
-            playCount={track.playCount}
-            username={track.username}
-            userId={track.userId}
-            tags={track.tags}
-            likeCount={track.likeCount}
-            createdAt={track.createdAt}
-            userLikedTrack={track.userLikedTrack}
-            originalDuration={track.duration}
-            updatedAt={track.updatedAt}
-          />
-        ))}
-      </Container>
+      <Grid container spacing={4} sx={{ alignItems: 'flex-start' }}>
+        <Grid item xs={12} md={8}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {tracks.map((track) => (
+              <Track
+                key={track.id}
+                id={track.id}
+                imageUrl={track.imageUrl}
+                title={track.title}
+                audioFileUrl={track.audioFileUrl}
+                playCount={track.playCount}
+                username={track.username}
+                userId={track.userId}
+                tags={track.tags}
+                likeCount={track.likeCount}
+                createdAt={track.createdAt}
+                userLikedTrack={track.userLikedTrack}
+                originalDuration={track.duration}
+                updatedAt={track.updatedAt}
+              />
+            ))}
+          </Box>
 
-      {isLoading && <Loader />}
+          {isLoading && <Loader />}
 
-      {hasNextPage && (
-        <div ref={loaderRef} style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
-          <Loader />
-        </div>
-      )}
+          {hasNextPage && (
+            <div ref={loaderRef} style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
+              <Loader />
+            </div>
+          )}
 
-      {isError && <div>Error: {error.message}</div>}
+          {isError && <div>Error: {error.message}</div>}
+        </Grid>
 
-      <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
+        <Grid item xs={12} md={4}>
+          <Box sx={{ bgcolor: 'background.paper', borderRadius: 2, p: 2, position: 'sticky', top: 16 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: '#666' }}>
+              plays recentes
+            </Typography>
+            <RecentTracks userId={user.id} />
+            <Divider sx={{ my: 2, borderColor: 'transparent' }} />
+            <Typography variant="h6" sx={{ mb: 2, color: '#666' }}>
+              curtidas recentes
+            </Typography>
+            <RecentLikes userId={user.id} />
+          </Box>
+        </Grid>
+      </Grid>
+
+      <Divider sx={{ mt: 8, borderColor: 'transparent' }} />
     </Container>
   );
 }

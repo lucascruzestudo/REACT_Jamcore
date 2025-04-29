@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Avatar } from '@mui/material';
 
 interface CommentComponentProps {
@@ -14,13 +15,29 @@ interface Comment {
     userProfileUpdatedAt: string;
     createdAt: string;
 }
+
 const CommentComponent: React.FC<CommentComponentProps> = ({ comment }) => {
+    const navigate = useNavigate();
+
+    const handleProfileClick = () => {
+        navigate(`/user/${comment.userId}`);
+    };
+
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <Avatar src={comment.userProfilePictureUrl ? `${comment.userProfilePictureUrl}?t=${comment.userProfileUpdatedAt || ''}` : '/jamcoredefaultpicture.jpg'} alt={comment.displayName || comment.username || ''} sx={{ width: 40, height: '100%', mr: 2 }} />
+            <Avatar 
+                src={comment.userProfilePictureUrl ? `${comment.userProfilePictureUrl}?t=${comment.userProfileUpdatedAt || ''}` : '/jamcoredefaultpicture.jpg'} 
+                alt={comment.displayName || comment.username || ''} 
+                sx={{ width: 40, height: '100%', mr: 2 }} 
+            />
             <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="subtitle2" noWrap>
+                    <Typography 
+                        variant="subtitle2" 
+                        noWrap 
+                        onClick={handleProfileClick} 
+                        sx={{ cursor: 'pointer', '&:hover': { fontWeight: 'bold' } }}
+                    >
                         {comment.displayName || comment.username || ''}
                     </Typography>
                     <Typography variant="caption" color="textSecondary" sx={{ ml: 1, fontSize: 12 }}>
@@ -50,7 +67,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({ comment }) => {
                     </Typography>
                 </Box>
                 <Typography variant="body1" sx={{ mt: 0.5 }}>
-                “{comment.text}”
+                    “{comment.text}”
                 </Typography>
             </Box>
         </Box>

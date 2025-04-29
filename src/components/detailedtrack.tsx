@@ -22,7 +22,7 @@ import { useUser } from '../contexts/usercontext';
 import TrackCover from './trackcover';
 import CommentComponent from './comment';
 import { useNavigate } from 'react-router-dom';
-import { useTrackInteraction } from '../hooks/useTrackInteraction';
+import { useTrackInteraction } from '../hooks/usetrackinteraction';
 import { useCommentContext } from '../contexts/commentcontext';
 
 interface DetailedTrackProps {
@@ -490,7 +490,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
         ))
       ) : (
         <Typography variant="body1" color="textSecondary">
-          nenhum comentário...
+          nenhum comentário.
         </Typography>
       )}
 
