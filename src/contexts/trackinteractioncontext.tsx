@@ -13,6 +13,7 @@ interface TrackInteractionContextData {
   toggleLike: (trackId: string) => Promise<void>;
   incrementPlay: (trackId: string) => void;
   updateTrackInteraction: (trackId: string, data: Partial<TrackInteractionState>) => void;
+  interactionVersion: number;
 }
 
 const TrackInteractionContext = createContext<TrackInteractionContextData>(
@@ -25,6 +26,7 @@ export const TrackInteractionProvider: React.FC<{ children: React.ReactNode }> =
   const [interactions, setInteractions] = useState<{
     [trackId: string]: TrackInteractionState;
   }>({});
+  const [interactionVersion, setInteractionVersion] = useState(0);
 
   const getTrackInteraction = useCallback(
     (trackId: string): TrackInteractionState => {
@@ -60,6 +62,7 @@ export const TrackInteractionProvider: React.FC<{ children: React.ReactNode }> =
             },
           };
         });
+        setInteractionVersion((v) => v + 1);
       } catch (error) {
         console.error('Error liking/unliking track:', error);
       }
@@ -77,6 +80,7 @@ export const TrackInteractionProvider: React.FC<{ children: React.ReactNode }> =
           hasPlayed: false,
         };
         if (current.hasPlayed) return prev;
+        setInteractionVersion((v) => v + 1);
         return {
           ...prev,
           [trackId]: {
@@ -119,7 +123,7 @@ export const TrackInteractionProvider: React.FC<{ children: React.ReactNode }> =
 
   return (
     <TrackInteractionContext.Provider
-      value={{ getTrackInteraction, toggleLike, incrementPlay, updateTrackInteraction }}
+      value={{ getTrackInteraction, toggleLike, incrementPlay, updateTrackInteraction, interactionVersion }}
     >
       {children}
     </TrackInteractionContext.Provider>

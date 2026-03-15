@@ -113,27 +113,45 @@ const Navbar: React.FC = () => {
           )}
 
           {!showSearch && (
-            <Button
-              component={Link}
-              to="/track/create"
-              variant="contained"
-              size="small"
-              startIcon={<AddIcon />}
-              sx={{
-                borderRadius: '8px',
-                fontWeight: 700,
-                fontSize: '0.82rem',
-                py: 0.6,
-                px: { xs: 1.2, sm: 1.8 },
-                boxShadow: 'none',
-                backgroundColor: '#E93434',
-                color: '#fff',
-                border: '1px solid rgba(233,52,52,0.16)',
-                '&:hover': { backgroundColor: '#c62828' },
-              }}
-            >
-              {!isMobile ? 'criar jam' : ''}
-            </Button>
+            isMobile ? (
+              <IconButton
+                component={Link}
+                to="/track/create"
+                size="small"
+                sx={{
+                  backgroundColor: '#E93434',
+                  color: '#fff',
+                  borderRadius: '8px',
+                  width: 34,
+                  height: 34,
+                  '&:hover': { backgroundColor: '#c62828' },
+                }}
+              >
+                <AddIcon sx={{ fontSize: 20 }} />
+              </IconButton>
+            ) : (
+              <Button
+                component={Link}
+                to="/track/create"
+                variant="contained"
+                size="small"
+                startIcon={<AddIcon />}
+                sx={{
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.82rem',
+                  py: 0.6,
+                  px: 1.8,
+                  boxShadow: 'none',
+                  backgroundColor: '#E93434',
+                  color: '#fff',
+                  border: '1px solid rgba(233,52,52,0.16)',
+                  '&:hover': { backgroundColor: '#c62828' },
+                }}
+              >
+                criar jam
+              </Button>
+            )
           )}
 
           <IconButton
@@ -144,7 +162,7 @@ const Navbar: React.FC = () => {
             <Avatar
               alt={user?.username || ''}
               src={avatarSrc}
-              sx={{ width: 34, height: 34, borderRadius: '8px', border: '1.5px solid rgba(0,0,0,0.08)' }}
+              sx={{ width: 34, height: 34, borderRadius: '50%', border: '1.5px solid rgba(0,0,0,0.08)' }}
             />
           </IconButton>
 

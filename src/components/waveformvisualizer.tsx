@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, CircularProgress, useMediaQuery, useTheme } from '@mui/material';
 
 // Global peak cache so we only decode each audio URL once
 const peakCache = new Map<string, Float32Array>();
@@ -48,8 +48,10 @@ interface WaveformVisualizerProps {
   height?: number;
 }
 
-const BAR_COUNT = 180;
-const BAR_GAP = 1;
+const BAR_COUNT_DESKTOP = 180;
+const BAR_COUNT_MOBILE = 60;
+const BAR_GAP_DESKTOP = 1;
+const BAR_GAP_MOBILE = 2;
 
 const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   audioUrl,
@@ -61,6 +63,11 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   unplayedColor = '#CCCCCC',
   height = 56,
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const BAR_COUNT = isMobile ? BAR_COUNT_MOBILE : BAR_COUNT_DESKTOP;
+  const BAR_GAP = isMobile ? BAR_GAP_MOBILE : BAR_GAP_DESKTOP;
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [peaks, setPeaks] = useState<Float32Array | null>(null);
   const [loading, setLoading] = useState(false);
@@ -69,8 +76,9 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   // Load + analyze audio
   useEffect(() => {
     let cancelled = false;
-    if (peakCache.has(audioUrl)) {
-      setPeaks(peakCache.get(audioUrl)!);
+    const cacheKey = `${audioUrl}:${BAR_COUNT}`;
+    if (peakCache.has(cacheKey)) {
+      setPeaks(peakCache.get(cacheKey)!);
       return;
     }
     setLoading(true);
@@ -89,7 +97,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
         }
       });
     return () => { cancelled = true; };
-  }, [audioUrl]);
+  }, [audioUrl, BAR_COUNT]);
 
   // Draw waveform
   useEffect(() => {
@@ -136,7 +144,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
       ctx.roundRect(x, y, bw, barH, Math.min(1.5, bw / 2));
       ctx.fill();
     }
-  }, [peaks, currentTime, duration, isActive, playedColor, unplayedColor, error, height]);
+  }, [peaks, currentTime, duration, isActive, playedColor, unplayedColor, error, height, BAR_COUNT, BAR_GAP]);
 
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {

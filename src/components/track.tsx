@@ -368,7 +368,7 @@ const Track: React.FC<TrackProps> = ({
                           ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt || ''}`
                           : '/jamcoredefaultpicture.jpg'
                       }
-                      sx={{ width: 24, height: 24, flexShrink: 0 }}
+                      sx={{ width: 24, height: 24, flexShrink: 0, borderRadius: '50%' }}
                     />
                     <InputBase
                       placeholder="Escreva um comentário..."
@@ -404,7 +404,7 @@ const Track: React.FC<TrackProps> = ({
       <Box sx={{ borderTop: '1px solid rgba(0,0,0,0.06)', mx: 2 }} />
 
       {/* Bottom stats bar */}
-      <Box sx={{ display: 'flex', alignItems: 'center', px: 1.5, py: 0.5 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', px: 1.5, py: 0.5, gap: 1.5 }}>
         <Button
           startIcon={<PlayArrowIcon sx={{ fontSize: 15 }} />}
           variant="text"
@@ -444,20 +444,19 @@ const Track: React.FC<TrackProps> = ({
           {formatCount(localCommentCount)}
         </Button>
 
-        <Button
-          startIcon={<LinkIcon sx={{ fontSize: 15 }} />}
-          variant="text"
-          color="secondary"
-          size="small"
-          sx={{ minWidth: 0, fontSize: '0.75rem' }}
-          onClick={() => {
-            const url =
-              window.location.href.split('/').slice(0, 3).join('/') + `/track/${id}`;
-            navigator.clipboard.writeText(url);
-          }}
-        >
-          copiar link
-        </Button>
+        <Tooltip title="Copiar link">
+          <IconButton
+            size="small"
+            onClick={() => {
+              const url =
+                window.location.href.split('/').slice(0, 3).join('/') + `/track/${id}`;
+              navigator.clipboard.writeText(url);
+            }}
+            sx={{ color: 'secondary.main', p: 0.5 }}
+          >
+            <LinkIcon sx={{ fontSize: 15 }} />
+          </IconButton>
+        </Tooltip>
       </Box>
 
       <TrackCover open={modalOpen} onClose={() => setModalOpen(false)} imageUrl={imageUrl} title={title} />

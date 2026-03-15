@@ -1,4 +1,4 @@
-﻿import { useInfiniteQuery } from '@tanstack/react-query';
+﻿import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { Container, Typography, Grid, Box } from '@mui/material';
 import Track from '../components/track';
 import RecentTracks from '../components/userplays';
@@ -7,17 +7,20 @@ import api from '../services/api';
 import Loader from '../components/loader';
 import { useUser } from '../contexts/usercontext';
 import { useEffect, useRef } from 'react';
+import { useTrackInteractionContext } from '../contexts/trackinteractioncontext';
 import { motion } from 'framer-motion';
 
 export default function Feed() {
   const { user, userProfile } = useUser();
+  const queryClient = useQueryClient();
+  const { interactionVersion } = useTrackInteractionContext();
   const loaderRef = useRef(null);
 
-  const fetchTracks = async ({ pageParam = 1 }) => {
-    const response = await api.get('Track', {
+  const fetchFeed = async ({ pageParam = 1 }) => {
+    const response = await api.get('Track/feed', {
       params: { pageNumber: pageParam, pageSize: 6 },
     });
-    return response.data.data.tracks;
+    return response.data.data;
   };
 
   const {
@@ -29,19 +32,28 @@ export default function Feed() {
     isError,
     error,
   } = useInfiniteQuery({
-    queryKey: ['tracks'],
-    queryFn: fetchTracks,
+    queryKey: ['feed'],
+    queryFn: fetchFeed,
     getNextPageParam: (lastPage) =>
-      lastPage.hasNextPage ? lastPage.pageNumber + 1 : undefined,
+      lastPage.tracks.hasNextPage ? lastPage.tracks.pageNumber + 1 : undefined,
     initialPageParam: 1,
     refetchInterval: 300000,
   });
 
-  const tracks = data?.pages.flatMap((page) => page.items) || [];
+  const tracks = data?.pages.flatMap((page) => page.tracks.items) || [];
+  const latestPage = data?.pages[data.pages.length - 1];
+  const recentPlays = latestPage?.recentPlays ?? [];
+  const recentLikes = latestPage?.recentLikes ?? [];
 
   const displayName = userProfile?.displayName
     ? userProfile.displayName
     : user?.username || '';
+
+  useEffect(() => {
+    if (interactionVersion > 0) {
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
+    }
+  }, [interactionVersion, queryClient]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -156,14 +168,14 @@ export default function Feed() {
               <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 2, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
                 plays recentes
               </Typography>
-              <RecentTracks userId={user.id} />
+              <RecentTracks tracks={recentPlays} />
 
               <Box sx={{ my: 2.5, borderTop: '1px solid rgba(0,0,0,0.06)' }} />
 
               <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 2, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
                 curtidas recentes
               </Typography>
-              <RecentLikes userId={user.id} />
+              <RecentLikes tracks={recentLikes} />
             </Box>
           </Grid>
         </Grid>
