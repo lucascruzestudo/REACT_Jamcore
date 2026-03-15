@@ -10,6 +10,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import CloseIcon from '@mui/icons-material/Close';
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { cropToSquare } from "../utils/imageUtils";
 
 interface TrackFormData {
     title: string;
@@ -72,11 +73,12 @@ const CreateTrackPage: React.FC = () => {
         }
     };
 
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const file = event.target.files[0];
-            setValue("imageFile", file);
-            setImagePreview(URL.createObjectURL(file));
+            const squared = await cropToSquare(file);
+            setValue("imageFile", squared);
+            setImagePreview(URL.createObjectURL(squared));
         }
     };
 

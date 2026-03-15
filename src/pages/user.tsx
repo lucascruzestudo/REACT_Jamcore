@@ -8,6 +8,7 @@ import Loader from "../components/loader";
 import { useUser } from "../contexts/usercontext";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
+import { cropToSquare } from "../utils/imageUtils";
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import CompactTrack from "../components/compacttrack";
 import UserComments from "../components/usercomments";
@@ -132,11 +133,12 @@ const UserProfilePage: React.FC = () => {
         }
     };
 
-    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const file = event.target.files[0];
-            setImage(file);
-            setImagePreview(URL.createObjectURL(file));
+            const squared = await cropToSquare(file);
+            setImage(squared);
+            setImagePreview(URL.createObjectURL(squared));
         }
     };
 

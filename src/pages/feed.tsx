@@ -166,14 +166,14 @@ export default function Feed() {
               }}
             >
               <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 2, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
-                plays recentes
+                histórico de reprodução
               </Typography>
               <RecentTracks tracks={recentPlays} />
 
               <Box sx={{ my: 2.5, borderTop: '1px solid rgba(0,0,0,0.06)' }} />
 
               <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 2, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
-                curtidas recentes
+                curtidas recentemente
               </Typography>
               <RecentLikes tracks={recentLikes} />
             </Box>
