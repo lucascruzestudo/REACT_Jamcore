@@ -1,8 +1,7 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import { Button, IconButton, InputAdornment, TextField, Typography, Box, Link } from '@mui/material';
+import { Button, IconButton, InputAdornment, TextField, Typography, Box, Link, Divider } from '@mui/material';
 import { motion } from 'framer-motion';
-import styles from '../styles';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import AlertCard from '../components/alertcard';
@@ -26,11 +25,11 @@ const Register = () => {
     const [isRegistered, setIsRegistered] = useState(false);
     const navigate = useNavigate();
 
-    const validatePassword = (password: string): string => {
-        if (password.length < 8) return 'a senha deve ter pelo menos 8 caracteres';
-        if (!/[A-Z]/.test(password)) return 'a senha deve ter pelo menos uma letra maiúscula';
-        if (!/[0-9]/.test(password)) return 'a senha deve ter pelo menos um número';
-        if (!/[\W_]/.test(password)) return 'a senha deve ter pelo menos um caractere especial';
+    const validatePassword = (pw: string): string => {
+        if (pw.length < 8) return 'a senha deve ter pelo menos 8 caracteres';
+        if (!/[A-Z]/.test(pw)) return 'a senha deve ter pelo menos uma letra maiuscula';
+        if (!/[0-9]/.test(pw)) return 'a senha deve ter pelo menos um numero';
+        if (!/[\W_]/.test(pw)) return 'a senha deve ter pelo menos um caractere especial';
         return '';
     };
 
@@ -38,12 +37,8 @@ const Register = () => {
         setErrors({ username: '', password: '', email: '', confirmPassword: '' });
         setRegisterError('');
 
-        if (!username) {
-            setErrors((prev) => ({ ...prev, username: 'informe seu nome de usuário' }));
-        }
-        if (!email) {
-            setErrors((prev) => ({ ...prev, email: 'informe seu e-mail' }));
-        }
+        if (!username) setErrors((prev) => ({ ...prev, username: 'informe seu nome de usuario' }));
+        if (!email) setErrors((prev) => ({ ...prev, email: 'informe seu e-mail' }));
         if (!password) {
             setErrors((prev) => ({ ...prev, password: 'informe sua senha' }));
         } else {
@@ -54,7 +49,7 @@ const Register = () => {
             }
         }
         if (password !== confirmPassword) {
-            setErrors((prev) => ({ ...prev, confirmPassword: 'as senhas não coincidem' }));
+            setErrors((prev) => ({ ...prev, confirmPassword: 'as senhas nao coincidem' }));
         }
 
         if (!username || !email || !password || password !== confirmPassword) return;
@@ -70,109 +65,160 @@ const Register = () => {
             if (response.status === 200) {
                 setSuccessMessage('cadastro realizado com sucesso, confirme sua conta para logar.');
                 setIsRegistered(true);
-                setTimeout(() => {
-                    navigate('/login');
-                }, 5000);
+                setTimeout(() => navigate('/login'), 5000);
             } else {
                 setRegisterError('opa, o cadastro falhou... tente novamente.');
             }
-        } catch (error) {
+        } catch {
             setRegisterError('erro ao tentar registrar, tente novamente mais tarde.');
         } finally {
             setLoading(false);
         }
     };
 
+    const fieldSx = {
+        '& .MuiOutlinedInput-root': { borderRadius: '10px', backgroundColor: '#FAFAFA' },
+    };
+
     return (
-        <motion.div
-            style={styles.root as React.CSSProperties}
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
+        <Box
+            sx={{
+                minHeight: '100vh',
+                backgroundColor: '#FAFAFA',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                px: 2,
+                py: 4,
+            }}
         >
-            <img src="/jamcorelogored.png" alt="logo" style={styles.logo as React.CSSProperties} />
-            <div style={styles.form as React.CSSProperties}>
-                {registerError && <AlertCard message={registerError} type="error" />}
-                {successMessage && <AlertCard message={successMessage} type="success" />}
-                <TextField
-                    fullWidth
-                    label="nome de usuário"
-                    variant="standard"
-                    sx={styles.textField}
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    error={!!errors.username}
-                    helperText={errors.username}
-                />
-                <TextField
-                    fullWidth
-                    label="e-mail"
-                    variant="standard"
-                    sx={styles.textField}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    error={!!errors.email}
-                    helperText={errors.email}
-                />
-                <TextField
-                    fullWidth
-                    label="senha"
-                    type={showPassword ? 'text' : 'password'}
-                    variant="standard"
-                    sx={styles.textField}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    error={!!errors.password}
-                    helperText={errors.password}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton onClick={() => setShowPassword(!showPassword)}>
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                                </IconButton>
-                            </InputAdornment>
-                        ),
+            <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                style={{ width: '100%', maxWidth: '420px' }}
+            >
+                <Box
+                    sx={{
+                        backgroundColor: '#fff',
+                        borderRadius: '20px',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+                        px: { xs: 3, sm: 5 },
+                        py: { xs: 4, sm: 5 },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
                     }}
-                />
-                <TextField
-                    fullWidth
-                    label="confirmação de senha"
-                    type={showPassword ? 'text' : 'password'}
-                    variant="standard"
-                    sx={styles.textField}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    error={!!errors.confirmPassword}
-                    helperText={errors.confirmPassword}
-                    InputProps={{
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <IconButton onClick={() => setShowPassword(!showPassword)}>
-                                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                                </IconButton>
-                            </InputAdornment>
-                        ),
-                    }}
-                />
-                <Box display="flex" alignItems="center" justifyContent="space-between" width="100%" mt={2}>
+                >
+                    <img src="/jamcorelogored.png" alt="jamcore" style={{ width: '130px', marginBottom: '8px' }} />
+
+                    <Typography variant="body2" sx={{ color: '#999', mb: 3, textAlign: 'center' }}>
+                        crie sua conta gratis
+                    </Typography>
+
+                    {registerError && <AlertCard message={registerError} type="error" />}
+                    {successMessage && <AlertCard message={successMessage} type="success" />}
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
+                        <TextField
+                            fullWidth
+                            label="nome de usuario"
+                            variant="outlined"
+                            size="small"
+                            sx={fieldSx}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            error={!!errors.username}
+                            helperText={errors.username}
+                        />
+                        <TextField
+                            fullWidth
+                            label="e-mail"
+                            variant="outlined"
+                            size="small"
+                            sx={fieldSx}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            error={!!errors.email}
+                            helperText={errors.email}
+                        />
+                        <TextField
+                            fullWidth
+                            label="senha"
+                            type={showPassword ? 'text' : 'password'}
+                            variant="outlined"
+                            size="small"
+                            sx={fieldSx}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            error={!!errors.password}
+                            helperText={errors.password}
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setShowPassword(!showPassword)} size="small" edge="end">
+                                                {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                },
+                            }}
+                        />
+                        <TextField
+                            fullWidth
+                            label="confirmacao de senha"
+                            type={showPassword ? 'text' : 'password'}
+                            variant="outlined"
+                            size="small"
+                            sx={fieldSx}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            error={!!errors.confirmPassword}
+                            helperText={errors.confirmPassword}
+                            slotProps={{
+                                input: {
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setShowPassword(!showPassword)} size="small" edge="end">
+                                                {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                },
+                            }}
+                        />
+                    </Box>
+
                     <Button
                         variant="contained"
                         color="primary"
+                        fullWidth
+                        size="large"
                         onClick={handleRegister}
                         disabled={loading || isRegistered}
+                        sx={{
+                            mt: 3,
+                            py: 1.4,
+                            borderRadius: '10px',
+                            fontSize: '0.95rem',
+                            fontWeight: 700,
+                        }}
                     >
                         {loading ? 'criando...' : isRegistered ? 'conta criada' : 'criar conta'}
                     </Button>
-                </Box>
 
-                <Typography variant="body2" sx={{ mt: 4 }}>
-                    já possui uma conta?{' '}
-                    <Link component={RouterLink} to="/login" color="primary" underline="hover">
-                        faça login
-                    </Link>
-                </Typography>
-            </div>
-        </motion.div>
+                    <Divider sx={{ width: '100%', my: 3, borderColor: 'rgba(0,0,0,0.06)' }} />
+
+                    <Typography variant="body2" sx={{ color: '#666' }}>
+                        ja possui uma conta?{' '}
+                        <Link component={RouterLink} to="/login" color="primary" underline="hover" fontWeight={600}>
+                            faca login
+                        </Link>
+                    </Typography>
+                </Box>
+            </motion.div>
+        </Box>
     );
 };
 

@@ -157,35 +157,46 @@ const CreateTrackPage: React.FC = () => {
     const isFormValid = watch("title") && watch("description") && watch("trackFile");
 
     return (
-        <Container>
-            <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
-            <Typography variant="h5" sx={{ marginTop: 4, marginBottom: 2 }}>
-                criar jam
-            </Typography>
+        <Container maxWidth="md" sx={{ minHeight: '100vh', backgroundColor: '#FAFAFA' }}>
+            <Box sx={{ pt: 11, pb: 2 }}>
+                <Typography variant="h5" fontWeight={700} sx={{ color: '#111' }}>
+                    criar jam
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#888', mt: 0.5 }}>
+                    faça upload do seu áudio e personalize as informações.
+                </Typography>
+            </Box>
 
             <Box
                 sx={{
-                    border: '2px dashed #ccc',
-                    borderRadius: '8px',
-                    padding: 2,
+                    border: '2px dashed rgba(233,52,52,0.25)',
+                    borderRadius: '14px',
+                    padding: 3,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: 1,
+                    gap: 1.5,
                     textAlign: 'center',
-                    backgroundColor: '#f9f9f9',
+                    backgroundColor: 'rgba(233,52,52,0.02)',
                     cursor: 'pointer',
                     maxWidth: '770px',
                     width: '100%',
-                    margin: 'auto'
+                    margin: 'auto',
+                    transition: 'border-color 0.2s, background-color 0.2s',
+                    '&:hover': {
+                        borderColor: 'rgba(233,52,52,0.5)',
+                        backgroundColor: 'rgba(233,52,52,0.04)',
+                    },
                 }}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
-                <CloudUploadIcon sx={{ color: '#ccc' }} />
-                <Typography variant="body1" component="label" sx={{ cursor: 'pointer', display: 'block', color: 'secondary.main' }}>
-                    Arraste e solte o arquivo de áudio aqui ou clique para selecionar (.mp3, máximo 10MB)
+                <CloudUploadIcon sx={{ color: '#E93434', fontSize: 36, opacity: 0.7 }} />
+                <Typography variant="body2" component="label" sx={{ cursor: 'pointer', display: 'block', color: '#555' }}>
+                    arraste e solte o arquivo de áudio aqui ou{' '}
+                    <Box component="span" sx={{ color: 'primary.main', fontWeight: 600 }}>clique para selecionar</Box>
+                    {' '}(.mp3, máximo 10mb)
                     <input
                         type="file"
                         hidden
@@ -209,22 +220,23 @@ const CreateTrackPage: React.FC = () => {
                             }}
                         />
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <IconButton onClick={handlePlayPause}>
+                            <IconButton
+                              onClick={handlePlayPause}
+                              sx={{ color: 'primary.main', '&:hover': { backgroundColor: 'rgba(233,52,52,0.08)' } }}
+                            >
                                 {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
                             </IconButton>
                             <Slider
                                 value={audioProgress}
                                 onChange={handleSliderChange}
-                                sx={{ flex: 1 }}
+                                sx={{ flex: 1, color: '#E93434' }}
                             />
                         </Box>
                     </Box>
                 )}
             </Box>
 
-            <Divider sx={{ marginTop: 2, borderColor: 'transparent' }} />
-
-            <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, alignItems: 'flex-start' }}>
+            <Box sx={{ maxWidth: 800, margin: '0 auto', padding: 2, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, alignItems: 'flex-start', mt: 3 }}>
 
                 <Box sx={{ width: { xs: '100%', md: '40%' }, display: 'flex', flexDirection: 'column', gap: 2 }}>
 
@@ -233,9 +245,10 @@ const CreateTrackPage: React.FC = () => {
                             position: 'relative',
                             width: '100%',
                             aspectRatio: '1/1',
-                            borderRadius: '8px',
+                            borderRadius: '12px',
                             overflow: 'hidden',
-                            backgroundColor: '#f0f0f0',
+                            backgroundColor: '#F5F5F5',
+                            border: '1px solid rgba(0,0,0,0.08)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -246,16 +259,19 @@ const CreateTrackPage: React.FC = () => {
                         onMouseEnter={() => setIsHovered(true)}
                         onMouseLeave={() => setIsHovered(false)}
                     >
-                        {imagePreview ? (
+                        {!imagePreview && (
+                            <Box sx={{ textAlign: 'center', opacity: 0.4 }}>
+                                <CloudUploadIcon sx={{ fontSize: 32 }} />
+                                <Typography variant="caption" display="block">capa da jam</Typography>
+                            </Box>
+                        )}
+                        {imagePreview && (
                             <Avatar
                                 src={imagePreview}
-                                alt="Imagem da Track"
+                                alt="capa da jam"
                                 variant="rounded"
-                                sx={{ width: '100%', height: '100%' }}
+                                sx={{ width: '100%', height: '100%', borderRadius: 0 }}
                             />
-                        ) : (
-                            <Typography variant="body1" color="textSecondary">
-                            </Typography>
                         )}
                         {isHovered && (
                             <IconButton
@@ -354,28 +370,35 @@ const CreateTrackPage: React.FC = () => {
                                     <Box
                                         key={index}
                                         sx={{
-                                            backgroundColor: '#eee',
+                                            backgroundColor: 'rgba(233,52,52,0.08)',
+                                            border: '1px solid rgba(233,52,52,0.2)',
                                             borderRadius: '8px',
                                             padding: '2px 8px',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            gap: 1,
+                                            gap: 0.5,
                                         }}
                                     >
-                                        <Typography variant="body2" color="textPrimary" noWrap>
+                                        <Typography variant="body2" color="primary" noWrap sx={{ fontSize: '0.8rem' }}>
                                             #{tag}
                                         </Typography>
-                                        <IconButton size="small" onClick={() => removeTag(index)}>
-                                            <CloseIcon fontSize="small" />
+                                        <IconButton size="small" onClick={() => removeTag(index)} sx={{ p: '2px' }}>
+                                            <CloseIcon fontSize="small" sx={{ fontSize: 14 }} />
                                         </IconButton>
                                     </Box>
                                 ))}
                             </Box>
                         </Box>
 
-                        <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button type="submit" variant="contained" disabled={!isFormValid || isLoading}>
-                                {isLoading ? "enviando..." : "criar"}
+                        <Box sx={{ marginTop: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button
+                              type="submit"
+                              variant="contained"
+                              color="primary"
+                              disabled={!isFormValid || isLoading}
+                              sx={{ px: 4, py: 1.2, borderRadius: '10px', fontWeight: 700 }}
+                            >
+                                {isLoading ? "enviando..." : "criar jam"}
                             </Button>
                         </Box>
                     </form>

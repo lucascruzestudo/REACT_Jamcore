@@ -128,15 +128,17 @@ const UpdateTrackPage: React.FC = () => {
     }
 
     return (
-        <Container>
-            <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
-            <Typography variant="h5" sx={{ marginTop: 4, marginBottom: 2, color: 'secondary.main' }}>
-                editar jam
-            </Typography>
+        <Container maxWidth="md" sx={{ minHeight: '100vh', backgroundColor: '#FAFAFA' }}>
+            <Box sx={{ pt: 11, pb: 2 }}>
+                <Typography variant="h5" fontWeight={700} sx={{ color: '#111' }}>
+                    editar jam
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#888', mt: 0.5 }}>
+                    atualize as informações da sua jam.
+                </Typography>
+            </Box>
 
-            <Divider sx={{ marginTop: 2, borderColor: 'transparent' }} />
-
-            <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, alignItems: 'flex-start' }}>
+            <Box sx={{ maxWidth: 800, margin: '0 auto', padding: 2, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, alignItems: 'flex-start', mt: 1 }}>
 
                 <Box sx={{ width: { xs: '100%', md: '40%' }, display: 'flex', flexDirection: 'column', gap: 2 }}>
 
@@ -145,9 +147,10 @@ const UpdateTrackPage: React.FC = () => {
                             position: 'relative',
                             width: '100%',
                             aspectRatio: '1/1',
-                            borderRadius: '8px',
+                            borderRadius: '12px',
                             overflow: 'hidden',
-                            backgroundColor: '#f0f0f0',
+                            backgroundColor: '#F5F5F5',
+                            border: '1px solid rgba(0,0,0,0.08)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -265,27 +268,34 @@ const UpdateTrackPage: React.FC = () => {
                                     <Box
                                         key={index}
                                         sx={{
-                                            backgroundColor: '#eee',
+                                            backgroundColor: 'rgba(233,52,52,0.08)',
+                                            border: '1px solid rgba(233,52,52,0.2)',
                                             borderRadius: '8px',
                                             padding: '2px 8px',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            gap: 1,
+                                            gap: 0.5,
                                         }}
                                     >
-                                        <Typography variant="body2" color="textPrimary" noWrap>
+                                        <Typography variant="body2" color="primary" noWrap sx={{ fontSize: '0.8rem' }}>
                                             #{tag}
                                         </Typography>
-                                        <IconButton size="small" onClick={() => removeTag(index)}>
-                                            <CloseIcon fontSize="small" />
+                                        <IconButton size="small" onClick={() => removeTag(index)} sx={{ p: '2px' }}>
+                                            <CloseIcon fontSize="small" sx={{ fontSize: 14 }} />
                                         </IconButton>
                                     </Box>
                                 ))}
                             </Box>
                         </Box>
 
-                        <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button type="submit" variant="contained" disabled={!isFormValid || isLoading}>
+                        <Box sx={{ marginTop: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button
+                              type="submit"
+                              variant="contained"
+                              color="primary"
+                              disabled={!isFormValid || isLoading}
+                              sx={{ px: 4, py: 1.2, borderRadius: '10px', fontWeight: 700 }}
+                            >
                                 {isLoading ? "salvando..." : "salvar"}
                             </Button>
                         </Box>

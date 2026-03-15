@@ -72,15 +72,29 @@ const CompactTrack: React.FC<TrackProps> = ({
   };
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, p: 1, backgroundColor: 'white', borderRadius: 1 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1.5,
+        p: 1,
+        borderRadius: '10px',
+        backgroundColor: '#fff',
+        border: '1px solid rgba(0,0,0,0.06)',
+        transition: 'background-color 0.15s',
+        '&:hover': { backgroundColor: '#FAFAFA' },
+      }}
+    >
       <Box
         sx={{
-          width: 50,
-          height: 50,
+          width: 44,
+          height: 44,
           overflow: 'hidden',
           cursor: 'pointer',
           position: 'relative',
-          border: '1px solid #ccc',
+          borderRadius: '7px',
+          border: '1px solid rgba(0,0,0,0.08)',
+          flexShrink: 0,
           '&:hover .play-pause-icon': {
             opacity: 1,
           },

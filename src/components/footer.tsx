@@ -1,266 +1,199 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Box, Button, Typography, Slider, Avatar, Divider } from '@mui/material';
+﻿import React, { useRef } from 'react';
+import { Box, Typography, Slider, Avatar, IconButton } from '@mui/material';
 import { useTrack } from '../contexts/trackcontext';
-import { PlayArrow, Pause, SkipPrevious, SkipNext, VolumeUp } from '@mui/icons-material';
+import {
+  PlayArrow,
+  Pause,
+  SkipPrevious,
+  SkipNext,
+  VolumeUp,
+  VolumeMute,
+  Favorite,
+  FavoriteBorder,
+} from '@mui/icons-material';
+import { useTrackInteraction } from '../hooks/usetrackinteraction';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 
+const PLAYER_HEIGHT = 68;
+
 const Footer: React.FC = () => {
-    const navigate = useNavigate();
-    const { currentTrack, isPlaying, currentTime, duration, togglePlayPause, updateTime, setIsPlaying, setVolume, volume } = useTrack();
-    const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-    const volumeSliderRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const {
+    currentTrack,
+    isPlaying,
+    currentTime,
+    duration,
+    togglePlayPause,
+    updateTime,
+    setIsPlaying,
+    setVolume,
+    volume,
+  } = useTrack();
 
-    const handlePlayPause = () => {
-        if (currentTrack) {
-            togglePlayPause(currentTrack);
-        }
-    };
+  const { userLiked, toggleLike } = useTrackInteraction({
+    trackId: currentTrack?.id || '',
+    initialLikeCount: currentTrack?.likeCount || 0,
+    initialPlayCount: (currentTrack as any)?.playCount || 0,
+    initialUserLiked: (currentTrack as any)?.userLikedTrack || false,
+  });
 
-    const handleTimeChange = (_event: Event, newValue: number | number[]) => {
-        if (typeof newValue === 'number') {
-            updateTime(newValue);
-        }
-    };
+  const volumeRef = useRef<HTMLDivElement>(null);
 
-    const handleVolumeChange = (_event: Event, newValue: number | number[]) => {
-        if (typeof newValue === 'number') {
-            setVolume(newValue);
-        }
-    };
+  const handlePlayPause = () => {
+    if (currentTrack) togglePlayPause(currentTrack);
+  };
 
-    const handleSkipPrevious = () => {
-        if (currentTrack) {
-            updateTime(0);
-            setIsPlaying(true);
-        }
-    };
+  const handleTimeChange = (_: Event, val: number | number[]) => {
+    if (typeof val === 'number') updateTime(val);
+  };
 
-    const handleSkipNext = () => {
-        // Implement skip next functionality
-    };
+  const handleVolumeChange = (_: Event, val: number | number[]) => {
+    if (typeof val === 'number') setVolume(val);
+  };
 
-    const handleClickOutside = (event: MouseEvent) => {
-        if (volumeSliderRef.current && !volumeSliderRef.current.contains(event.target as Node)) {
-            setShowVolumeSlider(false);
-        }
-    };
-
-    useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
-    if (!currentTrack) {
-        return null;
+  const handleSkipPrevious = () => {
+    if (currentTrack) {
+      updateTime(0);
+      setIsPlaying(true);
     }
+  };
 
-    return (
-        <Box
+  const formatTime = (s: number) =>
+    `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
+
+  if (!currentTrack) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        key="footer-player"
+        initial={{ y: PLAYER_HEIGHT + 10, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: PLAYER_HEIGHT + 10, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+        style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1300 }}
+      >
+        <Box sx={{ width: '100%', backgroundColor: '#fff', borderTop: '1px solid rgba(233,52,52,0.08)' }}>
+          <Box
             sx={{
-                width: '100%',
-                padding: '4px',
-                position: 'fixed',
-                bottom: 0,
-                left: 0,
-                backgroundColor: '#F2F2F2',
-                color: 'primary',
+              width: '100%',
+              maxWidth: 1100,
+              mx: 'auto',
+              height: PLAYER_HEIGHT,
+              display: 'flex',
+              alignItems: 'center',
+              px: { xs: 1.5, sm: 3 },
+              gap: 0,
+            }}
+          >
+            {/* -- Controls (left) -------------------------------- */}
+            <Box
+              sx={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                height: 'auto',
-                borderTop: '1px solid #ccc',
-                '@media (max-width: 600px)': {
-                    flexDirection: 'column',
-                    padding: '8px',
-                },
-            }}
-        >
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    width: '100%',
-                    maxWidth: '1000px',
-                    gap: 2,
-                    padding: '0 16px',
-                    '@media (max-width: 600px)': {
-                        flexDirection: 'column',
-                        gap: 1,
-                    },
-                }}
+                gap: { xs: 0.5, sm: 1 },
+                flex: { xs: '1 1 100%', md: '0 0 70%' },
+                pr: 2,
+              }}
             >
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        flex: 1,
-                        justifyContent: 'center',
-                        '@media (max-width: 600px)': {
-                            width: '100%',
-                            justifyContent: 'space-between',
-                        },
-                    }}
-                >
-                    <Button
-                        onClick={handleSkipPrevious}
-                        variant="text"
-                        color="secondary"
-                        sx={{ minWidth: 'auto', padding: '8px' }}
-                    >
-                        <SkipPrevious sx={{ fontSize: '1.1rem' }} />
-                    </Button>
-                    <Button
-                        onClick={handlePlayPause}
-                        variant="text"
-                        color="secondary"
-                        sx={{ minWidth: 'auto', padding: '8px' }}
-                    >
-                        {isPlaying ? (
-                            <Pause sx={{ fontSize: '1.1rem' }} />
-                        ) : (
-                            <PlayArrow sx={{ fontSize: '1.1rem' }} />
-                        )}
-                    </Button>
-                    <Button
-                        onClick={handleSkipNext}
-                        variant="text"
-                        color="secondary"
-                        sx={{ minWidth: 'auto', padding: '8px' }}
-                    >
-                        <SkipNext sx={{ fontSize: '1.1rem' }} />
-                    </Button>
-                    <Slider
-                        value={currentTime}
-                        min={0}
-                        max={duration}
-                        step={0.1}
-                        onChange={handleTimeChange}
-                        valueLabelDisplay="auto"
-                        valueLabelFormat={(value) => `${Math.floor(value / 60)}:${Math.floor(value % 60)}`}
-                        sx={{ width: '200px', marginRight: 1, '& .MuiSlider-thumb': { display: 'none' } }}
-                        size="small"
-                    />
-                    <Typography
-                        variant="body2"
-                        color="textSecondary"
-                        sx={{ fontSize: '0.65rem', minWidth: '80px', textAlign: 'center' }}
-                    >
-                        {Math.floor(currentTime / 60)}:{Math.floor(currentTime % 60).toString().padStart(2, '0')} /{' '}
-                        {currentTrack.originalDuration}
-                    </Typography>
+              <IconButton
+                onClick={handleSkipPrevious}
+                size="small"
+                sx={{ color: 'rgba(0,0,0,0.65)', '&:hover': { color: '#111' } }}
+              >
+                <SkipPrevious sx={{ fontSize: 20 }} />
+              </IconButton>
 
-                    <Box
-                        sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}
-                        onMouseEnter={() => setShowVolumeSlider(true)}
-                        onMouseLeave={() => setShowVolumeSlider(false)}
-                        ref={volumeSliderRef}
-                    >
-                        <Button
-                            onClick={() => setShowVolumeSlider(!showVolumeSlider)}
-                            variant="text"
-                            color="secondary"
-                            sx={{ minWidth: 'auto', padding: '8px' }}
-                        >
-                            <VolumeUp sx={{ fontSize: '1.1rem' }} />
-                        </Button>
-                        <AnimatePresence>
-                            {showVolumeSlider && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 10 }}
-                                    transition={{ duration: 0.2 }}
-                                    style={{
-                                        position: 'absolute',
-                                        bottom: '100%',
-                                        left: '5%',
-                                        transform: 'translateX(-50%)',
-                                        backgroundColor: '#eee',
-                                        border: '1px solid #ccc',
-                                        borderRadius: '4px',
-                                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                                        paddingTop: '12px',
-                                    }}
-                                >
-                                    <Slider
-                                        orientation="vertical"
-                                        value={volume}
-                                        max={1}
-                                        step={0.01}
-                                        aria-labelledby="vertical-slider"
-                                        onChange={handleVolumeChange}
-                                        size="small"
-                                        color="secondary"
-                                        sx={{
-                                            height: '100px',
-                                            '& .MuiSlider-thumb': {
-                                                width: 8,
-                                                height: 8,
-                                            },
-                                        }}
-                                    />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </Box>
-                </Box>
+              <IconButton
+                onClick={handlePlayPause}
+                sx={{
+                  backgroundColor: '#E93434',
+                  color: '#fff',
+                  width: 38,
+                  height: 38,
+                  '&:hover': { backgroundColor: '#c62828', transform: 'scale(1.06)' },
+                  transition: 'all 0.18s ease',
+                  boxShadow: '0 6px 18px rgba(233,52,52,0.16)'
+                }}
+              >
+                {isPlaying ? <Pause sx={{ fontSize: 20 }} /> : <PlayArrow sx={{ fontSize: 20 }} />}
+              </IconButton>
 
-                <Divider orientation="vertical" flexItem sx={{ mx: 1, '@media (max-width: 600px)': { display: 'none' } }} />
+              <IconButton size="small" sx={{ color: 'rgba(0,0,0,0.65)', '&:hover': { color: '#111' } }}>
+                <SkipNext sx={{ fontSize: 20 }} />
+              </IconButton>
 
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2,
-                        flex: 1,
-                        minWidth: 0,
-                        cursor: 'pointer',
-                        '@media (max-width: 600px)': {
-                            width: '100%',
-                            justifyContent: 'center',
-                        },
-                    }}
-                    onClick={() => navigate(`/track/${currentTrack.id}`)}
-                >
-                    <Avatar
-                        src={`${currentTrack.imageUrl}?t=${currentTrack.updatedAt || currentTrack.createdAt}`}
-                        alt={currentTrack.title}
-                        sx={{ width: 40, height: 40, borderRadius: '2px', flexShrink: 0, border: '1px solid #ccc'}}
-                    />
-                    <Box sx={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
-                        <Typography
-                            variant="body2"
-                            color="textSecondary"
-                            sx={{
-                                fontSize: '0.65rem',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                            }}
-                        >
-                            {currentTrack.username}
-                        </Typography>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontSize: '0.8rem',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                            }}
-                        >
-                            {currentTrack.title}
-                        </Typography>
-                    </Box>
-                </Box>
+              <Typography sx={{ color: 'rgba(0,0,0,0.7)', fontSize: '0.68rem', flexShrink: 0, minWidth: 30, textAlign: 'right', display: { xs: 'none', sm: 'block' } }}>
+                {formatTime(currentTime)}
+              </Typography>
+
+              <Slider
+                value={currentTime}
+                min={0}
+                max={duration || 100}
+                step={0.1}
+                onChange={handleTimeChange}
+                size="small"
+                sx={{
+                  flex: 1,
+                  minWidth: 60,
+                  color: '#E93434',
+                  height: 3,
+                  '& .MuiSlider-thumb': {
+                    width: 12,
+                    height: 12,
+                    backgroundColor: '#E93434',
+                    boxShadow: '0 0 0 6px rgba(233,52,52,0.06)',
+                    '&:hover, &.Mui-focusVisible': { boxShadow: '0 0 0 8px rgba(233,52,52,0.10)' },
+                  },
+                  '&:hover .MuiSlider-thumb': { opacity: 1 },
+                  '& .MuiSlider-rail': { backgroundColor: 'rgba(0,0,0,0.06)' },
+                  '& .MuiSlider-track': { backgroundColor: '#E93434', border: 'none' },
+                }}
+              />
+
+              <Typography sx={{ color: 'rgba(0,0,0,0.7)', fontSize: '0.68rem', flexShrink: 0, minWidth: 30, display: { xs: 'none', sm: 'block' } }}>
+                {currentTrack.originalDuration}
+              </Typography>
+
+              <Box ref={volumeRef} sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.5, flexShrink: 0, ml: 0.5 }}>
+                <IconButton size="small" onClick={() => setVolume(volume > 0 ? 0 : 0.8)} sx={{ color: 'rgba(0,0,0,0.75)', '&:hover': { color: '#111' } }}>
+                  {volume === 0 ? <VolumeMute sx={{ fontSize: 18 }} /> : <VolumeUp sx={{ fontSize: 18 }} />}
+                </IconButton>
+                <Slider value={volume} min={0} max={1} step={0.01} onChange={handleVolumeChange} size="small" sx={{ width: 72, color: '#E93434', height: 3, '& .MuiSlider-thumb': { width: 10, height: 10, backgroundColor: '#E93434' }, '& .MuiSlider-rail': { backgroundColor: 'rgba(0,0,0,0.06)' }, '& .MuiSlider-track': { backgroundColor: '#E93434' } }} />
+              </Box>
             </Box>
+
+            {/* -- Divider ------------------------------------------ */}
+            <Box sx={{ width: '1px', height: 32, backgroundColor: 'rgba(233,52,52,0.12)', flexShrink: 0, mx: { xs: 1, sm: 2 } }} />
+
+            {/* -- Track info (right) -------------------------------- */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: { xs: '1 1 100%', md: '0 0 30%' }, minWidth: 0, pl: 2 }}>
+              <Avatar
+                src={`${currentTrack.imageUrl}?t=${currentTrack.updatedAt || currentTrack.createdAt}`}
+                alt={currentTrack.title}
+                variant="rounded"
+                sx={{ width: 42, height: 42, borderRadius: '6px', flexShrink: 0, border: '1px solid rgba(233,52,52,0.14)', cursor: 'pointer' }}
+                onClick={(e) => { e.stopPropagation(); navigate(`/track/${currentTrack.id}`); }}
+              />
+
+              <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
+                <Typography onClick={(e) => { e.stopPropagation(); navigate(`/track/${currentTrack.id}`); }} sx={{ color: '#111', fontWeight: 600, fontSize: '0.82rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>{currentTrack.title}</Typography>
+                <Typography onClick={(e) => { e.stopPropagation(); navigate(`/user/${currentTrack.userId}`); }} sx={{ color: 'rgba(0,0,0,0.6)', fontSize: '0.70rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}>{currentTrack.username}</Typography>
+              </Box>
+
+              <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                <IconButton onClick={async (e) => { e.stopPropagation(); await toggleLike(); }} size="small" sx={{ color: userLiked ? '#E93434' : 'rgba(0,0,0,0.6)' }}>
+                  {userLiked ? <Favorite sx={{ fontSize: 18 }} /> : <FavoriteBorder sx={{ fontSize: 18 }} />}
+                </IconButton>
+              </Box>
+            </Box>
+          </Box>
         </Box>
-    );
+      </motion.div>
+    </AnimatePresence>
+  );
 };
 
 export default Footer;

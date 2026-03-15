@@ -3,13 +3,13 @@ import api from '../services/api';
 import Track from '../components/track';
 
 interface Track {
-    key: string;
     id: string;
     title: string;
     tags: string[];
     audioFileUrl: string;
     imageUrl: string;
     username: string;
+    userId: string;
     createdAt: string;
     likeCount: number;
     playCount: number;
@@ -30,6 +30,7 @@ interface TrackContextType {
     currentTrack: Track | null;
     setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
     setCurrentTrack: React.Dispatch<React.SetStateAction<Track | null>>;
+    audioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
 const TrackContext = createContext<TrackContextType | undefined>(undefined);
@@ -139,7 +140,7 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [volume]);
 
     return (
-        <TrackContext.Provider value={{ isPlaying, currentTime, duration, volume, currentTrack, togglePlayPause, updateTime, setCurrentTime, setVolume, setIsPlaying, setCurrentTrack }}>
+        <TrackContext.Provider value={{ isPlaying, currentTime, duration, volume, currentTrack, togglePlayPause, updateTime, setCurrentTime, setVolume, setIsPlaying, setCurrentTrack, audioRef }}>
             {children}
             <audio ref={audioRef} />
         </TrackContext.Provider>

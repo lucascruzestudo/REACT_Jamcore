@@ -1,17 +1,32 @@
-import React from 'react';
-import { Box, Typography, IconButton, Slider, Button, Divider, Tooltip } from '@mui/material';
+﻿import React, { useState } from 'react';
+import {
+  Box,
+  Typography,
+  IconButton,
+  Avatar,
+  InputBase,
+  Button,
+  Tooltip,
+} from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import LinkIcon from '@mui/icons-material/Link';
+import SendIcon from '@mui/icons-material/Send';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { useTrack } from '../contexts/trackcontext';
 import TrackCover from './trackcover';
 import { useNavigate } from 'react-router-dom';
 import { useTrackInteraction } from '../hooks/usetrackinteraction';
+import WaveformVisualizer from './waveformvisualizer';
+import { useUser } from '../contexts/usercontext';
+import { useCommentContext } from '../contexts/commentcontext';
+import api from '../services/api';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface TrackProps {
-  key: string;
   id: string;
   title: string;
   tags: string[];
@@ -25,6 +40,34 @@ interface TrackProps {
   userLikedTrack: boolean;
   originalDuration: string;
   updatedAt: string;
+  commentCount?: number;
+}
+
+function formatTimeAgo(createdAt: string): string {
+  const date = new Date(createdAt);
+  const today = new Date();
+  const diffTime = Math.abs(today.getTime() - date.getTime());
+  const diffSeconds = Math.ceil(diffTime / 1000);
+  const diffMinutes = Math.ceil(diffSeconds / 60);
+  const diffHours = Math.ceil(diffMinutes / 60);
+  const diffDays = Math.ceil(diffHours / 24);
+
+  if (diffSeconds < 60) return `${diffSeconds} segundo${diffSeconds !== 1 ? 's' : ''} atrás`;
+  if (diffMinutes < 60) return `${diffMinutes} minuto${diffMinutes !== 1 ? 's' : ''} atrás`;
+  if (diffHours < 24) return `${diffHours} hora${diffHours !== 1 ? 's' : ''} atrás`;
+  if (diffDays < 30) return `${diffDays} dia${diffDays !== 1 ? 's' : ''} atrás`;
+  if (diffDays < 365) {
+    const months = Math.ceil(diffDays / 30);
+    return `${months} ${months === 1 ? 'mês' : 'meses'} atrás`;
+  }
+  const years = Math.ceil(diffDays / 365);
+  return `${years} ano${years !== 1 ? 's' : ''} atrás`;
+}
+
+function formatCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}m`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n || 0);
 }
 
 const Track: React.FC<TrackProps> = ({
@@ -41,31 +84,29 @@ const Track: React.FC<TrackProps> = ({
   userLikedTrack,
   originalDuration,
   updatedAt,
+  commentCount = 0,
 }) => {
-  const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack } = useTrack();
-  const { localLikeCount, localPlayCount, userLiked, incrementPlay, toggleLike } = useTrackInteraction({
-    trackId: id,
-    initialLikeCount: likeCount,
-    initialPlayCount: playCount,
-    initialUserLiked: userLikedTrack,
-  });
-  const [modalOpen, setModalOpen] = React.useState(false);
+  const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack } =
+    useTrack();
+  const { localLikeCount, localPlayCount, userLiked, incrementPlay, toggleLike } =
+    useTrackInteraction({
+      trackId: id,
+      initialLikeCount: likeCount,
+      initialPlayCount: playCount,
+      initialUserLiked: userLikedTrack,
+    });
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [isPosting, setIsPosting] = useState(false);
+  const [commentSent, setCommentSent] = useState(false);
+  const { user, userProfile } = useUser();
+  const { addComment, getComments } = useCommentContext();
   const navigate = useNavigate();
 
-  const handleNavigateToTrack = () => {
-    navigate(`/track/${id}`);
-  };
-
-  const handleOpenModal = () => {
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-  };
+  const isActiveTrack = id === currentTrack?.id;
 
   const trackData = {
-    key: id,
     id,
     title,
     tags,
@@ -81,9 +122,40 @@ const Track: React.FC<TrackProps> = ({
     updatedAt,
   };
 
-  const updateSliderTime = (_event: Event, newValue: number | number[]) => {
-    if (typeof newValue === 'number') {
-      updateTime(newValue);
+  const activeDuration =
+    isActiveTrack && duration > 0
+      ? duration
+      : originalDuration.split(':').map(Number).reduce((acc, p) => acc * 60 + p, 0);
+
+  const displayCurrentTime = isActiveTrack
+    ? `${Math.floor(currentTime / 60)}:${Math.floor(currentTime % 60).toString().padStart(2, '0')}`
+    : '0:00';
+
+  const localCommentCount = getComments(id).length > 0 ? getComments(id).length : commentCount;
+
+  const handleCommentSubmit = async () => {
+    if (!newComment.trim() || isPosting) return;
+    setIsPosting(true);
+    try {
+      const response = await api.post('/TrackComment', { trackId: id, comment: newComment });
+      addComment(id, {
+        id: response.data.data.id,
+        text: newComment,
+        userId: user?.id || userProfile?.userId || '',
+        username: userProfile?.displayName || user?.username || '',
+        displayName: userProfile?.displayName || user?.username || '',
+        userProfilePictureUrl:
+          userProfile?.profilePictureUrl || '/jamcoredefaultpicture.jpg',
+        createdAt: new Date().toISOString(),
+        userProfileUpdatedAt: userProfile?.updatedAt || '',
+      });
+      setNewComment('');
+      setCommentSent(true);
+      setTimeout(() => setCommentSent(false), 2000);
+    } catch (e) {
+      console.error('Error posting comment:', e);
+    } finally {
+      setIsPosting(false);
     }
   };
 
@@ -95,274 +167,303 @@ const Track: React.FC<TrackProps> = ({
         maxWidth: { xs: 600, sm: 700 },
         width: { xs: '100%', sm: 700 },
         m: 'auto',
-        backgroundColor: 'white',
+        backgroundColor: '#fff',
+        borderRadius: '14px',
+        border: '1px solid rgba(0,0,0,0.07)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        overflow: 'hidden',
+        transition: 'box-shadow 0.2s',
+        '&:hover': { boxShadow: '0 6px 20px rgba(0,0,0,0.10)' },
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: { xs: 'column', sm: 'row' },
-        }}
-      >
+      {/* Main content row */}
+      <Box sx={{ display: 'flex', p: 2, gap: 2, alignItems: 'flex-start' }}>
+        {/* Cover image */}
         <Box
           sx={{
-            width: { xs: '100%', sm: 100 },
-            height: { xs: 150, sm: 100 },
+            width: 120,
+            height: 120,
+            flexShrink: 0,
+            borderRadius: '8px',
             overflow: 'hidden',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            mb: { xs: 2, sm: 0 },
+            border: '1px solid rgba(0,0,0,0.08)',
             cursor: 'pointer',
-            border: '1px solid #ccc',
           }}
-          onClick={handleOpenModal}
+          onClick={() => setModalOpen(true)}
         >
           <img
             src={`${imageUrl}?t=${updatedAt || createdAt}`}
             alt={title}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         </Box>
 
-        <Box
-          sx={{
-            ml: { sm: 2 },
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            height: { sm: 100 },
-          }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Box>
-              <Box sx={{ cursor: 'pointer' }} onClick={() => navigate(`/user/${userId}`)}>
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  noWrap
-                  sx={{ '&:hover': { fontWeight: '500' } }}
-                >
-                  {username || 'null'}
-                </Typography>
-              </Box>
-              <Box sx={{ cursor: 'pointer' }} onClick={handleNavigateToTrack}>
-                <Typography
-                  variant="body1"
-                  noWrap
-                  sx={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    wordBreak: 'break-word',
-                    maxWidth: { xs: '26ch', sm: '45ch' },
-                    '&:hover': { fontWeight: '500' },
-                  }}
-                >
-                  {title || 'null'}
-                </Typography>
-              </Box>
+        {/* Right content */}
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {/* Top row: artist / title :: date / tag */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Box sx={{ minWidth: 0, flex: 1, pr: 1 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#888',
+                  letterSpacing: '0.02em',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'block',
+                  '&:hover': { color: 'primary.main' },
+                }}
+                onClick={() => navigate(`/user/${userId}`)}
+                noWrap
+              >
+                {username || ''}
+              </Typography>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 700,
+                  lineHeight: 1.25,
+                  cursor: 'pointer',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  '&:hover': { color: 'primary.main' },
+                }}
+                onClick={() => navigate(`/track/${id}`)}
+              >
+                {title || ''}
+              </Typography>
             </Box>
-            <Box textAlign="right">
-              {(() => {
-                const date = new Date(createdAt);
-                const today = new Date();
-                const diffTime = Math.abs(today.getTime() - date.getTime());
-                const diffSeconds = Math.ceil(diffTime / 1000);
-                const diffMinutes = Math.ceil(diffSeconds / 60);
-                const diffHours = Math.ceil(diffMinutes / 60);
-                const diffDays = Math.ceil(diffHours / 24);
 
-                if (diffSeconds < 60) {
-                  return (
-                    <Typography variant="body2" color="textSecondary" noWrap>
-                      {diffSeconds === 1 ? `${diffSeconds} segundo atrás` : `${diffSeconds} segundos atrás`}
-                    </Typography>
-                  );
-                } else if (diffMinutes < 60) {
-                  return (
-                    <Typography variant="body2" color="textSecondary" noWrap>
-                      {diffMinutes === 1 ? `${diffMinutes} minuto atrás` : `${diffMinutes} minutos atrás`}
-                    </Typography>
-                  );
-                } else if (diffHours < 24) {
-                  return (
-                    <Typography variant="body2" color="textSecondary" noWrap>
-                      {diffHours === 1 ? `${diffHours} hora atrás` : `${diffHours} horas atrás`}
-                    </Typography>
-                  );
-                } else if (diffDays < 30) {
-                  return (
-                    <Typography variant="body2" color="textSecondary" noWrap>
-                      {diffDays === 1 ? `${diffDays} dia atrás` : `${diffDays} dias atrás`}
-                    </Typography>
-                  );
-                } else if (diffDays < 365) {
-                  return (
-                    <Typography variant="body2" color="textSecondary" noWrap>
-                      {diffDays === 30
-                        ? `${Math.ceil(diffDays / 30)} mês atrás`
-                        : `${Math.ceil(diffDays / 30)} meses atrás`}
-                    </Typography>
-                  );
-                } else {
-                  return (
-                    <Typography variant="body2" color="textSecondary" noWrap>
-                      {diffDays === 365
-                        ? `${Math.ceil(diffDays / 365)} ano atrás`
-                        : `${Math.ceil(diffDays / 365)} anos atrás`}
-                    </Typography>
-                  );
-                }
-              })()}
-
-              <Box sx={{ display: 'inline-block', ...(tags.length > 1 && { gap: 1 }) }}>
-                {tags.length > 0 && (
+            {/* Date + tag */}
+            <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
+              <Typography variant="caption" color="textSecondary" noWrap sx={{ display: 'block' }}>
+                {formatTimeAgo(createdAt)}
+              </Typography>
+              {tags.length > 0 && (
+                <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
                   <Box
                     sx={{
-                      backgroundColor: '#eee',
-                      borderRadius: '8px',
-                      padding: '2px 8px',
-                      display: 'inline-block',
-                      fontSize: '0.75rem',
+                      backgroundColor: 'rgba(233,52,52,0.08)',
+                      borderRadius: '6px',
+                      px: 1,
+                      py: '2px',
                     }}
                   >
-                    <Typography variant="body2" color="textPrimary" noWrap>
+                    <Typography
+                      variant="caption"
+                      color="primary"
+                      sx={{ fontWeight: 600, fontSize: '0.68rem' }}
+                      noWrap
+                    >
                       #{tags[0]}
                     </Typography>
                   </Box>
-                )}
-                {tags.length > 1 && (
-                  <Box
-                    sx={{
-                      backgroundColor: '#eee',
-                      borderRadius: '8px',
-                      padding: '2px 8px',
-                      marginLeft: '4px',
-                      display: 'inline-block',
-                      fontSize: '0.75rem',
-                    }}
-                  >
+                  {tags.length > 1 && (
                     <Tooltip title={tags.slice(1).join(', ')} arrow>
-                      <Typography variant="body2" color="textPrimary" noWrap>
-                        +{tags.length - 1}
-                      </Typography>
+                      <Box
+                        sx={{
+                          backgroundColor: '#F0F0F0',
+                          borderRadius: '6px',
+                          px: 1,
+                          py: '2px',
+                          cursor: 'default',
+                        }}
+                      >
+                        <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.68rem' }}>
+                          +{tags.length - 1}
+                        </Typography>
+                      </Box>
                     </Tooltip>
-                  </Box>
-                )}
+                  )}
+                </Box>
+              )}
+            </Box>
+          </Box>
+
+          {/* Waveform row */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IconButton
+              size="small"
+              onClick={() => { togglePlayPause(trackData); incrementPlay(); }}
+              onKeyDown={(e) => e.key === ' ' && e.preventDefault()}
+              sx={{
+                bgcolor: 'primary.main',
+                color: '#fff',
+                width: 32,
+                height: 32,
+                flexShrink: 0,
+                '&:hover': { bgcolor: 'primary.dark' },
+              }}
+            >
+              {isPlaying && isActiveTrack ? (
+                <PauseIcon sx={{ fontSize: 18 }} />
+              ) : (
+                <PlayArrowIcon sx={{ fontSize: 18 }} />
+              )}
+            </IconButton>
+
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <WaveformVisualizer
+                audioUrl={audioFileUrl}
+                currentTime={isActiveTrack ? currentTime : 0}
+                duration={activeDuration}
+                isActive={isActiveTrack}
+                onSeek={(time) => updateTime(time)}
+                height={52}
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.25 }}>
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', color: '#aaa' }}>
+                  {displayCurrentTime}
+                </Typography>
+                <Typography variant="caption" sx={{ fontSize: '0.65rem', color: '#aaa' }}>
+                  {originalDuration}
+                </Typography>
               </Box>
             </Box>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2 }}>
-            <IconButton
-              onKeyDown={(event) => {
-                if (event.key === ' ') {
-                  event.preventDefault();
-                }
-              }}
-              onClick={async () => {
-                togglePlayPause(trackData);
-                incrementPlay();
+          {/* Inline comment input */}
+          {user && (
+            <Box
+              sx={{
+                border: '1px solid rgba(0,0,0,0.10)',
+                borderRadius: '24px',
+                px: 1.5,
+                py: 0.5,
+                bgcolor: '#FAFAFA',
+                overflow: 'hidden',
+                minHeight: 36,
+                display: 'flex',
+                alignItems: 'center',
               }}
             >
-              {isPlaying && id === currentTrack?.id ? <PauseIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
-            </IconButton>
-
-            <Slider
-              value={id === currentTrack?.id ? currentTime : 0}
-              min={0}
-              max={id === currentTrack?.id ? duration : (() => {
-                const timeParts = originalDuration.split(':').map(Number);
-                return timeParts.reduce((acc, part) => acc * 60 + part, 0);
-              })()}
-              onChange={updateSliderTime}
-              valueLabelDisplay="auto"
-              valueLabelFormat={(value) => `${Math.floor(value / 60)}:${Math.floor(value % 60).toString().padStart(2, '0')}`}
-              sx={{
-                flex: 1,
-                mx: 1,
-                '& .MuiSlider-thumb': { display: 'none' },
-              }}
-              disabled={id !== currentTrack?.id}
-            />
-
-            <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.75rem', pl: 2 }}>
-              {id === currentTrack?.id
-                ? `${Math.floor(currentTime / 60)}:${Math.floor(currentTime % 60).toString().padStart(2, '0')} / ${originalDuration}`
-                : `00:00 / ${originalDuration}`}
-            </Typography>
-          </Box>
+              <AnimatePresence mode="wait" initial={false}>
+                {commentSent ? (
+                  <motion.div
+                    key="sent"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%' }}
+                  >
+                    <CheckCircleOutlineIcon sx={{ fontSize: 16, color: 'success.main' }} />
+                    <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600, fontSize: '0.8rem' }}>
+                      comentário enviado!
+                    </Typography>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="input"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}
+                  >
+                    <Avatar
+                      src={
+                        userProfile?.profilePictureUrl
+                          ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt || ''}`
+                          : '/jamcoredefaultpicture.jpg'
+                      }
+                      sx={{ width: 24, height: 24, flexShrink: 0 }}
+                    />
+                    <InputBase
+                      placeholder="Escreva um comentário..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleCommentSubmit();
+                        }
+                      }}
+                      sx={{ flex: 1, fontSize: '0.82rem', color: '#555' }}
+                    />
+                    {newComment.trim() && (
+                      <IconButton
+                        size="small"
+                        onClick={handleCommentSubmit}
+                        disabled={isPosting}
+                        sx={{ color: 'primary.main', p: 0.5 }}
+                      >
+                        <SendIcon sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Box>
+          )}
         </Box>
       </Box>
 
-      <Divider sx={{ my: 2 }} />
+      {/* Divider */}
+      <Box sx={{ borderTop: '1px solid rgba(0,0,0,0.06)', mx: 2 }} />
 
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-around',
-          alignItems: 'center',
-          gap: 2,
-          flexWrap: 'nowrap',
-          width: '100%',
-        }}
-      >
+      {/* Bottom stats bar */}
+      <Box sx={{ display: 'flex', alignItems: 'center', px: 1.5, py: 0.5 }}>
         <Button
-          startIcon={<PlayArrowIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
+          startIcon={<PlayArrowIcon sx={{ fontSize: 15 }} />}
           variant="text"
           color="secondary"
           size="small"
-          sx={{ py: { xs: 1, sm: 0.5 } }}
+          disableRipple
+          sx={{ minWidth: 0, fontSize: '0.75rem' }}
         >
-          {localPlayCount >= 1000000
-            ? `${(localPlayCount / 1000000).toFixed(1)}m`
-            : localPlayCount >= 1000
-              ? `${(localPlayCount / 1000).toFixed(1)}k`
-              : localPlayCount || 0}
+          {formatCount(localPlayCount)}
         </Button>
+
         <Button
           startIcon={
             userLiked ? (
-              <FavoriteIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />
+              <FavoriteIcon sx={{ fontSize: 15 }} />
             ) : (
-              <FavoriteBorderIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />
+              <FavoriteBorderIcon sx={{ fontSize: 15 }} />
             )
           }
           variant="text"
           color={userLiked ? 'primary' : 'secondary'}
           size="small"
-          sx={{ py: { xs: 1, sm: 0.5 } }}
+          sx={{ minWidth: 0, fontSize: '0.75rem' }}
           onClick={toggleLike}
         >
-          {localLikeCount >= 1000000
-            ? `${(localLikeCount / 1000000).toFixed(1)}m`
-            : localLikeCount >= 1000
-              ? `${(localLikeCount / 1000).toFixed(1)}k`
-              : localLikeCount || 0}
+          {formatCount(localLikeCount)}
         </Button>
+
         <Button
-          startIcon={<LinkIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
+          startIcon={<ChatBubbleOutlineIcon sx={{ fontSize: 15 }} />}
           variant="text"
           color="secondary"
           size="small"
-          sx={{ py: { xs: 1, sm: 0.5 } }}
+          sx={{ minWidth: 0, fontSize: '0.75rem' }}
+          onClick={() => navigate(`/track/${id}`)}
+        >
+          {formatCount(localCommentCount)}
+        </Button>
+
+        <Button
+          startIcon={<LinkIcon sx={{ fontSize: 15 }} />}
+          variant="text"
+          color="secondary"
+          size="small"
+          sx={{ minWidth: 0, fontSize: '0.75rem' }}
           onClick={() => {
-            const url = window.location.href.split('/').slice(0, 3).join('/') + `/track/${id}`;
+            const url =
+              window.location.href.split('/').slice(0, 3).join('/') + `/track/${id}`;
             navigator.clipboard.writeText(url);
           }}
         >
           copiar link
         </Button>
       </Box>
-      <TrackCover open={modalOpen} onClose={handleCloseModal} imageUrl={imageUrl} title={title} />
+
+      <TrackCover open={modalOpen} onClose={() => setModalOpen(false)} imageUrl={imageUrl} title={title} />
     </Box>
   );
 };
 
 export default Track;
+

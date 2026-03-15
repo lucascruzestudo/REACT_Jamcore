@@ -1,7 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+﻿import React, { useEffect, useState, useRef } from "react";
 import { Button, TextField, Typography, Box, Avatar, IconButton, Divider, Container } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import EditIcon from '@mui/icons-material/Edit';
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import Loader from "../components/loader";
 import { useUser } from "../contexts/usercontext";
 import { useParams } from "react-router-dom";
@@ -27,8 +29,8 @@ const UserProfilePage: React.FC = () => {
     const [hover, setHover] = useState(false);
     const [bioLength, setBioLength] = useState(0);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isSaving, setIsSaving] = useState<boolean>(false);
+    const [isEditing, setIsEditing] = useState<boolean>(false);
     const loaderRef = useRef(null);
 
     const { control, handleSubmit, watch, reset } = useForm<UserProfile>({
@@ -97,7 +99,6 @@ const UserProfilePage: React.FC = () => {
                 location: userProfile.location,
                 profilePictureUrl: userProfile.profilePictureUrl,
             });
-            setIsLoading(false);
         }
     }, [userProfile, reset]);
 
@@ -124,7 +125,8 @@ const UserProfilePage: React.FC = () => {
 
         try {
             await updateUserProfile(formData);
-            setTimeout(() => setIsSaving(false), 2000);
+            setIsSaving(false);
+            setIsEditing(false);
         } catch (error) {
             setIsSaving(false);
         }
@@ -188,218 +190,166 @@ const UserProfilePage: React.FC = () => {
         return <Typography variant="h6">User not found</Typography>;
     }
 
+    const avatarSrc = imagePreview
+        ? imagePreview
+        : userProfile?.profilePictureUrl
+            ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt}`
+            : '/jamcoredefaultpicture.jpg';
+
     return (
-        <Container>
-            <Divider sx={{ marginTop: 12, borderColor: 'transparent' }} />
-            <Typography
-                variant="h5"
+        <Container maxWidth="md">
+            {/* Header */}
+            <Box sx={{ pt: 12, pb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Typography variant="h5" sx={{ color: '#666', fontWeight: 600 }}>
+                    {isCurrentUser ? 'seu perfil' : 'perfil'}
+                </Typography>
+                {isCurrentUser && !isEditing && (
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<EditIcon />}
+                        onClick={() => setIsEditing(true)}
+                        sx={{ borderRadius: '8px', borderColor: '#E93434', color: '#E93434', '&:hover': { borderColor: '#c62828', backgroundColor: 'rgba(233,52,52,0.04)' } }}
+                    >
+                        editar perfil
+                    </Button>
+                )}
+            </Box>
+
+            {/* Profile card */}
+            <Box
                 sx={{
-                    color: '#666',
-                    textAlign: { xs: 'center', md: 'left' },
+                    backgroundColor: '#fff',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(0,0,0,0.07)',
+                    p: { xs: 3, md: 4 },
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: 4,
+                    alignItems: { xs: 'center', md: 'flex-start' },
+                    mb: 4,
                 }}
             >
-                {isCurrentUser ? 'seu perfil' : 'perfil'}
-            </Typography>
+                {/* Avatar */}
+                <Box
+                    sx={{
+                        position: 'relative',
+                        width: { xs: 120, md: 160 },
+                        height: { xs: 120, md: 160 },
+                        flexShrink: 0,
+                        borderRadius: '50%',
+                        overflow: 'hidden',
+                        cursor: isEditing ? 'pointer' : 'default',
+                    }}
+                    onMouseEnter={() => { if (isEditing) setHover(true); }}
+                    onMouseLeave={() => setHover(false)}
+                >
+                    <Avatar src={avatarSrc} alt="foto do perfil" sx={{ width: '100%', height: '100%' }} />
+                    {isEditing && hover && (
+                        <Box
+                            sx={{
+                                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                                backgroundColor: 'rgba(0,0,0,0.48)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                        >
+                            <IconButton component="label">
+                                <CloudUploadIcon sx={{ color: '#fff' }} />
+                                <input type="file" hidden onChange={handleImageChange} accept="image/*" />
+                            </IconButton>
+                        </Box>
+                    )}
+                </Box>
 
-            {isLoading ? (
-                <Loader />
-            ) : (
-                <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4, alignItems: 'center' }}>
-                    <Box
-                        sx={{
-                            position: 'relative',
-                            width: { xs: 150, md: 200 },
-                            height: { xs: 150, md: 200 },
-                            borderRadius: '50%',
-                            overflow: 'hidden',
-                            '&:hover .upload-button': {
-                                opacity: 1,
-                            }
-                        }}
-                        onMouseEnter={() => setHover(true)}
-                        onMouseLeave={() => setHover(false)}
-                    >
-                        <Avatar
-                            src={imagePreview ? imagePreview : userProfile?.profilePictureUrl ? `${userProfile?.profilePictureUrl}?t=${userProfile?.updatedAt}` : '/jamcoredefaultpicture.jpg'}
-                            alt="Foto do Perfil"
-                            sx={{ width: '100%', height: '100%' }}
-                        />
-                        {isCurrentUser && hover && (
-                            <Box
-                                className="upload-button"
-                                sx={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    opacity: 0,
-                                    transition: 'opacity 0.3s',
-                                }}
-                            >
-                                <IconButton component="label">
-                                    <CloudUploadIcon sx={{ color: 'white' }} />
-                                    <input
-                                        type="file"
-                                        hidden
-                                        onChange={handleImageChange}
-                                        accept="image/*"
-                                    />
-                                </IconButton>
-                            </Box>
-                        )}
-                    </Box>
-
-                    <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
-
-                    <Box sx={{ flex: 1, width: '100%' }}>
-                        {isCurrentUser ? (
-                            <form onSubmit={handleSubmit(onSubmit)}>
-                                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, mb: 2 }}>
-                                    <Controller
-                                        name="displayName"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="nome de exibição"
-                                                fullWidth
-                                                margin="normal"
-                                                variant="outlined"
-                                            />
-                                        )}
-                                    />
-                                    <Controller
-                                        name="location"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <TextField
-                                                {...field}
-                                                label="localização"
-                                                fullWidth
-                                                margin="normal"
-                                                variant="outlined"
-                                            />
-                                        )}
-                                    />
+                <Box sx={{ flex: 1, width: '100%' }}>
+                    {!isEditing ? (
+                        /* ── VIEW MODE ─────────────────────────────────── */
+                        <Box>
+                            <Typography variant="h5" sx={{ fontWeight: 700, color: '#111', lineHeight: 1.2 }}>
+                                {userProfile.displayName || userProfile.username}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#888', mb: 1.5 }}>
+                                @{userProfile.username}
+                            </Typography>
+                            {userProfile.location && (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
+                                    <PlaceOutlinedIcon sx={{ fontSize: 16, color: '#aaa' }} />
+                                    <Typography variant="body2" sx={{ color: '#555' }}>{userProfile.location}</Typography>
                                 </Box>
-
+                            )}
+                            {userProfile.bio ? (
+                                <Typography variant="body1" sx={{ color: '#444', lineHeight: 1.65, mt: 1 }}>
+                                    {userProfile.bio}
+                                </Typography>
+                            ) : isCurrentUser ? (
+                                <Typography variant="body2" sx={{ color: '#bbb', fontStyle: 'italic', mt: 1 }}>
+                                    nenhuma bio ainda. clique em editar para adicionar.
+                                </Typography>
+                            ) : null}
+                        </Box>
+                    ) : (
+                        /* ── EDIT MODE ──────────────────────────────────── */
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
                                 <Controller
-                                    name="bio"
+                                    name="displayName"
                                     control={control}
                                     render={({ field }) => (
-                                        <TextField
-                                            {...field}
-                                            label="biografia"
-                                            fullWidth
-                                            margin="normal"
-                                            variant="outlined"
-                                            multiline
-                                            rows={4}
-                                            inputProps={{ maxLength: 500 }}
-                                        />
+                                        <TextField {...field} label="nome de exibição" fullWidth margin="normal" variant="outlined" size="small" />
                                     )}
                                 />
-                                <Typography variant="body2" sx={{ textAlign: 'right', color: 'text.secondary' }}>
-                                    {bioLength}/500 caracteres
-                                </Typography>
-                                <Box sx={{ marginTop: 2, display: 'flex', justifyContent: 'flex-end' }}>
-                                    <Button type="submit" variant="contained" disabled={isSaving || isButtonDisabled()}>
-                                        {isSaving ? "salvando..." : "salvar"}
-                                    </Button>
-                                </Box>
-                            </form>
-                        ) : (
-                            <Box>
-                                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, mb: 2 }}>
-                                    <Box sx={{ flex: 1 }}>
-                                        <TextField
-                                            value={userProfile.displayName || userProfile.username || ' '}
-                                            fullWidth
-                                            margin="normal"
-                                            variant="outlined"
-                                            disabled
-                                            label="nome de exibição"
-                                            sx={{
-                                                "& .MuiInputBase-input.Mui-disabled": {
-                                                    WebkitTextFillColor: "black",
-                                                },
-                                                "& .MuiInputLabel-root.Mui-disabled": {
-                                                    color: "black",
-                                                },
-                                                "& .MuiOutlinedInput-notchedOutline": {
-                                                    borderColor: "rgba(0, 0, 0, 0.23) !important",
-                                                },
-                                                "&:hover .MuiOutlinedInput-notchedOutline": {
-                                                    borderColor: "rgba(0, 0, 0, 0.23) !important !important",
-                                                }
-                                            }}
-                                        />
-                                    </Box>
-                                    <Box sx={{ flex: 1 }}>
-                                        <TextField
-                                            value={userProfile.location || ' '}
-                                            fullWidth
-                                            margin="normal"
-                                            variant="outlined"
-                                            disabled
-                                            label="localização"
-                                            sx={{
-                                                "& .MuiInputBase-input.Mui-disabled": {
-                                                    WebkitTextFillColor: "black",
-                                                },
-                                                "& .MuiInputLabel-root.Mui-disabled": {
-                                                    color: "black",
-                                                },
-                                                "& .MuiOutlinedInput-notchedOutline": {
-                                                    borderColor: "rgba(0, 0, 0, 0.23) !important",
-                                                },
-                                                "&:hover .MuiOutlinedInput-notchedOutline": {
-                                                    borderColor: "rgba(0, 0, 0, 0.23) !important !important",
-                                                }
-                                            }}
-                                        />
-                                    </Box>
-                                </Box>
-
-                                <Box sx={{ mt: 2 }}>
+                                <Controller
+                                    name="location"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <TextField {...field} label="localização" fullWidth margin="normal" variant="outlined" size="small" />
+                                    )}
+                                />
+                            </Box>
+                            <Controller
+                                name="bio"
+                                control={control}
+                                render={({ field }) => (
                                     <TextField
-                                        value={userProfile.bio || ' '}
+                                        {...field}
+                                        label="biografia"
                                         fullWidth
                                         margin="normal"
                                         variant="outlined"
                                         multiline
                                         rows={4}
-                                        disabled
-                                        label="biografia"
-                                        sx={{
-                                            "& .MuiInputBase-input.Mui-disabled": {
-                                                WebkitTextFillColor: "black",
-                                            },
-                                            "& .MuiInputLabel-root.Mui-disabled": {
-                                                color: "black",
-                                            },
-                                            "& .MuiOutlinedInput-notchedOutline": {
-                                                borderColor: "rgba(0, 0, 0, 0.23) !important",
-                                            },
-                                            "&:hover .MuiOutlinedInput-notchedOutline": {
-                                                borderColor: "rgba(0, 0, 0, 0.23) !important !important",
-                                            }
-                                        }}
+                                        size="small"
+                                        inputProps={{ maxLength: 500 }}
                                     />
-                                </Box>
+                                )}
+                            />
+                            <Typography variant="body2" sx={{ textAlign: 'right', color: 'text.secondary', mt: 0.5 }}>
+                                {bioLength}/500
+                            </Typography>
+                            <Box sx={{ mt: 2, display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
+                                <Button
+                                    variant="outlined"
+                                    onClick={() => { setIsEditing(false); setImagePreview(null); setImage(null); }}
+                                    sx={{ borderRadius: '8px', borderColor: 'rgba(0,0,0,0.18)', color: '#555' }}
+                                >
+                                    cancelar
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="contained"
+                                    disabled={isSaving || isButtonDisabled()}
+                                    sx={{ borderRadius: '8px', boxShadow: 'none' }}
+                                >
+                                    {isSaving ? 'salvando...' : 'salvar'}
+                                </Button>
                             </Box>
-                        )}
-                    </Box>
+                        </form>
+                    )}
                 </Box>
-            )}
+            </Box>
+
 
             <Divider sx={{ marginTop: 4, borderColor: 'transparent' }} />
-
             <Typography variant="h5" sx={{ color: '#666', mt: 4 }}>
                 comentários recentes
             </Typography>

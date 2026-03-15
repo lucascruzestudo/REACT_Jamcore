@@ -1,6 +1,7 @@
 import { FC, useState, useEffect } from 'react'
 import { Box, Typography } from '@mui/material'
-import InfoIcon from '@mui/icons-material/Info'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface AlertCardProps {
@@ -8,14 +9,18 @@ interface AlertCardProps {
   type: 'success' | 'error'
 }
 
-const styles = {
+const config = {
   success: {
-    backgroundColor: '#4caf50',
-    color: '#fff',
+    bg: '#F0FAF0',
+    border: '#A8D5A8',
+    color: '#1B5E20',
+    icon: <CheckCircleOutlineIcon sx={{ fontSize: 18 }} />,
   },
   error: {
-    backgroundColor: '#f44336',
-    color: '#fff',
+    bg: '#FEF2F2',
+    border: '#F5ACAC',
+    color: '#7F1D1D',
+    icon: <ErrorOutlineIcon sx={{ fontSize: 18 }} />,
   },
 }
 
@@ -23,45 +28,41 @@ const AlertCard: FC<AlertCardProps> = ({ message, type }) => {
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(false)
-    }, 6000)
-
+    setIsVisible(true)
+    const timer = setTimeout(() => setIsVisible(false), 6000)
     return () => clearTimeout(timer)
   }, [message])
+
+  const { bg, border, color, icon } = config[type]
 
   return (
     <AnimatePresence>
       {isVisible && (
         <motion.div
           key={message}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.5 }}
-          style={{ pointerEvents: 'none' }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.3 }}
+          style={{ width: '100%', marginBottom: '12px' }}
         >
           <Box
             sx={{
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              padding: '10px 20px',
-              borderRadius: '4px',
-              marginBottom: '16px',
-              boxShadow: '0px 2px 8px rgba(0,0,0,0.2)',
-              ...styles[type],
+              alignItems: 'flex-start',
+              gap: 1,
+              px: 2,
+              py: 1.5,
+              borderRadius: '10px',
+              border: `1px solid ${border}`,
+              backgroundColor: bg,
+              color,
             }}
           >
-            <InfoIcon sx={{ marginRight: '4px', flexShrink: 0 }} />
+            <Box sx={{ mt: '1px', flexShrink: 0, color }}>{icon}</Box>
             <Typography
               variant="body2"
-              sx={{
-                flex: 1,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'pre-wrap',
-              }}
+              sx={{ color, lineHeight: 1.5, flex: 1, fontSize: '0.85rem' }}
             >
               {message}
             </Typography>
