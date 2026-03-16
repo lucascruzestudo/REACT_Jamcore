@@ -1,9 +1,9 @@
-import React from "react";
+﻿import React from "react";
 import { Typography, Box } from "@mui/material";
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import api from "../services/api";
-import Loader from "../components/loader";
+import { Skeleton } from '@mui/material';
 
 interface Comment {
   id: string;
@@ -66,7 +66,16 @@ const UserComments: React.FC<UserCommentsProps> = ({ userId }) => {
   });
 
   if (isLoading) {
-    return <Loader />;
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Box key={i}>
+            <Skeleton variant="text" width={180} height={14} sx={{ mb: 0.5 }} />
+            <Skeleton variant="text" width="80%" height={16} />
+          </Box>
+        ))}
+      </Box>
+    );
   }
 
   if (isError) {
@@ -78,40 +87,47 @@ const UserComments: React.FC<UserCommentsProps> = ({ userId }) => {
   }
 
   return (
-    <Box sx={{ mt: 3 }}>
+    <Box>
       {data?.comments.length === 0 ? (
-        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-          nenhum comentário.
+        <Typography variant="body2" sx={{ color: '#999', py: 1 }}>
+          nenhum comentário ainda.
         </Typography>
       ) : (
-        data?.comments.map((comment) => (
-          <Box key={comment.id} sx={{ mb: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+        data?.comments.map((comment, index) => (
+          <Box
+            key={comment.id}
+            sx={{
+              py: 1.5,
+              borderTop: index > 0 ? '1px solid rgba(0,0,0,0.05)' : 'none',
+            }}
+          >
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
               <Typography
-                variant="body2"
-                sx={{ cursor: 'pointer', color: 'text.secondary', textDecoration: 'none' }}
-                onClick={() => navigate(`/track/${comment.trackId}`)}
+                variant="caption"
+                sx={{ color: '#888' }}
               >
                 em{' '}
-                <Typography
+                <Box
                   component="span"
-                  variant="body2"
-                  sx={{
-                    color: 'text.secondary',
-                    '&:hover': {
-                      fontWeight: 'bold',
-                    },
+                  role="link"
+                  tabIndex={0}
+                  onKeyDown={(e: React.KeyboardEvent) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      navigate(`/track/${comment.trackId}`);
+                    }
                   }}
+                  onClick={() => navigate(`/track/${comment.trackId}`)}
+                  sx={{ fontWeight: 600, color: '#555', cursor: 'pointer', '&:hover': { color: 'primary.main' } }}
                 >
                   {comment.trackName}
-                </Typography>
+                </Box>
               </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              <Typography variant="caption" sx={{ color: '#bbb', flexShrink: 0, ml: 1 }}>
                 {formatTimeAgo(comment.createdAt)}
               </Typography>
             </Box>
-            <Typography variant="body1" sx={{ color: 'text.primary' }}>
-              “{comment.text}”
+            <Typography variant="body2" sx={{ color: '#444', lineHeight: 1.6, fontStyle: 'italic' }}>
+              "{comment.text}"
             </Typography>
           </Box>
         ))

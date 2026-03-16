@@ -48,10 +48,15 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         if (!currentTrack || currentTrack.id !== newTrack.id) {
             setCurrentTrack(newTrack);
+            // Reset time/duration state so other track components render as starting from 0
+            setCurrentTime(0);
+            setDuration(0);
             audioRef.current.src = newTrack.audioFileUrl;
             audioRef.current.load();
 
             try {
+                // ensure playback starts from 0
+                audioRef.current.currentTime = 0;
                 audioRef.current.play();
                 setIsPlaying(true);
             } catch (error) {

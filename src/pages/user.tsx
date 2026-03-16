@@ -1,17 +1,24 @@
 ﻿import React, { useEffect, useState, useRef } from "react";
-import { Button, TextField, Typography, Box, Avatar, IconButton, Divider, Container } from "@mui/material";
+import { Button, TextField, Typography, Box, Avatar, IconButton, Container, Grid } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import EditIcon from '@mui/icons-material/Edit';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
-import Loader from "../components/loader";
+
 import { useUser } from "../contexts/usercontext";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { motion } from "framer-motion";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { cropToSquare } from "../utils/imageUtils";
-import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
-import CompactTrack from "../components/compacttrack";
+import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import Track from "../components/track";
+import TrackSkeleton from "../components/trackskeleton";
 import UserComments from "../components/usercomments";
+import RecentTracks from "../components/userplays";
+import RecentLikes from "../components/userlikes";
+import CompactTrackSkeleton from "../components/compacttrackskeleton";
+import UserProfileSkeleton from "./userskeleton";
 
 interface UserProfile {
     id: string;
@@ -25,6 +32,7 @@ interface UserProfile {
 
 const UserProfilePage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const { updateUserProfile, user } = useUser();
     const [image, setImage] = useState<File | null>(null);
     const [hover, setHover] = useState(false);
@@ -91,6 +99,26 @@ const UserProfilePage: React.FC = () => {
     });
 
     const tracks = data?.pages.flatMap((page) => page.items) || [];
+    const queryClient = useQueryClient();
+
+    const { data: recentPlaysData, isLoading: isLoadingPlays } = useQuery({
+        queryKey: ['recentPlays', id],
+        queryFn: () =>
+            api.get('TrackPlay/byUser', { params: { userId: id, pageNumber: 1, pageSize: 3 } })
+                .then((r) => r.data.data.tracks.items),
+        enabled: !!id,
+    });
+
+    const { data: recentLikesData, isLoading: isLoadingLikes } = useQuery({
+        queryKey: ['recentLikes', id],
+        queryFn: () =>
+            api.get('TrackLike/byUser', { params: { userId: id, pageNumber: 1, pageSize: 3 } })
+                .then((r) => r.data.data.tracks.items),
+        enabled: !!id,
+    });
+
+    const recentPlays = recentPlaysData ?? [];
+    const recentLikes = recentLikesData ?? [];
 
     useEffect(() => {
         if (userProfile) {
@@ -126,6 +154,7 @@ const UserProfilePage: React.FC = () => {
 
         try {
             await updateUserProfile(formData);
+            queryClient.invalidateQueries({ queryKey: ['userProfile', id] });
             setIsSaving(false);
             setIsEditing(false);
         } catch (error) {
@@ -181,7 +210,7 @@ const UserProfilePage: React.FC = () => {
     }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     if (isProfileLoading) {
-        return <Loader centered />;
+        return <UserProfileSkeleton />;
     }
 
     if (isProfileError) {
@@ -199,24 +228,40 @@ const UserProfilePage: React.FC = () => {
             : '/jamcoredefaultpicture.jpg';
 
     return (
-        <Container maxWidth="md">
-            {/* Header */}
-            <Box sx={{ pt: 12, pb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Typography variant="h5" sx={{ color: '#666', fontWeight: 600 }}>
-                    {isCurrentUser ? 'seu perfil' : 'perfil'}
-                </Typography>
-                {isCurrentUser && !isEditing && (
-                    <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<EditIcon />}
-                        onClick={() => setIsEditing(true)}
-                        sx={{ borderRadius: '8px', borderColor: '#E93434', color: '#E93434', '&:hover': { borderColor: '#c62828', backgroundColor: 'rgba(233,52,52,0.04)' } }}
-                    >
-                        editar perfil
-                    </Button>
-                )}
+        <Box sx={{ minHeight: '100vh', backgroundColor: '#FAFAFA' }}>
+
+            {/* Header banner */}
+            <Box sx={{ backgroundColor: '#fff', borderBottom: '1px solid rgba(0,0,0,0.06)', pt: 10, pb: 4, px: { xs: 2, sm: 4 } }}>
+                <Container maxWidth="lg">
+                    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+                        <Box>
+                            <Typography variant="body2" sx={{ color: '#aaa', mb: 0.5, letterSpacing: '0.05em', fontSize: '0.72rem' }}>
+                                {isCurrentUser ? 'meu perfil' : `perfil de @${userProfile.username}`}
+                            </Typography>
+                            <Typography variant="h4" sx={{ fontWeight: 700, color: '#111', lineHeight: 1.2 }}>
+                                {userProfile.displayName || userProfile.username}
+                            </Typography>
+                            <Typography variant="body1" sx={{ color: '#777', mt: 0.5 }}>
+                                {isCurrentUser ? 'gerencie suas informações e veja suas jams.' : `veja as jams e atividade de @${userProfile.username}.`}
+                            </Typography>
+                        </Box>
+                    </motion.div>
+                </Container>
             </Box>
+
+            {/* Voltar ao feed */}
+            <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 4 }, mt: 2 }}>
+                <Box sx={{ py: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconButton size="small" onClick={() => navigate('/feed')} sx={{ color: '#777', '&:hover': { color: '#111' } }}>
+                        <ArrowBackIcon fontSize="small" />
+                    </IconButton>
+                    <Button size="small" variant="text" onClick={() => navigate('/feed')} sx={{ color: '#777', textTransform: 'none' }}>
+                        voltar ao feed
+                    </Button>
+                </Box>
+            </Container>
+
+            <Container maxWidth="lg" sx={{ py: 2, px: { xs: 2, sm: 3 } }}>
 
             {/* Profile card */}
             <Box
@@ -229,7 +274,7 @@ const UserProfilePage: React.FC = () => {
                     flexDirection: { xs: 'column', md: 'row' },
                     gap: 4,
                     alignItems: { xs: 'center', md: 'flex-start' },
-                    mb: 4,
+                    mb: 3,
                 }}
             >
                 {/* Avatar */}
@@ -264,150 +309,221 @@ const UserProfilePage: React.FC = () => {
                 </Box>
 
                 <Box sx={{ flex: 1, width: '100%' }}>
-                    {!isEditing ? (
-                        /* ── VIEW MODE ─────────────────────────────────── */
-                        <Box>
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        {/* Nome */}
+                        {isEditing ? (
+                            <Controller
+                                name="displayName"
+                                control={control}
+                                render={({ field }) => (
+                                    <TextField
+                                        {...field}
+                                        variant="standard"
+                                        fullWidth
+                                        placeholder="nome de exibição"
+                                        inputProps={{ style: { fontSize: '1.5rem', fontWeight: 700, color: '#111', lineHeight: 1.2 } }}
+                                        sx={{ mb: 0.5 }}
+                                    />
+                                )}
+                            />
+                        ) : (
                             <Typography variant="h5" sx={{ fontWeight: 700, color: '#111', lineHeight: 1.2 }}>
                                 {userProfile.displayName || userProfile.username}
                             </Typography>
-                            <Typography variant="body2" sx={{ color: '#888', mb: 1.5 }}>
-                                @{userProfile.username}
-                            </Typography>
-                            {userProfile.location && (
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
-                                    <PlaceOutlinedIcon sx={{ fontSize: 16, color: '#aaa' }} />
-                                    <Typography variant="body2" sx={{ color: '#555' }}>{userProfile.location}</Typography>
-                                </Box>
-                            )}
-                            {userProfile.bio ? (
-                                <Typography variant="body1" sx={{ color: '#444', lineHeight: 1.65, mt: 1 }}>
-                                    {userProfile.bio}
-                                </Typography>
-                            ) : isCurrentUser ? (
-                                <Typography variant="body2" sx={{ color: '#bbb', fontStyle: 'italic', mt: 1 }}>
-                                    nenhuma bio ainda. clique em editar para adicionar.
-                                </Typography>
-                            ) : null}
-                        </Box>
-                    ) : (
-                        /* ── EDIT MODE ──────────────────────────────────── */
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2 }}>
-                                <Controller
-                                    name="displayName"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField {...field} label="nome de exibição" fullWidth margin="normal" variant="outlined" size="small" />
-                                    )}
-                                />
-                                <Controller
-                                    name="location"
-                                    control={control}
-                                    render={({ field }) => (
-                                        <TextField {...field} label="localização" fullWidth margin="normal" variant="outlined" size="small" />
-                                    )}
-                                />
+                        )}
+
+                        {/* Username (readonly) */}
+                        <Typography variant="body2" sx={{ color: '#888', mb: 1.5 }}>
+                            @{userProfile.username}
+                        </Typography>
+
+                        {/* Localização */}
+                        {isEditing ? (
+                            <Controller
+                                name="location"
+                                control={control}
+                                render={({ field }) => (
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
+                                        <PlaceOutlinedIcon sx={{ fontSize: 16, color: '#aaa' }} />
+                                        <TextField
+                                            {...field}
+                                            variant="standard"
+                                            placeholder="adicionar localização"
+                                            size="small"
+                                            inputProps={{ style: { fontSize: '0.875rem', color: '#555' } }}
+                                            sx={{ flex: 1 }}
+                                        />
+                                    </Box>
+                                )}
+                            />
+                        ) : userProfile.location ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
+                                <PlaceOutlinedIcon sx={{ fontSize: 16, color: '#aaa' }} />
+                                <Typography variant="body2" sx={{ color: '#555' }}>{userProfile.location}</Typography>
                             </Box>
+                        ) : null}
+
+                        {/* Bio */}
+                        {isEditing ? (
                             <Controller
                                 name="bio"
                                 control={control}
                                 render={({ field }) => (
                                     <TextField
                                         {...field}
-                                        label="biografia"
+                                        variant="standard"
                                         fullWidth
-                                        margin="normal"
-                                        variant="outlined"
                                         multiline
-                                        rows={4}
-                                        size="small"
-                                        inputProps={{ maxLength: 500 }}
+                                        placeholder="escreva sua bio..."
+                                        inputProps={{ maxLength: 500, style: { fontSize: '1rem', color: '#444', lineHeight: 1.65 } }}
+                                        sx={{ mt: 0.5 }}
                                     />
                                 )}
                             />
-                            <Typography variant="body2" sx={{ textAlign: 'right', color: 'text.secondary', mt: 0.5 }}>
-                                {bioLength}/500
+                        ) : userProfile.bio ? (
+                            <Typography variant="body1" sx={{ color: '#444', lineHeight: 1.65, mt: 1 }}>
+                                {userProfile.bio}
                             </Typography>
-                            <Box sx={{ mt: 2, display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
+                        ) : isCurrentUser ? (
+                            <Typography variant="body2" sx={{ color: '#bbb', fontStyle: 'italic', mt: 1 }}>
+                                nenhuma bio ainda. clique em editar para adicionar.
+                            </Typography>
+                        ) : null}
+
+                        {/* Contador de bio + ações */}
+                        {isEditing && (
+                            <Box sx={{ mt: 2.5 }}>
+                                <Typography variant="caption" sx={{ color: '#bbb', display: 'block', textAlign: 'right', mb: 1.5 }}>
+                                    {bioLength}/500
+                                </Typography>
+                                <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
+                                    <Button
+                                        variant="text"
+                                        size="small"
+                                        onClick={() => { setIsEditing(false); setImagePreview(null); setImage(null); reset({ displayName: userProfile.displayName, bio: userProfile.bio, location: userProfile.location, profilePictureUrl: userProfile.profilePictureUrl }); }}
+                                        sx={{ borderRadius: '8px', color: '#888', textTransform: 'none' }}
+                                    >
+                                        cancelar
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        size="small"
+                                        disabled={isSaving || isButtonDisabled()}
+                                        sx={{ borderRadius: '8px', boxShadow: 'none', fontWeight: 700, px: 3, textTransform: 'none' }}
+                                    >
+                                        {isSaving ? 'salvando...' : 'salvar'}
+                                    </Button>
+                                </Box>
+                            </Box>
+                        )}
+
+                        {/* Botão editar (modo view) */}
+                        {isCurrentUser && !isEditing && (
+                            <Box sx={{ mt: 2 }}>
                                 <Button
                                     variant="outlined"
-                                    onClick={() => { setIsEditing(false); setImagePreview(null); setImage(null); }}
-                                    sx={{ borderRadius: '8px', borderColor: 'rgba(0,0,0,0.18)', color: '#555' }}
+                                    size="small"
+                                    startIcon={<EditIcon />}
+                                    onClick={() => setIsEditing(true)}
+                                    sx={{ borderRadius: '8px', borderColor: '#E93434', color: '#E93434', textTransform: 'none', '&:hover': { borderColor: '#c62828', backgroundColor: 'rgba(233,52,52,0.04)' } }}
                                 >
-                                    cancelar
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    variant="contained"
-                                    disabled={isSaving || isButtonDisabled()}
-                                    sx={{ borderRadius: '8px', boxShadow: 'none' }}
-                                >
-                                    {isSaving ? 'salvando...' : 'salvar'}
+                                    editar perfil
                                 </Button>
                             </Box>
-                        </form>
-                    )}
+                        )}
+                    </form>
                 </Box>
             </Box>
 
 
-            <Divider sx={{ marginTop: 4, borderColor: 'transparent' }} />
-            <Typography variant="h5" sx={{ color: '#666', mt: 4 }}>
-                comentários recentes
-            </Typography>
+            <Grid container spacing={3} sx={{ alignItems: 'flex-start' }}>
 
-            <UserComments userId={id!} />
+                {/* ── Jams (main) ── */}
+                <Grid item xs={12} md={8}>
+                    {isTracksLoading ? (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {Array.from({ length: 5 }).map((_, i) => <TrackSkeleton key={i} />)}
+                        </Box>
+                    ) : tracks.length > 0 ? (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {tracks.map((track) => (
+                                <Track
+                                    key={track.id}
+                                    id={track.id}
+                                    imageUrl={track.imageUrl}
+                                    title={track.title}
+                                    audioFileUrl={track.audioFileUrl}
+                                    playCount={track.playCount}
+                                    username={track.username}
+                                    userId={track.userId}
+                                    tags={track.tags}
+                                    likeCount={track.likeCount}
+                                    createdAt={track.createdAt}
+                                    userLikedTrack={track.userLikedTrack}
+                                    originalDuration={track.duration}
+                                    updatedAt={track.updatedAt}
+                                />
+                            ))}
+                        </Box>
+                    ) : (
+                        <Typography variant="body2" sx={{ color: '#999', py: 1 }}>
+                            nenhuma jam por aqui.
+                        </Typography>
+                    )}
+                    {hasNextPage && (
+                        <Box ref={loaderRef} sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+                            {Array.from({ length: 3 }).map((_, i) => <TrackSkeleton key={i} />)}
+                        </Box>
+                    )}
+                    {isTracksError && (
+                        <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                            {tracksError.message}
+                        </Typography>
+                    )}
+                </Grid>
 
-            <Divider sx={{ marginTop: 4, borderColor: 'transparent' }} />
+                {/* ── Sidebar ── */}
+                <Grid item xs={12} md={4}>
+                    <Box sx={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.06)', p: 2.5, position: 'sticky', top: 80 }}>
+                        {/* Reproduções recentes */}
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
+                            reproduções recentes
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                            {isLoadingPlays
+                                ? <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>{Array.from({ length: 3 }).map((_, i) => <CompactTrackSkeleton key={i} />)}</Box>
+                                : <RecentTracks tracks={recentPlays} />}
+                        </Box>
 
-            <Typography variant="h5" sx={{ color: '#666', mt: 4 }}>
-                jams do usuário
-            </Typography>
+                        <Box sx={{ borderTop: '1px solid rgba(0,0,0,0.06)', pt: 2, mt: 1.5 }} />
 
-            {isTracksLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                    <Loader />
-                </Box>
-            ) : tracks.length > 0 ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4, mt: 4 }}>
-                    {tracks.map((track) => (
-                        <CompactTrack
-                            key={track.id}
-                            id={track.id}
-                            imageUrl={track.imageUrl}
-                            title={track.title}
-                            audioFileUrl={track.audioFileUrl}
-                            playCount={track.playCount}
-                            username={track.username}
-                            userId={track.userId}
-                            tags={track.tags}
-                            likeCount={track.likeCount}
-                            createdAt={track.createdAt}
-                            userLikedTrack={track.userLikedTrack}
-                            originalDuration={track.duration}
-                            updatedAt={track.updatedAt}
-                        />
-                    ))}
-                </Box>
-            ) : null}
+                        {/* Curtidas recentes */}
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
+                            curtidas recentes
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                            {isLoadingLikes
+                                ? <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>{Array.from({ length: 3 }).map((_, i) => <CompactTrackSkeleton key={i} />)}</Box>
+                                : <RecentLikes tracks={recentLikes} />}
+                        </Box>
 
-            {!isTracksLoading && tracks.length === 0 && (
-                <Typography sx={{ color: 'text.secondary', textAlign: 'left', mt: 3 }}>
-                    nenhuma jam por aqui.
-                </Typography>
-            )}
+                        <Box sx={{ borderTop: '1px solid rgba(0,0,0,0.06)', pt: 2, mt: 1.5 }} />
 
-            {hasNextPage && (
-                <div ref={loaderRef} style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
-                    <Loader />
-                </div>
-            )}
+                        {/* Comentários recentes */}
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
+                            comentários recentes
+                        </Typography>
+                        <Box>
+                            <UserComments userId={id!} />
+                        </Box>
+                    </Box>
+                </Grid>
 
-            {isTracksError && <div>Error: {tracksError.message}</div>}
+            </Grid>
 
-            <Divider sx={{ marginTop: 8, borderColor: 'transparent' }} />
-
-        </Container>
+            </Container>
+        </Box>
     );
 };
 

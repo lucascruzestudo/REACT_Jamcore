@@ -1,8 +1,12 @@
-﻿import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+﻿import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Container, Typography, Grid, Box } from '@mui/material';
 import Track from '../components/track';
 import RecentTracks from '../components/userplays';
 import RecentLikes from '../components/userlikes';
+import UserComments from '../components/usercomments';
+import { Divider } from '@mui/material';
+import TrackSkeleton from '../components/trackskeleton';
+import CompactTrackSkeleton from '../components/compacttrackskeleton';
 import api from '../services/api';
 import Loader from '../components/loader';
 import { useUser } from '../contexts/usercontext';
@@ -41,9 +45,27 @@ export default function Feed() {
   });
 
   const tracks = data?.pages.flatMap((page) => page.tracks.items) || [];
-  const latestPage = data?.pages[data.pages.length - 1];
-  const recentPlays = latestPage?.recentPlays ?? [];
-  const recentLikes = latestPage?.recentLikes ?? [];
+
+  const { data: recentPlaysData, isLoading: isLoadingPlays } = useQuery({
+    queryKey: ['recentPlays', user?.id],
+    queryFn: () =>
+      api
+        .get('TrackPlay/byUser', { params: { userId: user?.id, pageNumber: 1, pageSize: 3 } })
+        .then((r) => r.data.data.tracks.items),
+    enabled: !!user?.id,
+  });
+
+  const { data: recentLikesData, isLoading: isLoadingLikes } = useQuery({
+    queryKey: ['recentLikes', user?.id],
+    queryFn: () =>
+      api
+        .get('TrackLike/byUser', { params: { userId: user?.id, pageNumber: 1, pageSize: 3 } })
+        .then((r) => r.data.data.tracks.items),
+    enabled: !!user?.id,
+  });
+
+  const recentPlays = recentPlaysData ?? [];
+  const recentLikes = recentLikesData ?? [];
 
   const displayName = userProfile?.displayName
     ? userProfile.displayName
@@ -111,34 +133,34 @@ export default function Feed() {
           {/* Track feed */}
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              {tracks.map((track, i) => (
-                <motion.div
-                  key={track.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: i < 3 ? i * 0.06 : 0 }}
-                >
-                  <Track
-                    id={track.id}
-                    imageUrl={track.imageUrl}
-                    title={track.title}
-                    audioFileUrl={track.audioFileUrl}
-                    playCount={track.playCount}
-                    username={track.username}
-                    userId={track.userId}
-                    tags={track.tags}
-                    likeCount={track.likeCount}
-                    createdAt={track.createdAt}
-                    userLikedTrack={track.userLikedTrack}
-                    originalDuration={track.duration}
-                    updatedAt={track.updatedAt}
-                    commentCount={track.commentCount ?? 0}
-                  />
-                </motion.div>
-              ))}
+              {isLoading
+                ? Array.from({ length: 3 }).map((_, i) => <TrackSkeleton key={i} />)
+                : tracks.map((track, i) => (
+                    <motion.div
+                      key={track.id}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: i < 3 ? i * 0.06 : 0 }}
+                    >
+                      <Track
+                        id={track.id}
+                        imageUrl={track.imageUrl}
+                        title={track.title}
+                        audioFileUrl={track.audioFileUrl}
+                        playCount={track.playCount}
+                        username={track.username}
+                        userId={track.userId}
+                        tags={track.tags}
+                        likeCount={track.likeCount}
+                        createdAt={track.createdAt}
+                        userLikedTrack={track.userLikedTrack}
+                        originalDuration={track.duration}
+                        updatedAt={track.updatedAt}
+                        commentCount={track.commentCount ?? 0}
+                      />
+                    </motion.div>
+                  ))}
             </Box>
-
-            {isLoading && <Loader />}
 
             {hasNextPage && (
               <div ref={loaderRef} style={{ display: 'flex', justifyContent: 'center', padding: '20px' }}>
@@ -168,14 +190,29 @@ export default function Feed() {
               <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 2, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
                 histórico de reprodução
               </Typography>
-              <RecentTracks tracks={recentPlays} />
+              {isLoadingPlays
+                ? <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    {Array.from({ length: 3 }).map((_, i) => <CompactTrackSkeleton key={i} />)}
+                  </Box>
+                : <RecentTracks tracks={recentPlays} />}
 
               <Box sx={{ my: 2.5, borderTop: '1px solid rgba(0,0,0,0.06)' }} />
 
               <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 2, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
                 curtidas recentemente
               </Typography>
-              <RecentLikes tracks={recentLikes} />
+              {isLoadingLikes
+                ? <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                    {Array.from({ length: 3 }).map((_, i) => <CompactTrackSkeleton key={i} />)}
+                  </Box>
+                : <RecentLikes tracks={recentLikes} />}
+
+              <Divider sx={{ my: 2 }} />
+
+              <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 2, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
+                comentários recentes
+              </Typography>
+              <UserComments userId={user?.id!} />
             </Box>
           </Grid>
         </Grid>

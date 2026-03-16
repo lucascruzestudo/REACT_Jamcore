@@ -309,7 +309,16 @@ const Track: React.FC<TrackProps> = ({
                 currentTime={isActiveTrack ? currentTime : 0}
                 duration={activeDuration}
                 isActive={isActiveTrack}
-                onSeek={(time) => updateTime(time)}
+                onSeek={(time) => {
+                  if (isActiveTrack) {
+                    updateTime(time);
+                    return;
+                  }
+
+                  // If clicking a waveform of a non-active track, only switch to that track
+                  // (do not seek). The user can click again to seek to a specific time.
+                  togglePlayPause(trackData);
+                }}
                 height={52}
               />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.25 }}>
@@ -403,60 +412,66 @@ const Track: React.FC<TrackProps> = ({
       {/* Divider */}
       <Box sx={{ borderTop: '1px solid rgba(0,0,0,0.06)', mx: 2 }} />
 
-      {/* Bottom stats bar */}
-      <Box sx={{ display: 'flex', alignItems: 'center', px: 1.5, py: 0.5, gap: 1.5 }}>
-        <Button
-          startIcon={<PlayArrowIcon sx={{ fontSize: 15 }} />}
-          variant="text"
-          color="secondary"
-          size="small"
-          disableRipple
-          sx={{ minWidth: 0, fontSize: '0.75rem' }}
-        >
-          {formatCount(localPlayCount)}
-        </Button>
+      {/* Bottom stats bar: actions left, counters right */}
+      <Box sx={{ display: 'flex', alignItems: 'center', px: 1.5, py: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Tooltip title="copiar link">
+            <Button
+              startIcon={<LinkIcon sx={{ fontSize: 15 }} />}
+              variant="text"
+              color="secondary"
+              size="small"
+              onClick={() => {
+                const url = window.location.href.split('/').slice(0, 3).join('/') + `/track/${id}`;
+                navigator.clipboard.writeText(url);
+              }}
+              sx={{ color: 'secondary.main', p: 0.5, textTransform: 'none', fontSize: '0.8rem', minWidth: 'auto' }}
+            >
+              copiar link
+            </Button>
+          </Tooltip>
+        </Box>
 
-        <Button
-          startIcon={
-            userLiked ? (
-              <FavoriteIcon sx={{ fontSize: 15 }} />
-            ) : (
-              <FavoriteBorderIcon sx={{ fontSize: 15 }} />
-            )
-          }
-          variant="text"
-          color={userLiked ? 'primary' : 'secondary'}
-          size="small"
-          sx={{ minWidth: 0, fontSize: '0.75rem' }}
-          onClick={toggleLike}
-        >
-          {formatCount(localLikeCount)}
-        </Button>
-
-        <Button
-          startIcon={<ChatBubbleOutlineIcon sx={{ fontSize: 15 }} />}
-          variant="text"
-          color="secondary"
-          size="small"
-          sx={{ minWidth: 0, fontSize: '0.75rem' }}
-          onClick={() => navigate(`/track/${id}`)}
-        >
-          {formatCount(localCommentCount)}
-        </Button>
-
-        <Tooltip title="Copiar link">
-          <IconButton
+        <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Button
+            startIcon={<PlayArrowIcon sx={{ fontSize: 15 }} />}
+            variant="text"
+            color="secondary"
             size="small"
-            onClick={() => {
-              const url =
-                window.location.href.split('/').slice(0, 3).join('/') + `/track/${id}`;
-              navigator.clipboard.writeText(url);
-            }}
-            sx={{ color: 'secondary.main', p: 0.5 }}
+            disableRipple
+            sx={{ minWidth: 0, fontSize: '0.75rem' }}
           >
-            <LinkIcon sx={{ fontSize: 15 }} />
-          </IconButton>
-        </Tooltip>
+            {formatCount(localPlayCount)}
+          </Button>
+
+          <Button
+            startIcon={
+              userLiked ? (
+                <FavoriteIcon sx={{ fontSize: 15 }} />
+              ) : (
+                <FavoriteBorderIcon sx={{ fontSize: 15 }} />
+              )
+            }
+            variant="text"
+            color={userLiked ? 'primary' : 'secondary'}
+            size="small"
+            sx={{ minWidth: 0, fontSize: '0.75rem' }}
+            onClick={toggleLike}
+          >
+            {formatCount(localLikeCount)}
+          </Button>
+
+          <Button
+            startIcon={<ChatBubbleOutlineIcon sx={{ fontSize: 15 }} />}
+            variant="text"
+            color="secondary"
+            size="small"
+            sx={{ minWidth: 0, fontSize: '0.75rem' }}
+            onClick={() => navigate(`/track/${id}`)}
+          >
+            {formatCount(localCommentCount)}
+          </Button>
+        </Box>
       </Box>
 
       <TrackCover open={modalOpen} onClose={() => setModalOpen(false)} imageUrl={imageUrl} title={title} />

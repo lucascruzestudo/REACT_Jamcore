@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
+import { useAuthStore } from '../store/auth';
 
 interface TrackInteractionState {
   likeCount: number;
@@ -23,6 +25,8 @@ const TrackInteractionContext = createContext<TrackInteractionContextData>(
 export const TrackInteractionProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const queryClient = useQueryClient();
+  const userId = useAuthStore((s) => s.user?.id);
   const [interactions, setInteractions] = useState<{
     [trackId: string]: TrackInteractionState;
   }>({});
@@ -63,11 +67,12 @@ export const TrackInteractionProvider: React.FC<{ children: React.ReactNode }> =
           };
         });
         setInteractionVersion((v) => v + 1);
+        queryClient.invalidateQueries({ queryKey: ['recentLikes', userId] });
       } catch (error) {
         console.error('Error liking/unliking track:', error);
       }
     },
-    []
+    [queryClient, userId]
   );
 
   const incrementPlay = useCallback(
@@ -81,6 +86,7 @@ export const TrackInteractionProvider: React.FC<{ children: React.ReactNode }> =
         };
         if (current.hasPlayed) return prev;
         setInteractionVersion((v) => v + 1);
+        queryClient.invalidateQueries({ queryKey: ['recentPlays', userId] });
         return {
           ...prev,
           [trackId]: {
@@ -91,7 +97,7 @@ export const TrackInteractionProvider: React.FC<{ children: React.ReactNode }> =
         };
       });
     },
-    []
+    [queryClient, userId]
   );
 
   const updateTrackInteraction = useCallback(

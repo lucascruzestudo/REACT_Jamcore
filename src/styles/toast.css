@@ -1,0 +1,77 @@
+/* ============================================
+   Jamcore – Toast Notifications
+   ============================================ */
+
+.Toastify__toast-container {
+  width: 360px !important;
+  padding: 0 8px !important;
+}
+
+/* ── Base ─────────────────────────────────── */
+.jamcore-toast {
+  border-radius: 10px !important;
+  padding: 12px 14px 10px 16px !important;
+  box-shadow: 0 4px 20px rgba(16, 24, 40, 0.10), 0 1px 4px rgba(0,0,0,0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.07) !important;
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  font-family: Inter, Roboto, Arial, sans-serif !important;
+  min-height: unset !important;
+  margin-bottom: 10px !important;
+}
+
+/* ── Body ─────────────────────────────────── */
+.jamcore-toast__body {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+/* ── Icon ─────────────────────────────────── */
+.jamcore-toast .Toastify__toast-icon {
+  width: 18px !important;
+  min-width: 18px !important;
+  margin-right: 4px !important;
+  margin-top: 0 !important;
+}
+
+/* ── Close button ─────────────────────────── */
+.jamcore-toast .Toastify__close-button {
+  color: #c0c0c0 !important;
+  opacity: 1 !important;
+  align-self: center !important;
+  padding: 0 !important;
+  margin-left: 4px !important;
+}
+
+.jamcore-toast .Toastify__close-button:hover {
+  color: #555 !important;
+}
+
+/* ── Type borders ─────────────────────────── */
+.jamcore-toast--success { border-left: 4px solid #27ae60 !important; }
+.jamcore-toast--error   { border-left: 4px solid #e93434 !important; }
+.jamcore-toast--info    { border-left: 4px solid #3182ce !important; }
+.jamcore-toast--warning { border-left: 4px solid #dd6b20 !important; }
+
+/* ── Icon colors per type ─────────────────── */
+.jamcore-toast--success .Toastify__toast-icon svg { fill: #27ae60 !important; }
+.jamcore-toast--error   .Toastify__toast-icon svg { fill: #e93434 !important; }
+.jamcore-toast--info    .Toastify__toast-icon svg { fill: #3182ce !important; }
+.jamcore-toast--warning .Toastify__toast-icon svg { fill: #dd6b20 !important; }
+
+/* ── Progress bar ─────────────────────────── */
+.jamcore-toast__progress {
+  height: 2px !important;
+  border-radius: 0 !important;
+  opacity: 0.7 !important;
+}
+
+.jamcore-toast--success .jamcore-toast__progress { background: #27ae60 !important; }
+.jamcore-toast--error   .jamcore-toast__progress { background: #e93434 !important; }
+.jamcore-toast--info    .jamcore-toast__progress { background: #3182ce !important; }
+.jamcore-toast--warning .jamcore-toast__progress { background: #dd6b20 !important; }

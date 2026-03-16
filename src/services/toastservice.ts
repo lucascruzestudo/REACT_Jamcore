@@ -1,6 +1,7 @@
 
 import { toast, ToastOptions } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import '../styles/toast.css'
 
 interface CustomToastOptions extends ToastOptions {
   duration?: number;
@@ -16,6 +17,9 @@ class ToastService {
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
+      className: 'jamcore-toast jamcore-toast--success',
+      bodyClassName: 'jamcore-toast__body',
+      progressClassName: 'jamcore-toast__progress',
       ...options,
     })
   }
@@ -29,6 +33,9 @@ class ToastService {
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
+      className: 'jamcore-toast jamcore-toast--error',
+      bodyClassName: 'jamcore-toast__body',
+      progressClassName: 'jamcore-toast__progress',
       ...options,
     })
   }
@@ -42,6 +49,9 @@ class ToastService {
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
+      className: 'jamcore-toast jamcore-toast--info',
+      bodyClassName: 'jamcore-toast__body',
+      progressClassName: 'jamcore-toast__progress',
       ...options,
     })
   }
@@ -55,6 +65,9 @@ class ToastService {
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
+      className: 'jamcore-toast jamcore-toast--warning',
+      bodyClassName: 'jamcore-toast__body',
+      progressClassName: 'jamcore-toast__progress',
       ...options,
     })
   }
