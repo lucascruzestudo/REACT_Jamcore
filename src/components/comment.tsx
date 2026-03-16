@@ -28,7 +28,8 @@ const CommentComponent: React.FC<CommentComponentProps> = ({ comment }) => {
             <Avatar 
                 src={comment.userProfilePictureUrl ? `${comment.userProfilePictureUrl}?t=${comment.userProfileUpdatedAt || ''}` : '/jamcoredefaultpicture.jpg'} 
                 alt={comment.displayName || comment.username || ''} 
-                sx={{ width: 40, height: 40, mr: 2, borderRadius: '50%' }} 
+                onClick={handleProfileClick}
+                sx={{ width: 40, height: 40, mr: 2, borderRadius: '50%', cursor: 'pointer' }} 
             />
             <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>

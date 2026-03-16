@@ -2,32 +2,7 @@ import { Box, Container, Grid, Skeleton } from '@mui/material';
 import CompactTrackSkeleton from '../components/compacttrackskeleton';
 import TrackSkeleton from '../components/trackskeleton';
 
-const cardSx = {
-    backgroundColor: '#fff',
-    borderRadius: '16px',
-    border: '1px solid rgba(0,0,0,0.07)',
-    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-    overflow: 'hidden',
-};
-
-const cardHeaderSx = {
-    px: { xs: 2, sm: 3 },
-    py: 2,
-    borderBottom: '1px solid rgba(0,0,0,0.06)',
-};
-
-const SidebarCard: React.FC<{ rows?: number }> = ({ rows = 3 }) => (
-    <Box sx={cardSx}>
-        <Box sx={cardHeaderSx}>
-            <Skeleton variant="text" width={130} height={14} />
-        </Box>
-        <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {Array.from({ length: rows }).map((_, i) => (
-                <CompactTrackSkeleton key={i} />
-            ))}
-        </Box>
-    </Box>
-);
+const sectionLabelSx = { mb: 1.5 };
 
 const UserProfileSkeleton: React.FC = () => (
     <Box sx={{ minHeight: '100vh', backgroundColor: '#FAFAFA' }}>
@@ -54,25 +29,19 @@ const UserProfileSkeleton: React.FC = () => (
             {/* Profile card */}
             <Box
                 sx={{
-                    ...cardSx,
+                    backgroundColor: '#fff',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(0,0,0,0.07)',
                     p: { xs: 3, md: 4 },
                     display: 'flex',
                     flexDirection: { xs: 'column', md: 'row' },
                     gap: 4,
                     alignItems: { xs: 'center', md: 'flex-start' },
                     mb: 3,
-                    boxShadow: 'none',
                 }}
             >
                 {/* Avatar */}
-                <Skeleton
-                    variant="circular"
-                    sx={{
-                        flexShrink: 0,
-                        width: { xs: 120, md: 160 },
-                        height: { xs: 120, md: 160 },
-                    }}
-                />
+                <Skeleton variant="circular" sx={{ flexShrink: 0, width: { xs: 120, md: 160 }, height: { xs: 120, md: 160 } }} />
 
                 {/* Info */}
                 <Box sx={{ flex: 1, width: '100%' }}>
@@ -101,26 +70,37 @@ const UserProfileSkeleton: React.FC = () => (
                     </Box>
                 </Grid>
 
-                {/* Sidebar */}
+                {/* Sidebar — single card, three sections with dividers (mirrors real page) */}
                 <Grid item xs={12} md={4}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, position: 'sticky', top: 80 }}>
-                        <SidebarCard rows={3} />
-                        <SidebarCard rows={3} />
+                    <Box sx={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.06)', p: 2.5, position: 'sticky', top: 80 }}>
+
+                        {/* Histórico de reprodução */}
+                        <Skeleton variant="text" width={160} height={13} sx={sectionLabelSx} />
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>
+                            {Array.from({ length: 3 }).map((_, i) => <CompactTrackSkeleton key={i} />)}
+                        </Box>
+
+                        <Box sx={{ borderTop: '1px solid rgba(0,0,0,0.06)', pt: 2, mt: 1.5 }} />
+
+                        {/* Curtidas recentemente */}
+                        <Skeleton variant="text" width={180} height={13} sx={sectionLabelSx} />
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>
+                            {Array.from({ length: 3 }).map((_, i) => <CompactTrackSkeleton key={i} />)}
+                        </Box>
+
+                        <Box sx={{ borderTop: '1px solid rgba(0,0,0,0.06)', pt: 2, mt: 1.5 }} />
 
                         {/* Comentários recentes */}
-                        <Box sx={cardSx}>
-                            <Box sx={cardHeaderSx}>
-                                <Skeleton variant="text" width={160} height={14} />
-                            </Box>
-                            <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                {Array.from({ length: 3 }).map((_, i) => (
-                                    <Box key={i}>
-                                        <Skeleton variant="text" width="80%" height={16} />
-                                        <Skeleton variant="text" width="55%" height={13} />
-                                    </Box>
-                                ))}
-                            </Box>
+                        <Skeleton variant="text" width={170} height={13} sx={sectionLabelSx} />
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {Array.from({ length: 3 }).map((_, i) => (
+                                <Box key={i}>
+                                    <Skeleton variant="text" width="80%" height={16} />
+                                    <Skeleton variant="text" width="55%" height={13} />
+                                </Box>
+                            ))}
                         </Box>
+
                     </Box>
                 </Grid>
 

@@ -25,7 +25,7 @@ interface RecentTracksProps {
 const RecentTracks: React.FC<RecentTracksProps> = ({ tracks }) => {
   if (!tracks || tracks.length === 0) {
     return (
-      <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+      <Typography variant="body2" sx={{ color: '#999', py: 1 }}>
         nenhuma jam escutada recentemente.
       </Typography>
     );

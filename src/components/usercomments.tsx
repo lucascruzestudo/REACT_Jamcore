@@ -90,7 +90,7 @@ const UserComments: React.FC<UserCommentsProps> = ({ userId }) => {
     <Box>
       {data?.comments.length === 0 ? (
         <Typography variant="body2" sx={{ color: '#999', py: 1 }}>
-          nenhum comentário ainda.
+          nenhum comentário recente.
         </Typography>
       ) : (
         data?.comments.map((comment, index) => (

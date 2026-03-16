@@ -130,6 +130,7 @@ const Register = () => {
                             onChange={(e) => setUsername(e.target.value)}
                             error={!!errors.username}
                             helperText={errors.username}
+                            autoComplete="username"
                         />
                         <TextField
                             fullWidth
@@ -141,6 +142,7 @@ const Register = () => {
                             onChange={(e) => setEmail(e.target.value)}
                             error={!!errors.email}
                             helperText={errors.email}
+                            autoComplete="email"
                         />
                         <TextField
                             fullWidth
@@ -153,6 +155,7 @@ const Register = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             error={!!errors.password}
                             helperText={errors.password}
+                            autoComplete="new-password"
                             slotProps={{
                                 input: {
                                     endAdornment: (
@@ -176,6 +179,7 @@ const Register = () => {
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             error={!!errors.confirmPassword}
                             helperText={errors.confirmPassword}
+                            autoComplete="new-password"
                             slotProps={{
                                 input: {
                                     endAdornment: (

@@ -89,6 +89,7 @@ const Login = () => {
               onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
               error={!!errors.username}
               helperText={errors.username}
+              autoComplete="username"
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px', backgroundColor: '#FAFAFA' } }}
             />
             <TextField
@@ -102,6 +103,7 @@ const Login = () => {
               onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
               error={!!errors.password}
               helperText={errors.password}
+              autoComplete="current-password"
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: '10px', backgroundColor: '#FAFAFA' } }}
               slotProps={{
                 input: {

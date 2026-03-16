@@ -25,7 +25,7 @@ interface RecentLikesProps {
 const RecentLikes: React.FC<RecentLikesProps> = ({ tracks }) => {
   if (!tracks || tracks.length === 0) {
     return (
-      <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+      <Typography variant="body2" sx={{ color: '#999', py: 1 }}>
         nenhuma jam curtida recentemente.
       </Typography>
     );

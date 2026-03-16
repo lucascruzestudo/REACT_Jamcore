@@ -29,9 +29,12 @@ const Footer: React.FC = () => {
     duration,
     togglePlayPause,
     updateTime,
-    setIsPlaying,
     setVolume,
     volume,
+    playNext,
+    playPrevious,
+    playlist,
+    playlistIndex,
   } = useTrack();
 
   const { userLiked, toggleLike } = useTrackInteraction({
@@ -53,13 +56,6 @@ const Footer: React.FC = () => {
 
   const handleVolumeChange = (_: Event, val: number | number[]) => {
     if (typeof val === 'number') setVolume(val);
-  };
-
-  const handleSkipPrevious = () => {
-    if (currentTrack) {
-      updateTime(0);
-      setIsPlaying(true);
-    }
   };
 
   const formatTime = (s: number) =>
@@ -131,7 +127,7 @@ const Footer: React.FC = () => {
 
               {/* Row 2: controls + slider + time */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <IconButton onClick={handleSkipPrevious} size="small" sx={{ color: 'rgba(0,0,0,0.55)', p: 0.5 }}>
+                <IconButton onClick={playPrevious} size="small" sx={{ color: 'rgba(0,0,0,0.55)', p: 0.5 }}>
                   <SkipPrevious sx={{ fontSize: 20 }} />
                 </IconButton>
                 <IconButton
@@ -145,7 +141,7 @@ const Footer: React.FC = () => {
                 >
                   {isPlaying ? <Pause sx={{ fontSize: 18 }} /> : <PlayArrow sx={{ fontSize: 18 }} />}
                 </IconButton>
-                <IconButton size="small" sx={{ color: 'rgba(0,0,0,0.55)', p: 0.5 }}>
+                <IconButton size="small" sx={{ color: 'rgba(0,0,0,0.55)', p: 0.5 }} onClick={playNext} disabled={playlistIndex >= playlist.length - 1}>
                   <SkipNext sx={{ fontSize: 20 }} />
                 </IconButton>
 
@@ -171,7 +167,7 @@ const Footer: React.FC = () => {
             >
               {/* Controls */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: '0 0 70%', pr: 2 }}>
-                <IconButton onClick={handleSkipPrevious} size="small" sx={{ color: 'rgba(0,0,0,0.65)', '&:hover': { color: '#111' } }}>
+                <IconButton onClick={playPrevious} size="small" sx={{ color: 'rgba(0,0,0,0.65)', '&:hover': { color: '#111' } }}>
                   <SkipPrevious sx={{ fontSize: 20 }} />
                 </IconButton>
                 <IconButton
@@ -185,7 +181,7 @@ const Footer: React.FC = () => {
                 >
                   {isPlaying ? <Pause sx={{ fontSize: 20 }} /> : <PlayArrow sx={{ fontSize: 20 }} />}
                 </IconButton>
-                <IconButton size="small" sx={{ color: 'rgba(0,0,0,0.65)', '&:hover': { color: '#111' } }}>
+                <IconButton size="small" sx={{ color: 'rgba(0,0,0,0.65)', '&:hover': { color: '#111' } }} onClick={playNext} disabled={playlistIndex >= playlist.length - 1}>
                   <SkipNext sx={{ fontSize: 20 }} />
                 </IconButton>
                 <Typography sx={{ color: 'rgba(0,0,0,0.7)', fontSize: '0.68rem', flexShrink: 0, minWidth: 30, textAlign: 'right' }}>

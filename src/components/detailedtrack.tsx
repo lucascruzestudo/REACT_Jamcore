@@ -114,7 +114,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
   updatedAt,
   onUpdate,
 }) => {
-  const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack } = useTrack();
+  const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack, setCurrentTrack, setIsPlaying, audioRef } = useTrack();
   const { localLikeCount, localPlayCount, userLiked, incrementPlay, toggleLike } = useTrackInteraction({
     trackId: id,
     initialLikeCount: likeCount,
@@ -290,6 +290,11 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
       await api.delete('/Track', { data: { trackId: id } });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
       queryClient.invalidateQueries({ queryKey: ['userTracks', userId] });
+      if (currentTrack?.id === id) {
+        audioRef.current?.pause();
+        setIsPlaying(false);
+        setCurrentTrack(null);
+      }
       navigate('/feed');
     } catch (error) {
       console.error('Error deleting track:', error);

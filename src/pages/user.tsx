@@ -5,6 +5,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import EditIcon from '@mui/icons-material/Edit';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 
+import TrackCover from "../components/trackcover";
 import { useUser } from "../contexts/usercontext";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
@@ -19,6 +20,7 @@ import RecentTracks from "../components/userplays";
 import RecentLikes from "../components/userlikes";
 import CompactTrackSkeleton from "../components/compacttrackskeleton";
 import UserProfileSkeleton from "./userskeleton";
+import type { Track as TrackItem } from '../contexts/trackcontext';
 
 interface UserProfile {
     id: string;
@@ -40,6 +42,7 @@ const UserProfilePage: React.FC = () => {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [avatarModalOpen, setAvatarModalOpen] = useState(false);
     const loaderRef = useRef(null);
 
     const { control, handleSubmit, watch, reset } = useForm<UserProfile>({
@@ -100,6 +103,9 @@ const UserProfilePage: React.FC = () => {
 
     const tracks = data?.pages.flatMap((page) => page.items) || [];
     const queryClient = useQueryClient();
+
+    // Map API shape to context's Track shape (duration → originalDuration)
+    const playlistTracks: TrackItem[] = tracks.map((t: any) => ({ ...t, originalDuration: t.duration ?? t.originalDuration ?? '' }));
 
     const { data: recentPlaysData, isLoading: isLoadingPlays } = useQuery({
         queryKey: ['recentPlays', id],
@@ -286,8 +292,9 @@ const UserProfilePage: React.FC = () => {
                         flexShrink: 0,
                         borderRadius: '50%',
                         overflow: 'hidden',
-                        cursor: isEditing ? 'pointer' : 'default',
+                        cursor: 'pointer',
                     }}
+                    onClick={() => { if (!isEditing) setAvatarModalOpen(true); }}
                     onMouseEnter={() => { if (isEditing) setHover(true); }}
                     onMouseLeave={() => setHover(false)}
                 >
@@ -447,7 +454,7 @@ const UserProfilePage: React.FC = () => {
                         </Box>
                     ) : tracks.length > 0 ? (
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            {tracks.map((track) => (
+                            {tracks.map((track, i) => (
                                 <Track
                                     key={track.id}
                                     id={track.id}
@@ -463,6 +470,8 @@ const UserProfilePage: React.FC = () => {
                                     userLikedTrack={track.userLikedTrack}
                                     originalDuration={track.duration}
                                     updatedAt={track.updatedAt}
+                                    playlist={playlistTracks}
+                                    playlistIndex={i}
                                 />
                             ))}
                         </Box>
@@ -488,7 +497,7 @@ const UserProfilePage: React.FC = () => {
                     <Box sx={{ backgroundColor: '#fff', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.06)', p: 2.5, position: 'sticky', top: 80 }}>
                         {/* Reproduções recentes */}
                         <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
-                            reproduções recentes
+                            histórico de reprodução
                         </Typography>
                         <Box sx={{ mb: 2 }}>
                             {isLoadingPlays
@@ -500,7 +509,7 @@ const UserProfilePage: React.FC = () => {
 
                         {/* Curtidas recentes */}
                         <Typography variant="body2" sx={{ fontWeight: 700, color: '#333', mb: 1.5, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}>
-                            curtidas recentes
+                            curtidas recentemente
                         </Typography>
                         <Box sx={{ mb: 2 }}>
                             {isLoadingLikes
@@ -523,6 +532,13 @@ const UserProfilePage: React.FC = () => {
             </Grid>
 
             </Container>
+
+            <TrackCover
+                open={avatarModalOpen}
+                onClose={() => setAvatarModalOpen(false)}
+                imageUrl={userProfile.profilePictureUrl ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt}` : '/jamcoredefaultpicture.jpg'}
+                title={userProfile.displayName || userProfile.username}
+            />
         </Box>
     );
 };

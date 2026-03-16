@@ -1,7 +1,7 @@
-import React from 'react';
-import { Box, Typography, IconButton, Divider } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, IconButton, Skeleton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TrackCoverProps {
     open: boolean;
@@ -11,91 +11,91 @@ interface TrackCoverProps {
 }
 
 const TrackCover: React.FC<TrackCoverProps> = ({ open, onClose, imageUrl, title }) => {
-    if (!open) return null;
+    const [loaded, setLoaded] = useState(false);
+
+    // Reset loaded state whenever a new image is shown
+    React.useEffect(() => { if (open) setLoaded(false); }, [open, imageUrl]);
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.1 }}
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(240, 240, 240, 0.78)',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 9999,
-            }}
-            onClick={onClose}
-        >
-            <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0.9 }}
-                transition={{ stiffness: 75, damping: 50 }}
-                style={{
-                    backgroundColor: 'white',
-                    padding: 2,
-                    position: 'relative',
-                    width: '80%',
-                    maxWidth: 600,
-                    borderRadius: 4,
-                }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <IconButton
-                    onClick={onClose}
-                    sx={{
-                        position: 'absolute',
-                        top: 8,
-                        right: 8,
-                        zIndex: 9999,
-                        fontSize: { xs: '1.5rem', sm: '2rem' },
-                        padding: { xs: '4px', sm: '8px' },
-                    }}
-                >
-                    <CloseIcon />
-                </IconButton>
-
-                <Typography
-                    variant="h6"
-                    sx={{
-                        padding: '16px',
-                        textAlign: 'left',
-                    }}
-                >
-                    {title}
-                </Typography>
-
-                <Divider sx={{ marginBottom: 2 }} />
-
-                <Box
-                    sx={{
+        <AnimatePresence>
+            {open && (
+                <motion.div
+                    key="trackcover-backdrop"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.18 }}
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        backgroundColor: 'rgba(10, 10, 10, 0.78)',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        width: '100%',
-                        marginBottom: 2,
+                        zIndex: 9999,
+                        padding: '24px',
                     }}
+                    onClick={onClose}
                 >
-                    <img
-                        src={imageUrl}
-                        alt={title}
-                        style={{
-                            width: '95%',
-                            height: 'auto',
-                            objectFit: 'contain',
-                            border: '1px solid #ccc',
-                        }}
-                    />
-                </Box>
-            </motion.div>
-        </motion.div>
+                    <motion.div
+                        key="trackcover-card"
+                        initial={{ opacity: 0, scale: 0.94, y: 12 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.94, y: 12 }}
+                        transition={{ type: 'spring', stiffness: 340, damping: 32 }}
+                        style={{ width: '100%', maxWidth: 520 }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <Box
+                            sx={{
+                                backgroundColor: '#fff',
+                                borderRadius: '16px',
+                                border: '1px solid rgba(0,0,0,0.07)',
+                                boxShadow: '0 24px 64px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.10)',
+                                overflow: 'hidden',
+                            }}
+                        >
+                            {/* Header */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, py: 1.5, borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                                <Typography
+                                    variant="body2"
+                                    sx={{ fontWeight: 700, color: '#111', fontSize: '0.875rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 40px)' }}
+                                >
+                                    {title}
+                                </Typography>
+                                <IconButton
+                                    size="small"
+                                    onClick={onClose}
+                                    sx={{ color: '#aaa', '&:hover': { color: '#333', backgroundColor: 'rgba(0,0,0,0.06)' }, p: '4px', ml: 1, flexShrink: 0 }}
+                                >
+                                    <CloseIcon sx={{ fontSize: 18 }} />
+                                </IconButton>
+                            </Box>
+
+                            {/* Image area */}
+                            <Box sx={{ p: 1.5 }}>
+                                <Box sx={{ position: 'relative', width: '100%', aspectRatio: '1/1', borderRadius: '10px', overflow: 'hidden', bgcolor: '#F0F0F0' }}>
+                                    {!loaded && (
+                                        <Skeleton variant="rectangular" sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', transform: 'none' }} />
+                                    )}
+                                    <img
+                                        src={imageUrl}
+                                        alt={title}
+                                        onLoad={() => setLoaded(true)}
+                                        style={{
+                                            display: loaded ? 'block' : 'none',
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+                        </Box>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
 

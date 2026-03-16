@@ -56,3 +56,20 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: #bbb;
 }
+
+/* Hide native password reveal/clear icons (Edge/IE and WebKit/Blink browsers) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-textfield-decoration-button,
+input[type="password"]::-webkit-textfield-decoration-container,
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input::-webkit-contacts-auto-fill-button {
+  display: none !important;
+  -webkit-appearance: none !important;
+}
+
+/* Some password managers inject buttons; prefer to hide them as well */
+input[data-credentials] { caret-color: auto; }

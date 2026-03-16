@@ -13,6 +13,7 @@ import { useUser } from '../contexts/usercontext';
 import { useEffect, useRef } from 'react';
 import { useTrackInteractionContext } from '../contexts/trackinteractioncontext';
 import { motion } from 'framer-motion';
+import type { Track as TrackItem } from '../contexts/trackcontext';
 
 export default function Feed() {
   const { user, userProfile } = useUser();
@@ -45,6 +46,9 @@ export default function Feed() {
   });
 
   const tracks = data?.pages.flatMap((page) => page.tracks.items) || [];
+
+  // Map API shape to the context's Track shape (duration → originalDuration)
+  const playlistTracks: TrackItem[] = tracks.map((t: any) => ({ ...t, originalDuration: t.duration ?? t.originalDuration ?? '' }));
 
   const { data: recentPlaysData, isLoading: isLoadingPlays } = useQuery({
     queryKey: ['recentPlays', user?.id],
@@ -157,6 +161,8 @@ export default function Feed() {
                         originalDuration={track.duration}
                         updatedAt={track.updatedAt}
                         commentCount={track.commentCount ?? 0}
+                        playlist={playlistTracks}
+                        playlistIndex={i}
                       />
                     </motion.div>
                   ))}

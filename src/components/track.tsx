@@ -16,7 +16,7 @@ import LinkIcon from '@mui/icons-material/Link';
 import SendIcon from '@mui/icons-material/Send';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { useTrack } from '../contexts/trackcontext';
+import { useTrack, Track as TrackItem } from '../contexts/trackcontext';
 import TrackCover from './trackcover';
 import { useNavigate } from 'react-router-dom';
 import { useTrackInteraction } from '../hooks/usetrackinteraction';
@@ -41,6 +41,8 @@ interface TrackProps {
   originalDuration: string;
   updatedAt: string;
   commentCount?: number;
+  playlist?: TrackItem[];
+  playlistIndex?: number;
 }
 
 function formatTimeAgo(createdAt: string): string {
@@ -85,8 +87,10 @@ const Track: React.FC<TrackProps> = ({
   originalDuration,
   updatedAt,
   commentCount = 0,
+  playlist,
+  playlistIndex,
 }) => {
-  const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack } =
+  const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack, setPlaylist } =
     useTrack();
   const { localLikeCount, localPlayCount, userLiked, incrementPlay, toggleLike } =
     useTrackInteraction({
@@ -285,7 +289,7 @@ const Track: React.FC<TrackProps> = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <IconButton
               size="small"
-              onClick={() => { togglePlayPause(trackData); incrementPlay(); }}
+              onClick={() => { if (playlist && playlistIndex !== undefined) setPlaylist(playlist, playlistIndex); togglePlayPause(trackData); incrementPlay(); }}
               onKeyDown={(e) => e.key === ' ' && e.preventDefault()}
               sx={{
                 bgcolor: 'primary.main',
@@ -317,6 +321,7 @@ const Track: React.FC<TrackProps> = ({
 
                   // If clicking a waveform of a non-active track, only switch to that track
                   // (do not seek). The user can click again to seek to a specific time.
+                  if (playlist && playlistIndex !== undefined) setPlaylist(playlist, playlistIndex);
                   togglePlayPause(trackData);
                 }}
                 height={52}
