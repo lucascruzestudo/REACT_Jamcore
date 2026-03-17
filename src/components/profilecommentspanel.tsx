@@ -144,12 +144,6 @@ const ProfileCommentsPanel: React.FC<ProfileCommentsPanelProps> = ({ userProfile
         p: { xs: 2, md: 3 },
       }}
     >
-      <Typography
-        variant="body2"
-        sx={{ fontWeight: 700, color: '#333', mb: 2, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.72rem' }}
-      >
-        comentários {totalCount > 0 && `· ${totalCount}`}
-      </Typography>
 
       {user && (
         <Box
@@ -195,7 +189,7 @@ const ProfileCommentsPanel: React.FC<ProfileCommentsPanelProps> = ({ userProfile
                   sx={{ width: 28, height: 28, flexShrink: 0, borderRadius: '50%' }}
                 />
                 <InputBase
-                  placeholder="adicionar um comentário..."
+                  placeholder="deixar uma mensagem no mural..."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   onKeyDown={(e) => {
@@ -233,7 +227,7 @@ const ProfileCommentsPanel: React.FC<ProfileCommentsPanelProps> = ({ userProfile
         </Box>
       ) : comments.length === 0 ? (
         <Typography variant="body2" color="textSecondary" sx={{ py: 1 }}>
-          nenhum comentário ainda. seja o primeiro!
+          nenhuma mensagem ainda. seja o primeiro!
         </Typography>
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column' }}>

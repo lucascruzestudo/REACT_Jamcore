@@ -491,7 +491,7 @@ const UserProfilePage: React.FC = () => {
                     />
                     <Tab
                         value="comments"
-                        label={`comentarios (${profileCommentsCount})`}
+                        label={`mural (${profileCommentsCount})`}
                         sx={{
                             textTransform: 'none',
                             fontWeight: 700,
