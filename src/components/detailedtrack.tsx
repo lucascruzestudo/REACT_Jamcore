@@ -126,6 +126,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
   const [newComment, setNewComment] = useState('');
   const [isCommenting, setIsCommenting] = useState(false);
   const [commentSent, setCommentSent] = useState(false);
+  const [deletedCommentIds, setDeletedCommentIds] = useState<Set<string>>(new Set());
   const { user, userProfile } = useUser();
   const navigate = useNavigate();
   const isUploader = user?.id === userId;
@@ -270,9 +271,18 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
   const handleDeleteComment = async (commentId: string) => {
     try {
       await api.delete('/TrackComment', { data: { trackId: id, commentId } });
-      removeComment(id, commentId);
-      queryClient.invalidateQueries({ queryKey: ['track', id] });
-      onUpdate?.();
+      // show deleted animation in-place
+      setDeletedCommentIds((prev) => new Set(prev).add(commentId));
+      setTimeout(() => {
+        removeComment(id, commentId);
+        queryClient.invalidateQueries({ queryKey: ['track', id] });
+        onUpdate?.();
+        setDeletedCommentIds((prev) => {
+          const next = new Set(prev);
+          next.delete(commentId);
+          return next;
+        });
+      }, 2000);
     } catch (error) {
       console.error('Error deleting comment:', error);
     }
@@ -760,11 +770,31 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 key={comment.id}
                 sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', borderRadius: '8px', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' }, pr: 0.5 }}
               >
-                <CommentComponent comment={comment} />
-                {comment.userId === user?.id && (
-                  <IconButton size="small" onClick={() => handleDeleteComment(comment.id)} sx={{ color: '#bbb', mt: 1, '&:hover': { color: 'error.main' } }}>
-                    <DeleteOutline fontSize="small" />
-                  </IconButton>
+                {deletedCommentIds.has(comment.id) ? (
+                  <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <motion.div
+                      key={`deleted-${comment.id}`}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+                    >
+                      <CheckCircleOutlineIcon sx={{ fontSize: 16, color: 'success.main' }} />
+                      <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>
+                        comentário excluído
+                      </Typography>
+                    </motion.div>
+                  </Box>
+                ) : (
+                  <>
+                    <CommentComponent comment={comment} />
+                    {(comment.userId === user?.id || isUploader) && (
+                      <IconButton size="small" onClick={() => handleDeleteComment(comment.id)} sx={{ color: '#bbb', mt: 1, '&:hover': { color: 'error.main' } }}>
+                        <DeleteOutline fontSize="small" />
+                      </IconButton>
+                    )}
+                  </>
                 )}
               </Box>
             ))}

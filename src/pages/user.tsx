@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState, useRef } from "react";
-import { Button, TextField, Typography, Box, Avatar, IconButton, Container, Grid } from "@mui/material";
+import { Button, TextField, Typography, Box, Avatar, IconButton, Container, Grid, Tabs, Tab } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +20,7 @@ import RecentTracks from "../components/userplays";
 import RecentLikes from "../components/userlikes";
 import CompactTrackSkeleton from "../components/compacttrackskeleton";
 import UserProfileSkeleton from "./userskeleton";
+import ProfileCommentsPanel from "../components/profilecommentspanel";
 import type { Track as TrackItem } from '../contexts/trackcontext';
 
 interface UserProfile {
@@ -43,6 +44,8 @@ const UserProfilePage: React.FC = () => {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [avatarModalOpen, setAvatarModalOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<'jams' | 'comments'>('jams');
+    const [profileCommentsCount, setProfileCommentsCount] = useState(0);
     const loaderRef = useRef(null);
 
     const { control, handleSubmit, watch, reset } = useForm<UserProfile>({
@@ -102,6 +105,7 @@ const UserProfilePage: React.FC = () => {
     });
 
     const tracks = data?.pages.flatMap((page) => page.items) || [];
+    const jamsCount = data?.pages?.[0]?.totalCount ?? tracks.length;
     const queryClient = useQueryClient();
 
     // Map API shape to context's Track shape (duration → originalDuration)
@@ -126,6 +130,21 @@ const UserProfilePage: React.FC = () => {
     const recentPlays = recentPlaysData ?? [];
     const recentLikes = recentLikesData ?? [];
 
+    const { data: userProfileCommentsCountData } = useQuery({
+        queryKey: ['userProfileCommentsCount', userProfile?.id],
+        queryFn: async () => {
+            const response = await api.get('UserProfileComment/byProfile', {
+                params: {
+                    userProfileId: userProfile?.id,
+                    pageNumber: 1,
+                    pageSize: 1,
+                },
+            });
+            return response.data.data.comments.totalCount as number;
+        },
+        enabled: !!userProfile?.id,
+    });
+
     useEffect(() => {
         if (userProfile) {
             reset({
@@ -136,6 +155,12 @@ const UserProfilePage: React.FC = () => {
             });
         }
     }, [userProfile, reset]);
+
+    useEffect(() => {
+        if (typeof userProfileCommentsCountData === 'number') {
+            setProfileCommentsCount(userProfileCommentsCountData);
+        }
+    }, [userProfileCommentsCountData]);
 
     const onSubmit = async (data: UserProfile) => {
         if (
@@ -444,51 +469,95 @@ const UserProfilePage: React.FC = () => {
             </Box>
 
 
+            <Box sx={{ mb: 2 }}>
+                <Tabs
+                    value={activeTab}
+                    onChange={(_, value: 'jams' | 'comments') => setActiveTab(value)}
+                    sx={{
+                        minHeight: 40,
+                        '& .MuiTabs-indicator': { backgroundColor: '#E93434', height: 2 },
+                    }}
+                >
+                    <Tab
+                        value="jams"
+                        label={`jams (${jamsCount})`}
+                        sx={{
+                            textTransform: 'none',
+                            fontWeight: 700,
+                            minHeight: 40,
+                            color: '#666',
+                            '&.Mui-selected': { color: '#E93434' },
+                        }}
+                    />
+                    <Tab
+                        value="comments"
+                        label={`comentarios (${profileCommentsCount})`}
+                        sx={{
+                            textTransform: 'none',
+                            fontWeight: 700,
+                            minHeight: 40,
+                            color: '#666',
+                            '&.Mui-selected': { color: '#E93434' },
+                        }}
+                    />
+                </Tabs>
+            </Box>
+
             <Grid container spacing={3} sx={{ alignItems: 'flex-start' }}>
 
-                {/* ── Jams (main) ── */}
+                {/* ── Main content ── */}
                 <Grid item xs={12} md={8}>
-                    {isTracksLoading ? (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            {Array.from({ length: 5 }).map((_, i) => <TrackSkeleton key={i} />)}
-                        </Box>
-                    ) : tracks.length > 0 ? (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            {tracks.map((track, i) => (
-                                <Track
-                                    key={track.id}
-                                    id={track.id}
-                                    imageUrl={track.imageUrl}
-                                    title={track.title}
-                                    audioFileUrl={track.audioFileUrl}
-                                    playCount={track.playCount}
-                                    username={track.username}
-                                    userId={track.userId}
-                                    tags={track.tags}
-                                    likeCount={track.likeCount}
-                                    createdAt={track.createdAt}
-                                    userLikedTrack={track.userLikedTrack}
-                                    originalDuration={track.duration}
-                                    updatedAt={track.updatedAt}
-                                    playlist={playlistTracks}
-                                    playlistIndex={i}
-                                />
-                            ))}
-                        </Box>
+                    {activeTab === 'jams' ? (
+                        <>
+                            {isTracksLoading ? (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {Array.from({ length: 5 }).map((_, i) => <TrackSkeleton key={i} />)}
+                                </Box>
+                            ) : tracks.length > 0 ? (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {tracks.map((track, i) => (
+                                        <Track
+                                            key={track.id}
+                                            id={track.id}
+                                            imageUrl={track.imageUrl}
+                                            title={track.title}
+                                            audioFileUrl={track.audioFileUrl}
+                                            playCount={track.playCount}
+                                            username={track.username}
+                                            userId={track.userId}
+                                            tags={track.tags}
+                                            likeCount={track.likeCount}
+                                            createdAt={track.createdAt}
+                                            userLikedTrack={track.userLikedTrack}
+                                            originalDuration={track.duration}
+                                            updatedAt={track.updatedAt}
+                                            playlist={playlistTracks}
+                                            playlistIndex={i}
+                                        />
+                                    ))}
+                                </Box>
+                            ) : (
+                                <Typography variant="body2" sx={{ color: '#999', py: 1 }}>
+                                    nenhuma jam por aqui.
+                                </Typography>
+                            )}
+                            {hasNextPage && (
+                                <Box ref={loaderRef} sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+                                    {Array.from({ length: 3 }).map((_, i) => <TrackSkeleton key={i} />)}
+                                </Box>
+                            )}
+                            {isTracksError && (
+                                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                                    {tracksError.message}
+                                </Typography>
+                            )}
+                        </>
                     ) : (
-                        <Typography variant="body2" sx={{ color: '#999', py: 1 }}>
-                            nenhuma jam por aqui.
-                        </Typography>
-                    )}
-                    {hasNextPage && (
-                        <Box ref={loaderRef} sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-                            {Array.from({ length: 3 }).map((_, i) => <TrackSkeleton key={i} />)}
-                        </Box>
-                    )}
-                    {isTracksError && (
-                        <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-                            {tracksError.message}
-                        </Typography>
+                        <ProfileCommentsPanel
+                            userProfileId={userProfile.id}
+                            profileOwnerUserId={userProfile.id}
+                            onCountChange={setProfileCommentsCount}
+                        />
                     )}
                 </Grid>
 

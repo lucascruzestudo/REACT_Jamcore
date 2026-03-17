@@ -177,16 +177,12 @@ const Track: React.FC<TrackProps> = ({
     }
   };
 
-  const handleBackgroundClick = () => {
-    // Click in the empty area of the track card should start playing this track
-    togglePlayPause(trackData);
-    incrementPlay();
-  };
+  // Removed background click handler: only explicit controls (play button / waveform)
+  // should start playback to avoid accidental plays when clicking empty space.
 
   return (
     <Box
       onContextMenu={handleContextMenu}
-      onClick={handleBackgroundClick}
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -320,7 +316,7 @@ const Track: React.FC<TrackProps> = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <IconButton
               size="small"
-              onClick={() => { if (playlist && playlistIndex !== undefined) setPlaylist(playlist, playlistIndex); togglePlayPause(trackData); incrementPlay(); }}
+              onClick={(e) => { e.stopPropagation(); if (playlist && playlistIndex !== undefined) setPlaylist(playlist, playlistIndex); togglePlayPause(trackData); incrementPlay(); }}
               onKeyDown={(e) => e.key === ' ' && e.preventDefault()}
               sx={{
                 bgcolor: 'primary.main',
