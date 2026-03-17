@@ -1,5 +1,5 @@
-﻿import React, { useRef } from 'react';
-import { Box, Typography, Slider, Avatar, IconButton, useMediaQuery, useTheme } from '@mui/material';
+﻿import React, { useRef, useState } from 'react';
+import { Box, Typography, Slider, Avatar, IconButton, useMediaQuery, useTheme, Popover } from '@mui/material';
 import { useTrack } from '../contexts/trackcontext';
 import {
   PlayArrow,
@@ -10,10 +10,12 @@ import {
   VolumeMute,
   Favorite,
   FavoriteBorder,
+  QueueMusic,
 } from '@mui/icons-material';
 import { useTrackInteraction } from '../hooks/usetrackinteraction';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import QueueItem from './queueitem';
 
 const PLAYER_HEIGHT_DESKTOP = 68;
 const PLAYER_HEIGHT_MOBILE = 96;
@@ -33,8 +35,10 @@ const Footer: React.FC = () => {
     volume,
     playNext,
     playPrevious,
+    playTrackAtIndex,
     playlist,
     playlistIndex,
+    setPlaylist,
   } = useTrack();
 
   const { userLiked, toggleLike } = useTrackInteraction({
@@ -45,6 +49,23 @@ const Footer: React.FC = () => {
   });
 
   const volumeRef = useRef<HTMLDivElement>(null);
+  const queueButtonRef = useRef<HTMLButtonElement>(null);
+  const [queueOpen, setQueueOpen] = useState(false);
+
+  const handleSelectQueueItem = (index: number) => {
+    playTrackAtIndex(index);
+  };
+
+  const handleReorderQueue = (from: number, to: number) => {
+    if (from === to) return;
+    const next = [...playlist];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+
+    const currentId = currentTrack?.id;
+    const newIndex = currentId ? next.findIndex((t) => t.id === currentId) : -1;
+    setPlaylist(next, newIndex >= 0 ? newIndex : 0);
+  };
 
   const handlePlayPause = () => {
     if (currentTrack) togglePlayPause(currentTrack);
@@ -122,6 +143,14 @@ const Footer: React.FC = () => {
                 </Box>
                 <IconButton onClick={async (e) => { e.stopPropagation(); await toggleLike(); }} size="small" sx={{ color: userLiked ? '#E93434' : 'rgba(0,0,0,0.5)', flexShrink: 0 }}>
                   {userLiked ? <Favorite sx={{ fontSize: 17 }} /> : <FavoriteBorder sx={{ fontSize: 17 }} />}
+                </IconButton>
+                <IconButton
+                  ref={queueButtonRef}
+                  size="small"
+                  onClick={() => setQueueOpen((v) => !v)}
+                  sx={{ color: queueOpen ? '#E93434' : 'rgba(0,0,0,0.5)', flexShrink: 0 }}
+                >
+                  <QueueMusic sx={{ fontSize: 17 }} />
                 </IconButton>
               </Box>
 
@@ -219,6 +248,14 @@ const Footer: React.FC = () => {
                   <IconButton onClick={async (e) => { e.stopPropagation(); await toggleLike(); }} size="small" sx={{ color: userLiked ? '#E93434' : 'rgba(0,0,0,0.6)' }}>
                     {userLiked ? <Favorite sx={{ fontSize: 18 }} /> : <FavoriteBorder sx={{ fontSize: 18 }} />}
                   </IconButton>
+                  <IconButton
+                    ref={queueButtonRef}
+                    size="small"
+                    onClick={() => setQueueOpen((v) => !v)}
+                    sx={{ color: queueOpen ? '#E93434' : 'rgba(0,0,0,0.6)', '&:hover': { color: '#E93434' } }}
+                  >
+                    <QueueMusic sx={{ fontSize: 18 }} />
+                  </IconButton>
                 </Box>
               </Box>
             </Box>
@@ -226,6 +263,65 @@ const Footer: React.FC = () => {
 
         </Box>
       </motion.div>
+
+      {/* Queue Popover */}
+      <Popover
+        open={queueOpen}
+        anchorEl={queueButtonRef.current}
+        onClose={() => setQueueOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        slotProps={{
+          paper: {
+            sx: {
+              width: 420,
+              maxHeight: 400,
+              borderRadius: '12px',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
+              border: '1px solid rgba(0,0,0,0.07)',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            },
+          },
+        }}
+      >
+        <Box sx={{ px: 2, pt: 1.5, pb: 1, borderBottom: '1px solid rgba(0,0,0,0.06)', flexShrink: 0 }}>
+          <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: '#111', letterSpacing: '0.02em' }}>
+            fila de reprodução
+          </Typography>
+          <Typography sx={{ fontSize: '0.65rem', color: 'rgba(0,0,0,0.4)', mt: 0.25 }}>
+            {playlist.length} {playlist.length === 1 ? 'música' : 'músicas'}
+          </Typography>
+        </Box>
+        <Box sx={{ overflowY: 'auto', py: 0.5, px: 0.5 }}>
+          {playlist.length === 0 ? (
+            <Typography sx={{ fontSize: '0.75rem', color: 'rgba(0,0,0,0.4)', textAlign: 'center', py: 3 }}>
+              nenhuma música na fila
+            </Typography>
+          ) : (
+            playlist.map((track, i) => (
+              <QueueItem
+                key={`${track.id}-${i}`}
+                index={i}
+                id={track.id}
+                title={track.title}
+                imageUrl={track.imageUrl}
+                username={track.username}
+                userId={track.userId}
+                createdAt={track.createdAt}
+                updatedAt={track.updatedAt}
+                isActive={i === playlistIndex}
+                onSelect={() => handleSelectQueueItem(i)}
+                onDragStart={() => {
+                  /* no-op: drag state handled via drag/drop dataTransfer */
+                }}
+                onDrop={(from, to) => handleReorderQueue(from, to)}
+              />
+            ))
+          )}
+        </Box>
+      </Popover>
     </AnimatePresence>
   );
 };

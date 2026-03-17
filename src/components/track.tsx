@@ -7,6 +7,10 @@ import {
   InputBase,
   Button,
   Tooltip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -16,6 +20,8 @@ import LinkIcon from '@mui/icons-material/Link';
 import SendIcon from '@mui/icons-material/Send';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import QueueMusicIcon from '@mui/icons-material/QueueMusic';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { useTrack, Track as TrackItem } from '../contexts/trackcontext';
 import TrackCover from './trackcover';
 import { useNavigate } from 'react-router-dom';
@@ -90,7 +96,7 @@ const Track: React.FC<TrackProps> = ({
   playlist,
   playlistIndex,
 }) => {
-  const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack, setPlaylist } =
+  const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack, setPlaylist, addToQueue, addAfterCurrent } =
     useTrack();
   const { localLikeCount, localPlayCount, userLiked, incrementPlay, toggleLike } =
     useTrackInteraction({
@@ -104,11 +110,19 @@ const Track: React.FC<TrackProps> = ({
   const [newComment, setNewComment] = useState('');
   const [isPosting, setIsPosting] = useState(false);
   const [commentSent, setCommentSent] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number } | null>(null);
   const { user, userProfile } = useUser();
   const { addComment, getComments } = useCommentContext();
   const navigate = useNavigate();
 
   const isActiveTrack = id === currentTrack?.id;
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ mouseX: e.clientX, mouseY: e.clientY });
+  };
+
+  const handleContextClose = () => setContextMenu(null);
 
   const trackData = {
     id,
@@ -163,8 +177,16 @@ const Track: React.FC<TrackProps> = ({
     }
   };
 
+  const handleBackgroundClick = () => {
+    // Click in the empty area of the track card should start playing this track
+    togglePlayPause(trackData);
+    incrementPlay();
+  };
+
   return (
     <Box
+      onContextMenu={handleContextMenu}
+      onClick={handleBackgroundClick}
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -193,7 +215,10 @@ const Track: React.FC<TrackProps> = ({
             border: '1px solid rgba(0,0,0,0.08)',
             cursor: 'pointer',
           }}
-          onClick={() => setModalOpen(true)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setModalOpen(true);
+          }}
         >
           <img
             src={`${imageUrl}?t=${updatedAt || createdAt}`}
@@ -217,7 +242,10 @@ const Track: React.FC<TrackProps> = ({
                   display: 'block',
                   '&:hover': { color: 'primary.main' },
                 }}
-                onClick={() => navigate(`/user/${userId}`)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/user/${userId}`);
+                }}
                 noWrap
               >
                 {username || ''}
@@ -233,7 +261,10 @@ const Track: React.FC<TrackProps> = ({
                   whiteSpace: 'nowrap',
                   '&:hover': { color: 'primary.main' },
                 }}
-                onClick={() => navigate(`/track/${id}`)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/track/${id}`);
+                }}
               >
                 {title || ''}
               </Typography>
@@ -480,6 +511,36 @@ const Track: React.FC<TrackProps> = ({
       </Box>
 
       <TrackCover open={modalOpen} onClose={() => setModalOpen(false)} imageUrl={imageUrl} title={title} />
+
+      {/* Right-click context menu */}
+      <Menu
+        open={contextMenu !== null}
+        onClose={handleContextClose}
+        anchorReference="anchorPosition"
+        anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+        slotProps={{ paper: { sx: { borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', minWidth: 200 } } }}
+      >
+        <MenuItem
+          onClick={() => {
+            addAfterCurrent(trackData);
+            handleContextClose();
+          }}
+          dense
+        >
+          <ListItemIcon><QueueMusicIcon fontSize="small" sx={{ color: '#E93434' }} /></ListItemIcon>
+          <ListItemText primaryTypographyProps={{ fontSize: '0.83rem' }}>tocar a seguir</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            addToQueue(trackData);
+            handleContextClose();
+          }}
+          dense
+        >
+          <ListItemIcon><PlaylistAddIcon fontSize="small" sx={{ color: 'rgba(0,0,0,0.5)' }} /></ListItemIcon>
+          <ListItemText primaryTypographyProps={{ fontSize: '0.83rem' }}>adicionar à fila</ListItemText>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 };

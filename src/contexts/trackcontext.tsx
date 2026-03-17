@@ -35,6 +35,9 @@ interface TrackContextType {
     setPlaylist: (tracks: Track[], index: number) => void;
     playNext: () => void;
     playPrevious: () => void;
+    addToQueue: (track: Track) => void;
+    addAfterCurrent: (track: Track) => void;
+    playTrackAtIndex: (index: number) => void;
 }
 
 const TrackContext = createContext<TrackContextType | undefined>(undefined);
@@ -132,6 +135,47 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     };
 
+    const addToQueue = (track: Track) => {
+        if (playlistRef.current.length === 0) {
+            // Nothing queued yet — start playing immediately as a single-track playlist
+            playlistRef.current = [track];
+            playlistIndexRef.current = 0;
+            setPlaylistState([track]);
+            setPlaylistIndex(0);
+            _startTrack(track);
+        } else {
+            const newPlaylist = [...playlistRef.current, track];
+            playlistRef.current = newPlaylist;
+            setPlaylistState(newPlaylist);
+        }
+    };
+
+    const addAfterCurrent = (track: Track) => {
+        if (playlistRef.current.length === 0) {
+            playlistRef.current = [track];
+            playlistIndexRef.current = 0;
+            setPlaylistState([track]);
+            setPlaylistIndex(0);
+            _startTrack(track);
+        } else {
+            const idx = playlistIndexRef.current;
+            const newPlaylist = [
+                ...playlistRef.current.slice(0, idx + 1),
+                track,
+                ...playlistRef.current.slice(idx + 1),
+            ];
+            playlistRef.current = newPlaylist;
+            setPlaylistState(newPlaylist);
+        }
+    };
+
+    const playTrackAtIndex = (index: number) => {
+        if (index < 0 || index >= playlistRef.current.length) return;
+        playlistIndexRef.current = index;
+        setPlaylistIndex(index);
+        _startTrack(playlistRef.current[index]);
+    };
+
     useEffect(() => {
         const audio = audioRef.current;
         if (audio) {
@@ -209,7 +253,7 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [volume]);
 
     return (
-        <TrackContext.Provider value={{ isPlaying, currentTime, duration, volume, currentTrack, togglePlayPause, updateTime, setCurrentTime, setVolume, setIsPlaying, setCurrentTrack, audioRef, playlist, playlistIndex, setPlaylist, playNext, playPrevious }}>
+        <TrackContext.Provider value={{ isPlaying, currentTime, duration, volume, currentTrack, togglePlayPause, updateTime, setCurrentTime, setVolume, setIsPlaying, setCurrentTrack, audioRef, playlist, playlistIndex, setPlaylist, playNext, playPrevious, addToQueue, addAfterCurrent, playTrackAtIndex }}>
             {children}
             <audio ref={audioRef} />
         </TrackContext.Provider>

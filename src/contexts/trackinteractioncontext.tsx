@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import { useAuthStore } from '../store/auth';
@@ -12,6 +12,7 @@ interface TrackInteractionState {
 
 interface TrackInteractionContextData {
   getTrackInteraction: (trackId: string) => TrackInteractionState;
+  hasInteraction: (trackId: string) => boolean;
   toggleLike: (trackId: string) => Promise<void>;
   incrementPlay: (trackId: string) => void;
   updateTrackInteraction: (trackId: string, data: Partial<TrackInteractionState>) => void;
@@ -31,6 +32,12 @@ export const TrackInteractionProvider: React.FC<{ children: React.ReactNode }> =
     [trackId: string]: TrackInteractionState;
   }>({});
   const [interactionVersion, setInteractionVersion] = useState(0);
+
+  // Limpa todas as interações em cache quando o usuário muda (login/logout/troca de conta)
+  useEffect(() => {
+    setInteractions({});
+    setInteractionVersion(0);
+  }, [userId]);
 
   const getTrackInteraction = useCallback(
     (trackId: string): TrackInteractionState => {
@@ -127,9 +134,14 @@ export const TrackInteractionProvider: React.FC<{ children: React.ReactNode }> =
     []
   );
 
+  const hasInteraction = useCallback(
+    (trackId: string) => trackId in interactions,
+    [interactions]
+  );
+
   return (
     <TrackInteractionContext.Provider
-      value={{ getTrackInteraction, toggleLike, incrementPlay, updateTrackInteraction, interactionVersion }}
+      value={{ getTrackInteraction, hasInteraction, toggleLike, incrementPlay, updateTrackInteraction, interactionVersion }}
     >
       {children}
     </TrackInteractionContext.Provider>

@@ -148,6 +148,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
 
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
+      e.stopPropagation();
       const canvas = canvasRef.current;
       if (!canvas || !duration) return;
       const rect = canvas.getBoundingClientRect();

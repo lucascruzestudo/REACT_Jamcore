@@ -1,9 +1,11 @@
-import React from 'react';
-import { Box, Typography, IconButton, Divider } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, IconButton, Divider, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import QueueMusicIcon from '@mui/icons-material/QueueMusic';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { useTrack } from '../contexts/trackcontext';
 import { useNavigate } from 'react-router-dom';
 import { useTrackInteraction } from '../hooks/usetrackinteraction';
@@ -40,7 +42,7 @@ const CompactTrack: React.FC<TrackProps> = ({
   originalDuration,
   updatedAt,
 }) => {
-  const { isPlaying, togglePlayPause, currentTrack } = useTrack();
+  const { isPlaying, togglePlayPause, currentTrack, addToQueue, addAfterCurrent } = useTrack();
   const { localLikeCount, localPlayCount, userLiked, incrementPlay, toggleLike } = useTrackInteraction({
     trackId: id,
     initialLikeCount: likeCount,
@@ -48,6 +50,15 @@ const CompactTrack: React.FC<TrackProps> = ({
     initialUserLiked: userLikedTrack,
   });
   const navigate = useNavigate();
+
+  const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number } | null>(null);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ mouseX: e.clientX, mouseY: e.clientY });
+  };
+
+  const handleContextClose = () => setContextMenu(null);
 
   const trackData = {
     key: id,
@@ -72,7 +83,9 @@ const CompactTrack: React.FC<TrackProps> = ({
   };
 
   return (
+    <>
     <Box
+      onContextMenu={handleContextMenu}
       sx={{
         display: 'flex',
         alignItems: 'center',
@@ -181,6 +194,31 @@ const CompactTrack: React.FC<TrackProps> = ({
         </IconButton>
       </Box>
     </Box>
+
+    {/* Right-click context menu */}
+    <Menu
+      open={contextMenu !== null}
+      onClose={handleContextClose}
+      anchorReference="anchorPosition"
+      anchorPosition={contextMenu !== null ? { top: contextMenu.mouseY, left: contextMenu.mouseX } : undefined}
+      slotProps={{ paper: { sx: { borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', minWidth: 200 } } }}
+    >
+      <MenuItem
+        onClick={() => { addAfterCurrent(trackData); handleContextClose(); }}
+        dense
+      >
+        <ListItemIcon><QueueMusicIcon fontSize="small" sx={{ color: '#E93434' }} /></ListItemIcon>
+        <ListItemText primaryTypographyProps={{ fontSize: '0.83rem' }}>tocar a seguir</ListItemText>
+      </MenuItem>
+      <MenuItem
+        onClick={() => { addToQueue(trackData); handleContextClose(); }}
+        dense
+      >
+        <ListItemIcon><PlaylistAddIcon fontSize="small" sx={{ color: 'rgba(0,0,0,0.5)' }} /></ListItemIcon>
+        <ListItemText primaryTypographyProps={{ fontSize: '0.83rem' }}>adicionar à fila</ListItemText>
+      </MenuItem>
+    </Menu>
+    </>
   );
 };
 

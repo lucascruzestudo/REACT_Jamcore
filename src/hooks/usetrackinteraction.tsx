@@ -23,13 +23,14 @@ export const useTrackInteraction = ({
   initialPlayCount,
   initialUserLiked,
 }: TrackInteractionProps): TrackInteraction => {
-  const { getTrackInteraction, toggleLike, incrementPlay, updateTrackInteraction } =
+  const { getTrackInteraction, hasInteraction, toggleLike, incrementPlay, updateTrackInteraction } =
     useTrackInteractionContext();
 
-  // Inicializa o estado da faixa no contexto apenas se ainda não estiver presente
+  // Inicializa o estado da faixa no contexto apenas se ainda não estiver presente.
+  // Após troca de usuário o mapa é limpo, então hasInteraction retorna false e
+  // a inicialização ocorre novamente com os dados frescos vindos da API.
   useEffect(() => {
-    const interaction = getTrackInteraction(trackId);
-    if (interaction.likeCount === 0 && interaction.playCount === 0 && !interaction.userLiked) {
+    if (!hasInteraction(trackId)) {
       updateTrackInteraction(trackId, {
         likeCount: initialLikeCount,
         playCount: initialPlayCount,
@@ -42,7 +43,7 @@ export const useTrackInteraction = ({
     initialLikeCount,
     initialPlayCount,
     initialUserLiked,
-    getTrackInteraction,
+    hasInteraction,
     updateTrackInteraction,
   ]);
 

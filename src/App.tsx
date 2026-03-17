@@ -53,7 +53,7 @@ function AppContent() {
         </Routes>
       </Box>
 
-      <Footer />
+      {showNav && <Footer />}
     </>
   )
 }

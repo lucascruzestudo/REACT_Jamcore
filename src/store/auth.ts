@@ -36,6 +36,9 @@ export const useAuthStore = create<AuthState>((set) => {
 
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
+        // Limpa qualquer cache de query anterior para garantir dados frescos do novo usuário
+        queryClient.clear();
+
         set({ token, user });
         return true;
       } catch (error) {
