@@ -96,7 +96,7 @@ const Track: React.FC<TrackProps> = ({
   playlist,
   playlistIndex,
 }) => {
-  const { isPlaying, currentTime, duration, togglePlayPause, updateTime, currentTrack, setPlaylist, addToQueue, addAfterCurrent } =
+  const { isPlaying, currentTime, duration, playWithContext, updateTime, currentTrack, setPlaylist, addToQueue, addAfterCurrent } =
     useTrack();
   const { localLikeCount, localPlayCount, userLiked, incrementPlay, toggleLike } =
     useTrackInteraction({
@@ -316,7 +316,7 @@ const Track: React.FC<TrackProps> = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <IconButton
               size="small"
-              onClick={(e) => { e.stopPropagation(); if (playlist && playlistIndex !== undefined) setPlaylist(playlist, playlistIndex); togglePlayPause(trackData); incrementPlay(); }}
+              onClick={(e) => { e.stopPropagation(); playWithContext(trackData, playlist && playlistIndex !== undefined ? playlist : [trackData], playlist && playlistIndex !== undefined ? playlistIndex : 0); incrementPlay(); }}
               onKeyDown={(e) => e.key === ' ' && e.preventDefault()}
               sx={{
                 bgcolor: 'primary.main',
@@ -341,15 +341,20 @@ const Track: React.FC<TrackProps> = ({
                 duration={activeDuration}
                 isActive={isActiveTrack}
                 onSeek={(time) => {
-                  if (isActiveTrack) {
-                    updateTime(time);
-                    return;
-                  }
+                  const ctx = playlist && playlistIndex !== undefined ? playlist : [trackData];
+                  const ctxIdx = playlist && playlistIndex !== undefined ? playlistIndex : 0;
 
-                  // If clicking a waveform of a non-active track, only switch to that track
-                  // (do not seek). The user can click again to seek to a specific time.
-                  if (playlist && playlistIndex !== undefined) setPlaylist(playlist, playlistIndex);
-                  togglePlayPause(trackData);
+                  if (isActiveTrack) {
+                    // Track already active: just seek.
+                    // Also upgrade the playlist context if the caller has a real playlist
+                    // (e.g. track was started from CompactTrack with a solo context).
+                    const isSoloContext = ctx.length === 1 && ctx[0].id === trackData.id;
+                    if (!isSoloContext) setPlaylist(ctx, ctxIdx);
+                    updateTime(time);
+                  } else {
+                    // Different track: start from beginning with the correct playlist context.
+                    playWithContext(trackData, ctx, ctxIdx);
+                  }
                 }}
                 height={52}
               />

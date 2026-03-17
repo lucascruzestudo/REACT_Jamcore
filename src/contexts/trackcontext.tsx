@@ -33,6 +33,7 @@ interface TrackContextType {
     playlist: Track[];
     playlistIndex: number;
     setPlaylist: (tracks: Track[], index: number) => void;
+    playWithContext: (track: Track, playlist: Track[], index: number) => void;
     playNext: () => void;
     playPrevious: () => void;
     addToQueue: (track: Track) => void;
@@ -75,10 +76,53 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         api.post('/TrackPlay', { trackId: track.id }).catch(e => console.error('Erro ao registrar play:', e));
     };
 
+    // Plays or toggles a track with explicit playlist context.
+    // If the track is already playing and the incoming playlist is solo (just that track),
+    // the existing playlist is preserved — only toggle play/pause.
+    // If the incoming playlist has more than one track, or the track is different, the
+    // playlist is always replaced so the queue reflects the correct origin.
+    const playWithContext = (newTrack: Track, playlist: Track[], index: number) => {
+        if (!audioRef.current) return;
+
+        if (currentTrack?.id === newTrack.id) {
+            // Same track already loaded — decide whether to replace the playlist.
+            const isSoloContext = playlist.length === 1 && playlist[0].id === newTrack.id;
+            if (!isSoloContext) {
+                // Caller has a real multi-track playlist: replace context.
+                playlistRef.current = playlist;
+                playlistIndexRef.current = index;
+                setPlaylistState(playlist);
+                setPlaylistIndex(index);
+            }
+            // Otherwise keep the existing playlist and just toggle.
+            if (isPlaying) {
+                audioRef.current.pause();
+                setIsPlaying(false);
+            } else {
+                audioRef.current.play().catch(console.error);
+                setIsPlaying(true);
+            }
+        } else {
+            // Different track: always install the new playlist context before starting.
+            playlistRef.current = playlist;
+            playlistIndexRef.current = index;
+            setPlaylistState(playlist);
+            setPlaylistIndex(index);
+            _startTrack(newTrack);
+        }
+    };
+
+    // Simple play/pause toggle for the current track (footer controls).
+    // Does not modify the playlist.
     const togglePlayPause = (newTrack: Track) => {
         if (!audioRef.current) return;
 
         if (!currentTrack || currentTrack.id !== newTrack.id) {
+            // Fallback solo playlist for components that bypass playWithContext
+            playlistRef.current = [newTrack];
+            playlistIndexRef.current = 0;
+            setPlaylistState([newTrack]);
+            setPlaylistIndex(0);
             _startTrack(newTrack);
         } else {
             if (isPlaying) {
@@ -253,7 +297,7 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, [volume]);
 
     return (
-        <TrackContext.Provider value={{ isPlaying, currentTime, duration, volume, currentTrack, togglePlayPause, updateTime, setCurrentTime, setVolume, setIsPlaying, setCurrentTrack, audioRef, playlist, playlistIndex, setPlaylist, playNext, playPrevious, addToQueue, addAfterCurrent, playTrackAtIndex }}>
+        <TrackContext.Provider value={{ isPlaying, currentTime, duration, volume, currentTrack, togglePlayPause, playWithContext, updateTime, setCurrentTime, setVolume, setIsPlaying, setCurrentTrack, audioRef, playlist, playlistIndex, setPlaylist, playNext, playPrevious, addToQueue, addAfterCurrent, playTrackAtIndex }}>
             {children}
             <audio ref={audioRef} />
         </TrackContext.Provider>

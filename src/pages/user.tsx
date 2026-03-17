@@ -531,6 +531,7 @@ const UserProfilePage: React.FC = () => {
                                             userLikedTrack={track.userLikedTrack}
                                             originalDuration={track.duration}
                                             updatedAt={track.updatedAt}
+                                            commentCount={track.commentCount ?? 0}
                                             playlist={playlistTracks}
                                             playlistIndex={i}
                                         />

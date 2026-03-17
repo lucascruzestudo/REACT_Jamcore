@@ -42,7 +42,7 @@ const CompactTrack: React.FC<TrackProps> = ({
   originalDuration,
   updatedAt,
 }) => {
-  const { isPlaying, togglePlayPause, currentTrack, addToQueue, addAfterCurrent } = useTrack();
+  const { isPlaying, playWithContext, currentTrack, addToQueue, addAfterCurrent } = useTrack();
   const { localLikeCount, localPlayCount, userLiked, incrementPlay, toggleLike } = useTrackInteraction({
     trackId: id,
     initialLikeCount: likeCount,
@@ -78,7 +78,7 @@ const CompactTrack: React.FC<TrackProps> = ({
   };
 
   const handlePlayPause = () => {
-    togglePlayPause(trackData);
+    playWithContext(trackData, [trackData], 0);
     incrementPlay();
   };
 
