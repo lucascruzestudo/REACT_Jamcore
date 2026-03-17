@@ -16,6 +16,16 @@ const TrackCover: React.FC<TrackCoverProps> = ({ open, onClose, imageUrl, title 
     // Reset loaded state whenever a new image is shown
     React.useEffect(() => { if (open) setLoaded(false); }, [open, imageUrl]);
 
+    const handleBackdropClick = (event: React.MouseEvent) => {
+        // Prevent the click from "falling through" to elements behind the overlay.
+        event.stopPropagation();
+        event.preventDefault();
+
+        // Defer closing so the browser finishes processing this click event
+        // before the overlay is removed from the DOM.
+        window.setTimeout(() => onClose(), 0);
+    };
+
     return (
         <AnimatePresence>
             {open && (
@@ -35,7 +45,7 @@ const TrackCover: React.FC<TrackCoverProps> = ({ open, onClose, imageUrl, title 
                         zIndex: 9999,
                         padding: '24px',
                     }}
-                    onClick={onClose}
+                    onClick={handleBackdropClick}
                 >
                     <motion.div
                         key="trackcover-card"
