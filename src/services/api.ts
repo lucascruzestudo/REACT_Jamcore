@@ -2,8 +2,12 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 import { useAuthStore } from '../store/auth'
 
+// Use Vite env var in production; default to the public API URL for safety.
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? 'https://dotnet-jamcoreapi.onrender.com') as string;
+const baseURL = API_BASE.replace(/\/$/, '') + '/api/v1/'
+
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api/v1/',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
