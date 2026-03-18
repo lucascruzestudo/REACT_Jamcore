@@ -5,6 +5,7 @@ import { Box, Typography, CircularProgress } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { motion } from 'framer-motion';
+import { publicUrl } from '../utils/imageUtils';
 
 const ConfirmAccount = () => {
     const { token } = useParams();
@@ -65,7 +66,7 @@ const ConfirmAccount = () => {
                         textAlign: 'center',
                     }}
                 >
-                    <img src="/jamcorelogored.png" alt="jamcore" style={{ width: '120px', marginBottom: '8px' }} />
+                    <img src={publicUrl('/jamcorelogored.png')} alt="jamcore" style={{ width: '120px', marginBottom: '8px' }} />
 
                     {status === 'loading' && (
                         <>

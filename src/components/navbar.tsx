@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { useTrack } from '../contexts/trackcontext';
 import { useUser } from '../contexts/usercontext';
+import { publicUrl } from '../utils/imageUtils';
 
 const Navbar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -45,7 +46,7 @@ const Navbar: React.FC = () => {
 
   const avatarSrc = userProfile?.profilePictureUrl && userProfile?.updatedAt
     ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt}`
-    : user?.profilePictureUrl || '/jamcoredefaultpicture.jpg';
+    : user?.profilePictureUrl || publicUrl('/jamcoredefaultpicture.jpg');
 
   return (
     <AppBar
@@ -60,7 +61,7 @@ const Navbar: React.FC = () => {
         {/* Logo */}
         {!showSearch && (
           <Link to="/feed" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-            <img src="/jamcorelogored.png" alt="jamcore" style={{ height: '26px', width: 'auto' }} />
+            <img src={publicUrl('/jamcorelogored.png')} alt="jamcore" style={{ height: '26px', width: 'auto' }} />
           </Link>
         )}
 

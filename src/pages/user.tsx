@@ -11,7 +11,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { motion } from "framer-motion";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { cropToSquare } from "../utils/imageUtils";
+import { cropToSquare, publicUrl } from "../utils/imageUtils";
 import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import Track from "../components/track";
 import TrackSkeleton from "../components/trackskeleton";
@@ -256,7 +256,7 @@ const UserProfilePage: React.FC = () => {
         ? imagePreview
         : userProfile?.profilePictureUrl
             ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt}`
-            : '/jamcoredefaultpicture.jpg';
+            : publicUrl('/jamcoredefaultpicture.jpg');
 
     return (
         <Box sx={{ minHeight: '100vh', backgroundColor: '#FAFAFA' }}>
@@ -606,7 +606,7 @@ const UserProfilePage: React.FC = () => {
             <TrackCover
                 open={avatarModalOpen}
                 onClose={() => setAvatarModalOpen(false)}
-                imageUrl={userProfile.profilePictureUrl ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt}` : '/jamcoredefaultpicture.jpg'}
+                imageUrl={userProfile.profilePictureUrl ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt}` : publicUrl('/jamcoredefaultpicture.jpg')}
                 title={userProfile.displayName || userProfile.username}
             />
         </Box>

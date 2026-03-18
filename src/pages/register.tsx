@@ -6,6 +6,7 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import AlertCard from '../components/alertcard';
 import api from '../services/api';
+import { publicUrl } from '../utils/imageUtils';
 
 const Register = () => {
     const [username, setUsername] = useState<string>('');
@@ -110,7 +111,7 @@ const Register = () => {
                         alignItems: 'center',
                     }}
                 >
-                    <img src="/jamcorelogored.png" alt="jamcore" style={{ width: '130px', marginBottom: '8px' }} />
+                    <img src={publicUrl('/jamcorelogored.png')} alt="jamcore" style={{ width: '130px', marginBottom: '8px' }} />
 
                     <Typography variant="body2" sx={{ color: '#999', mb: 3, textAlign: 'center' }}>
                         crie sua conta gratis

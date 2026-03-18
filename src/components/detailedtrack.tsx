@@ -46,7 +46,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTrackInteraction } from '../hooks/usetrackinteraction';
 import { useCommentContext } from '../contexts/commentcontext';
 import { AnimatePresence, motion } from 'framer-motion';
-import { cropToSquare } from '../utils/imageUtils';
+import { cropToSquare, publicUrl } from '../utils/imageUtils';
 
 interface DetailedTrackProps {
   key: string;
@@ -263,7 +263,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
         userId: user?.id || userProfile?.userId || '',
         username: userProfile?.displayName || user?.username || '',
         displayName: userProfile?.displayName || user?.username || '',
-        userProfilePictureUrl: userProfile?.profilePictureUrl || '/jamcoredefaultpicture.jpg',
+        userProfilePictureUrl: userProfile?.profilePictureUrl || publicUrl('/jamcoredefaultpicture.jpg'),
         createdAt: new Date().toISOString(),
         userProfileUpdatedAt: userProfile?.updatedAt || '',
       });
@@ -789,7 +789,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                   <Box sx={{ width: { xs: 64, sm: 88 }, flexShrink: 0 }}>
                     <Avatar
-                      src={uploaderProfile.profilePictureUrl ? `${uploaderProfile.profilePictureUrl}?t=${uploaderProfile.updatedAt || ''}` : '/jamcoredefaultpicture.jpg'}
+                      src={uploaderProfile.profilePictureUrl ? `${uploaderProfile.profilePictureUrl}?t=${uploaderProfile.updatedAt || ''}` : publicUrl('/jamcoredefaultpicture.jpg')}
                       sx={{ width: { xs: 64, sm: 88 }, height: { xs: 64, sm: 88 }, borderRadius: '50%', cursor: 'pointer' }}
                       onClick={() => navigate(`/user/${uploaderProfile.id}`)}
                       onKeyDown={(e) => { if (e.key === 'Enter') navigate(`/user/${uploaderProfile.id}`); }}
@@ -877,7 +877,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                   style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}
                 >
                   <Avatar
-                    src={userProfile?.profilePictureUrl ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt || ''}` : '/jamcoredefaultpicture.jpg'}
+                    src={userProfile?.profilePictureUrl ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt || ''}` : publicUrl('/jamcoredefaultpicture.jpg')}
                     sx={{ width: 28, height: 28, flexShrink: 0, borderRadius: '50%' }}
                   />
                   <InputBase

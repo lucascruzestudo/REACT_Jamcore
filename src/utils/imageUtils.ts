@@ -1,4 +1,13 @@
 /**
+ * Resolves a path relative to the Vite base URL so assets work on sub-path
+ * deployments like GitHub Pages (e.g. /REACT_Jamcore/logo.png).
+ */
+export function publicUrl(path: string): string {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  return `${base}${path}`;
+}
+
+/**
  * Crops an image file to a centered square and resizes it to `outputSize x outputSize`.
  * Always returns a JPEG file regardless of original format.
  */

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 import AlertCard from '../components/alertcard'
-
+import { publicUrl } from '../utils/imageUtils'
 const Login = () => {
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -69,7 +69,7 @@ const Login = () => {
             gap: 0,
           }}
         >
-          <img src="/jamcorelogored.png" alt="jamcore" style={{ width: '130px', marginBottom: '8px' }} />
+          <img src={publicUrl('/jamcorelogored.png')} alt="jamcore" style={{ width: '130px', marginBottom: '8px' }} />
 
           <Typography variant="body2" sx={{ color: '#999', mb: 3, textAlign: 'center' }}>
             sua plataforma de jams

@@ -20,6 +20,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import api from '../services/api';
 import { useUser } from '../contexts/usercontext';
 import CommentComponent from './comment';
+import { publicUrl } from '../utils/imageUtils';
 
 interface ProfileCommentItem {
   id: string;
@@ -184,7 +185,7 @@ const ProfileCommentsPanel: React.FC<ProfileCommentsPanelProps> = ({ userProfile
                 style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}
               >
                 <Avatar
-                  src={userProfile?.profilePictureUrl ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt || ''}` : '/jamcoredefaultpicture.jpg'}
+                  src={userProfile?.profilePictureUrl ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt || ''}` : publicUrl('/jamcoredefaultpicture.jpg')}
                   sx={{ width: 28, height: 28, flexShrink: 0, borderRadius: '50%' }}
                 />
                 <InputBase

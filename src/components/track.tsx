@@ -33,6 +33,7 @@ import { useUser } from '../contexts/usercontext';
 import { useCommentContext } from '../contexts/commentcontext';
 import api from '../services/api';
 import { AnimatePresence, motion } from 'framer-motion';
+import { publicUrl } from '../utils/imageUtils';
 
 interface TrackProps {
   id: string;
@@ -166,7 +167,7 @@ const Track: React.FC<TrackProps> = ({
         username: userProfile?.displayName || user?.username || '',
         displayName: userProfile?.displayName || user?.username || '',
         userProfilePictureUrl:
-          userProfile?.profilePictureUrl || '/jamcoredefaultpicture.jpg',
+          userProfile?.profilePictureUrl || publicUrl('/jamcoredefaultpicture.jpg'),
         createdAt: new Date().toISOString(),
         userProfileUpdatedAt: userProfile?.updatedAt || '',
       });
@@ -447,7 +448,7 @@ const Track: React.FC<TrackProps> = ({
                       src={
                         userProfile?.profilePictureUrl
                           ? `${userProfile.profilePictureUrl}?t=${userProfile.updatedAt || ''}`
-                          : '/jamcoredefaultpicture.jpg'
+                          : publicUrl('/jamcoredefaultpicture.jpg')
                       }
                       sx={{ width: 24, height: 24, flexShrink: 0, borderRadius: '50%' }}
                     />

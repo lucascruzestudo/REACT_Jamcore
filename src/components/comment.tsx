@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Avatar } from '@mui/material';
+import { publicUrl } from '../utils/imageUtils';
 
 interface CommentComponentProps {
     comment: Comment;
@@ -26,7 +27,7 @@ const CommentComponent: React.FC<CommentComponentProps> = ({ comment }) => {
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Avatar 
-                src={comment.userProfilePictureUrl ? `${comment.userProfilePictureUrl}?t=${comment.userProfileUpdatedAt || ''}` : '/jamcoredefaultpicture.jpg'} 
+                src={comment.userProfilePictureUrl ? `${comment.userProfilePictureUrl}?t=${comment.userProfileUpdatedAt || ''}` : publicUrl('/jamcoredefaultpicture.jpg')} 
                 alt={comment.displayName || comment.username || ''} 
                 onClick={handleProfileClick}
                 sx={{ width: 40, height: 40, mr: 2, borderRadius: '50%', cursor: 'pointer' }} 
