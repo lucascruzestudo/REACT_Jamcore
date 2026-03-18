@@ -557,19 +557,6 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
           >
             copiar link
           </Button>
-          <Button
-            startIcon={<MoreHorizIcon sx={{ fontSize: 18 }} />}
-            variant="text"
-            color="secondary"
-            size="small"
-            sx={{ textTransform: 'none', fontSize: '0.8rem' }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setContextMenu({ mouseX: e.clientX + 2, mouseY: e.clientY - 4 });
-            }}
-          >
-            mais ações
-          </Button>
           {isUploader && (
             <Button
               startIcon={isEditing ? <CloseIcon sx={{ fontSize: 15 }} /> : <Edit sx={{ fontSize: 15 }} />}
@@ -594,6 +581,19 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
               excluir
             </Button>
           )}
+          <Button
+            startIcon={<MoreHorizIcon sx={{ fontSize: 18 }} />}
+            variant="text"
+            color="secondary"
+            size="small"
+            sx={{ textTransform: 'none', fontSize: '0.8rem' }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setContextMenu({ mouseX: e.clientX + 2, mouseY: e.clientY - 4 });
+            }}
+          >
+            mais ações
+          </Button>
         </Box>
 
         <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 1, mr: { xs: 1, sm: 2 } }}>
