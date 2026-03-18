@@ -190,9 +190,7 @@ const Track: React.FC<TrackProps> = ({
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        maxWidth: { xs: 600, sm: 700 },
-        width: { xs: '100%', sm: 700 },
-        m: 'auto',
+        width: '100%',
         backgroundColor: '#fff',
         borderRadius: '14px',
         border: '1px solid rgba(0,0,0,0.07)',
