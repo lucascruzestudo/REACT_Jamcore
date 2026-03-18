@@ -25,7 +25,7 @@ export default function TrackPage() {
 
     return (
         <Box sx={{ minHeight: '100vh', backgroundColor: '#FAFAFA' }}>
-            <Container maxWidth="md" sx={{ pt: 10, pb: 4, px: { xs: 2, sm: 3 } }}>
+            <Container maxWidth="lg" sx={{ pt: 10, pb: 4, px: { xs: 2, sm: 3 } }}>
                 <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
