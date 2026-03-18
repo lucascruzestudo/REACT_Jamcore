@@ -4,7 +4,6 @@ import {
   Typography,
   IconButton,
   Button,
-  Tooltip,
   Avatar,
   InputBase,
   TextField,
@@ -122,7 +121,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
   updatedAt,
   onUpdate,
 }) => {
-  const { isPlaying, currentTime, duration, togglePlayPause, playWithContext, updateTime, currentTrack, setCurrentTrack, setIsPlaying, audioRef, addToQueue, addAfterCurrent } = useTrack();
+  const { isPlaying, currentTime, duration, playWithContext, updateTime, currentTrack, setCurrentTrack, setIsPlaying, audioRef, addToQueue, addAfterCurrent } = useTrack();
   const { localLikeCount, localPlayCount, userLiked, incrementPlay, toggleLike } = useTrackInteraction({
     trackId: id,
     initialLikeCount: likeCount,

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import {
     Button, TextField, Typography, Box, IconButton, Container, FormControlLabel,
-    Slider, Radio, RadioGroup, FormControl, FormLabel
+    Radio, RadioGroup, FormControl, FormLabel
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -43,7 +43,7 @@ const CreateTrackPage: React.FC = () => {
     const [imageHovered, setImageHovered] = useState<boolean>(false);
     const [audioPreview, setAudioPreview] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
-    const [audioProgress, setAudioProgress] = useState<number>(0);
+    const [_audioProgress, setAudioProgress] = useState<number>(0);
     const [audioCurrentTime, setAudioCurrentTime] = useState<number>(0);
     const [audioDuration, setAudioDuration] = useState<number>(0);
     const [tagsInput, setTagsInput] = useState<string>("");
@@ -104,16 +104,6 @@ const CreateTrackPage: React.FC = () => {
             if (isPlaying) audioRef.current.pause();
             else audioRef.current.play();
             setIsPlaying(!isPlaying);
-        }
-    };
-
-    const handleSliderChange = (_event: Event, newValue: number | number[]) => {
-        if (audioRef.current) {
-            const pct = newValue as number;
-            const dur = audioDuration || audioRef.current.duration || 0;
-            audioRef.current.currentTime = pct * (dur / 100);
-            setAudioProgress(pct as number);
-            setAudioCurrentTime(audioRef.current.currentTime);
         }
     };
 

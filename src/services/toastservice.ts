@@ -18,7 +18,6 @@ class ToastService {
       draggable: true,
       progress: undefined,
       className: 'jamcore-toast jamcore-toast--success',
-      bodyClassName: 'jamcore-toast__body',
       progressClassName: 'jamcore-toast__progress',
       ...options,
     })
@@ -34,7 +33,6 @@ class ToastService {
       draggable: true,
       progress: undefined,
       className: 'jamcore-toast jamcore-toast--error',
-      bodyClassName: 'jamcore-toast__body',
       progressClassName: 'jamcore-toast__progress',
       ...options,
     })
@@ -50,7 +48,6 @@ class ToastService {
       draggable: true,
       progress: undefined,
       className: 'jamcore-toast jamcore-toast--info',
-      bodyClassName: 'jamcore-toast__body',
       progressClassName: 'jamcore-toast__progress',
       ...options,
     })
@@ -66,7 +63,6 @@ class ToastService {
       draggable: true,
       progress: undefined,
       className: 'jamcore-toast jamcore-toast--warning',
-      bodyClassName: 'jamcore-toast__body',
       progressClassName: 'jamcore-toast__progress',
       ...options,
     })

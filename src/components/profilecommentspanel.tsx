@@ -47,7 +47,6 @@ const ProfileCommentsPanel: React.FC<ProfileCommentsPanelProps> = ({ userProfile
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
   const [commentSent, setCommentSent] = useState(false);
-  const [commentDeleted, setCommentDeleted] = useState(false);
   const [deletedCommentIds, setDeletedCommentIds] = useState<Set<string>>(new Set());
 
   const {
