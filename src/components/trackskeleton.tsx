@@ -16,7 +16,7 @@ const TrackSkeleton: React.FC = () => (
     {/* Main content row */}
     <Box sx={{ display: 'flex', p: 2, gap: 2, alignItems: 'flex-start' }}>
       {/* Cover */}
-      <Skeleton variant="rounded" width={120} height={120} sx={{ flexShrink: 0, borderRadius: '8px' }} />
+      <Skeleton variant="rounded" width={175} height={175} sx={{ flexShrink: 0, borderRadius: '8px' }} />
 
       {/* Right content */}
       <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>

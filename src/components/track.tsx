@@ -205,8 +205,8 @@ const Track: React.FC<TrackProps> = ({
         {/* Cover image */}
         <Box
           sx={{
-            width: 120,
-            height: 120,
+            width: 175,
+            height: 175,
             flexShrink: 0,
             borderRadius: '8px',
             overflow: 'hidden',
