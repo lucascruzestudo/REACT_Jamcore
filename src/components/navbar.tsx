@@ -10,12 +10,25 @@ import { useUser } from '../contexts/usercontext';
 const Navbar: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
   const searchRef = useRef<HTMLDivElement>(null);
   const logout = useAuthStore((state) => state.logout);
   const { setCurrentTrack, setIsPlaying } = useTrack();
   const { user, logoutUser, userProfile } = useUser();
   const navigate = useNavigate();
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
+
+  const handleSearch = () => {
+    const trimmed = searchValue.trim();
+    if (!trimmed) return;
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+    setShowSearch(false);
+    setSearchValue('');
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSearch();
+  };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -67,12 +80,21 @@ const Navbar: React.FC = () => {
               border: '1px solid rgba(0,0,0,0.04)',
               transition: 'border 0.18s',
               '&:focus-within': { border: '1px solid rgba(233,52,52,0.16)' },
+              cursor: 'text',
             }}
+            onClick={() => (document.getElementById('navbar-search-input') as HTMLInputElement | null)?.focus()}
           >
-            <SearchIcon sx={{ fontSize: 18, color: '#9aa0a6', mr: 0.5 }} />
+            <SearchIcon
+              sx={{ fontSize: 18, color: '#9aa0a6', mr: 0.5, cursor: 'pointer' }}
+              onClick={handleSearch}
+            />
             <InputBase
+              id="navbar-search-input"
               placeholder="pesquisar jams..."
               inputProps={{ 'aria-label': 'search' }}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
               sx={{ flex: 1, fontSize: '0.88rem', color: '#333', '& ::placeholder': { color: '#9aa0a6' } }}
             />
           </Box>
@@ -94,10 +116,16 @@ const Navbar: React.FC = () => {
                   border: '1px solid rgba(0,0,0,0.04)',
                 }}
           >
-                <SearchIcon sx={{ fontSize: 18, color: '#9aa0a6', mr: 0.5 }} />
+                <SearchIcon
+                  sx={{ fontSize: 18, color: '#9aa0a6', mr: 0.5, cursor: 'pointer' }}
+                  onClick={handleSearch}
+                />
                 <InputBase
                   placeholder="pesquisar jams..."
                   inputProps={{ 'aria-label': 'search' }}
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
                   sx={{ flex: 1, fontSize: '0.88rem', color: '#333', '& ::placeholder': { color: '#9aa0a6' } }}
                   autoFocus
                 />

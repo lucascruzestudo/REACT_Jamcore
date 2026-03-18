@@ -503,7 +503,7 @@ const UserProfilePage: React.FC = () => {
                 </Tabs>
             </Box>
 
-            <Grid container spacing={3} sx={{ alignItems: 'flex-start' }}>
+            <Grid container spacing={3}>
 
                 {/* ── Main content ── */}
                 <Grid item xs={12} md={8}>

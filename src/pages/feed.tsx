@@ -133,7 +133,7 @@ export default function Feed() {
 
       {/* Main content */}
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Grid container spacing={4} sx={{ alignItems: 'flex-start' }}>
+        <Grid container spacing={4}>
           {/* Track feed */}
           <Grid item xs={12} md={8}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

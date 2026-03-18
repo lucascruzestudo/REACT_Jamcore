@@ -15,6 +15,7 @@ import UserProfilePage from './pages/user.tsx'
 import Register from './pages/register.tsx'
 import ConfirmAccount from './pages/confirmaccount.tsx'
 import UpdateTrackPage from './pages/updatetrack.tsx'
+import SearchResults from './pages/searchresults.tsx'
 import { TrackInteractionProvider } from './contexts/trackinteractioncontext.tsx'
 import { CommentProvider } from './contexts/commentcontext.tsx'
 import { useTrack } from './contexts/trackcontext.tsx'
@@ -44,6 +45,7 @@ function AppContent() {
           <Route path='/confirmaccount/:token' element={<ConfirmAccount />} />
           <Route element={<PrivateRoute />}>
             <Route path="/feed" element={<Feed />} />
+            <Route path="/search" element={<SearchResults />} />
             <Route path="/track/:trackid" element={<TrackPage />} />
             <Route path="/user/:id" element={<UserProfilePage />} />
             <Route path="/track/create" element={<CreateTrackPage />} />
