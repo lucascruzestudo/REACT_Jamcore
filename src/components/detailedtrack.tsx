@@ -14,6 +14,10 @@ import {
   FormControlLabel,
   Radio,
   Popover,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -27,6 +31,9 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { DeleteOutline, Edit } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import QueueMusicIcon from '@mui/icons-material/QueueMusic';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import api from '../services/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import ConfirmDialog from './confirmdialog';
@@ -115,7 +122,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
   updatedAt,
   onUpdate,
 }) => {
-  const { isPlaying, currentTime, duration, togglePlayPause, playWithContext, updateTime, currentTrack, setCurrentTrack, setIsPlaying, audioRef } = useTrack();
+  const { isPlaying, currentTime, duration, togglePlayPause, playWithContext, updateTime, currentTrack, setCurrentTrack, setIsPlaying, audioRef, addToQueue, addAfterCurrent } = useTrack();
   const { localLikeCount, localPlayCount, userLiked, incrementPlay, toggleLike } = useTrackInteraction({
     trackId: id,
     initialLikeCount: likeCount,
@@ -129,6 +136,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
   const [commentSent, setCommentSent] = useState(false);
   const [deletedCommentIds, setDeletedCommentIds] = useState<Set<string>>(new Set());
   const [tagsAnchor, setTagsAnchor] = useState<HTMLElement | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number } | null>(null);
   const { user, userProfile } = useUser();
   const navigate = useNavigate();
   const isUploader = user?.id === userId;
@@ -315,6 +323,10 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
 
   return (
     <Box
+      onContextMenu={(e) => {
+        e.preventDefault();
+        setContextMenu({ mouseX: e.clientX + 2, mouseY: e.clientY - 4 });
+      }}
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -545,6 +557,19 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
           >
             copiar link
           </Button>
+          <Button
+            startIcon={<MoreHorizIcon sx={{ fontSize: 18 }} />}
+            variant="text"
+            color="secondary"
+            size="small"
+            sx={{ textTransform: 'none', fontSize: '0.8rem' }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setContextMenu({ mouseX: e.clientX + 2, mouseY: e.clientY - 4 });
+            }}
+          >
+            mais ações
+          </Button>
           {isUploader && (
             <Button
               startIcon={isEditing ? <CloseIcon sx={{ fontSize: 15 }} /> : <Edit sx={{ fontSize: 15 }} />}
@@ -598,6 +623,43 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
           </Button>
         </Box>
       </Box>
+
+      <Menu
+        open={contextMenu !== null}
+        onClose={() => setContextMenu(null)}
+        anchorReference="anchorPosition"
+        anchorPosition={
+          contextMenu !== null
+            ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
+            : undefined
+        }
+        slotProps={{ paper: { sx: { borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', minWidth: 200 } } }}
+      >
+        <MenuItem
+          onClick={() => {
+            addAfterCurrent(trackData);
+            setContextMenu(null);
+          }}
+          dense
+        >
+          <ListItemIcon>
+            <QueueMusicIcon fontSize="small" sx={{ color: '#E93434' }} />
+          </ListItemIcon>
+          <ListItemText primaryTypographyProps={{ fontSize: '0.83rem' }}>tocar a seguir</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            addToQueue(trackData);
+            setContextMenu(null);
+          }}
+          dense
+        >
+          <ListItemIcon>
+            <PlaylistAddIcon fontSize="small" sx={{ color: 'rgba(0,0,0,0.5)' }} />
+          </ListItemIcon>
+          <ListItemText primaryTypographyProps={{ fontSize: '0.83rem' }}>adicionar à fila</ListItemText>
+        </MenuItem>
+      </Menu>
 
       {/* ── Inline edit panel ── */}
       <AnimatePresence>

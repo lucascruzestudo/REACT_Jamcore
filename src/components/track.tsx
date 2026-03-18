@@ -23,6 +23,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import QueueMusicIcon from '@mui/icons-material/QueueMusic';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import { useTrack, Track as TrackItem } from '../contexts/trackcontext';
 import TrackCover from './trackcover';
 import { useNavigate } from 'react-router-dom';
@@ -485,7 +486,7 @@ const Track: React.FC<TrackProps> = ({
 
       {/* Bottom stats bar: actions left, counters right */}
       <Box sx={{ display: 'flex', alignItems: 'center', px: 1.5, py: 0.5 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Tooltip title="copiar link">
             <Button
               startIcon={<LinkIcon sx={{ fontSize: 15 }} />}
@@ -501,6 +502,19 @@ const Track: React.FC<TrackProps> = ({
               copiar link
             </Button>
           </Tooltip>
+          <Button
+            startIcon={<MoreHorizIcon sx={{ fontSize: 18 }} />}
+            variant="text"
+            color="secondary"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              setContextMenu({ mouseX: e.clientX + 2, mouseY: e.clientY - 4 });
+            }}
+            sx={{ color: 'secondary.main', p: 0.5, textTransform: 'none', fontSize: '0.8rem', minWidth: 'auto' }}
+          >
+            mais ações
+          </Button>
         </Box>
 
         <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 1.5 }}>
