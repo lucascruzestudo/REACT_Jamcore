@@ -8,7 +8,7 @@ import Navbar from './components/navbar.tsx'
 import Footer from './components/footer.tsx'
 import { UserProvider } from './contexts/usercontext.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import TrackPage from './pages/trackpage.tsx'
 import CreateTrackPage from './pages/createtrack.tsx'
 import UserProfilePage from './pages/user.tsx'
@@ -19,14 +19,42 @@ import SearchResults from './pages/searchresults.tsx'
 import { TrackInteractionProvider } from './contexts/trackinteractioncontext.tsx'
 import { CommentProvider } from './contexts/commentcontext.tsx'
 import { useTrack } from './contexts/trackcontext.tsx'
+import { useUser } from './contexts/usercontext.tsx'
 import { Box } from '@mui/material'
+import api from './services/api.ts'
 
 export const queryClient = new QueryClient();
 
 function AppContent() {
   const location = useLocation()
-  const { currentTrack } = useTrack()
+  const { currentTrack, volume, setVolume } = useTrack()
+  const { userProfile } = useUser()
   const showNav = location.pathname !== '/login' && location.pathname !== '/register' && !location.pathname.startsWith('/confirmaccount/')
+
+  // ── Sync volume: apply on every profile update (localStorage + API) ───────
+  // lastLoadedVolume tracks the most recent volume received from the server so
+  // the save effect can distinguish "just applied from server" from "user changed".
+  const lastLoadedVolume = useRef<number | null>(null)
+  useEffect(() => {
+    if (userProfile) {
+      const vol = userProfile.volume ?? 1
+      lastLoadedVolume.current = vol
+      setVolume(vol)
+    }
+  }, [userProfile])
+
+  // ── Debounce-save only user-initiated changes ─────────────────────────────
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => {
+    if (lastLoadedVolume.current === null) return         // profile not loaded yet
+    if (volume === lastLoadedVolume.current) return        // just applied from server, skip
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(() => {
+      lastLoadedVolume.current = volume
+      api.patch('Profile/volume', volume).catch(() => {})
+    }, 800)
+    return () => { if (saveTimer.current) clearTimeout(saveTimer.current) }
+  }, [volume])
 
   return (
     <>

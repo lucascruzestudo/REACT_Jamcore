@@ -13,6 +13,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Radio,
+  Popover,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -127,6 +128,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
   const [isCommenting, setIsCommenting] = useState(false);
   const [commentSent, setCommentSent] = useState(false);
   const [deletedCommentIds, setDeletedCommentIds] = useState<Set<string>>(new Set());
+  const [tagsAnchor, setTagsAnchor] = useState<HTMLElement | null>(null);
   const { user, userProfile } = useUser();
   const navigate = useNavigate();
   const isUploader = user?.id === userId;
@@ -386,23 +388,96 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                   {formatTimeAgo(createdAt)}
                 </Typography>
                 {tags.length > 0 && (
-                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                    <Box sx={{ backgroundColor: 'rgba(233,52,52,0.1)', borderRadius: '20px', px: 1.5, py: '2px', border: '1px solid rgba(233,52,52,0.2)' }}>
-                      <Typography variant="caption" color="primary" sx={{ fontWeight: 600, fontSize: '0.68rem' }} noWrap>
+                  <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
+                    <Box
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/search?q=${encodeURIComponent(tags[0])}`);
+                      }}
+                      sx={{
+                        backgroundColor: 'rgba(233,52,52,0.08)',
+                        borderRadius: '6px',
+                        px: 1,
+                        py: '2px',
+                        cursor: 'pointer',
+                        '&:hover': { backgroundColor: 'rgba(233,52,52,0.16)' },
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        color="primary"
+                        sx={{ fontWeight: 600, fontSize: '0.68rem' }}
+                        noWrap
+                      >
                         #{tags[0]}
                       </Typography>
                     </Box>
                     {tags.length > 1 && (
-                      <Tooltip title={tags.slice(1).join(', ')} arrow>
-                        <Box sx={{ backgroundColor: 'rgba(0,0,0,0.08)', borderRadius: '20px', px: 1.5, py: '2px', cursor: 'default' }}>
-                          <Typography variant="caption" sx={{ fontSize: '0.68rem', color: '#555' }}>
-                            +{tags.length - 1}
-                          </Typography>
-                        </Box>
-                      </Tooltip>
+                      <Box
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTagsAnchor(e.currentTarget);
+                        }}
+                        sx={{
+                          backgroundColor: '#F0F0F0',
+                          borderRadius: '6px',
+                          px: 1,
+                          py: '2px',
+                          cursor: 'pointer',
+                          '&:hover': { backgroundColor: '#E0E0E0' },
+                        }}
+                      >
+                        <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.68rem' }}>
+                          +{tags.length - 1}
+                        </Typography>
+                      </Box>
                     )}
                   </Box>
                 )}
+
+                <Popover
+                  open={Boolean(tagsAnchor)}
+                  anchorEl={tagsAnchor}
+                  onClose={() => setTagsAnchor(null)}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                  slotProps={{
+                    paper: {
+                      sx: {
+                        borderRadius: '10px',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                        p: 1.5,
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 0.75,
+                        maxWidth: 240,
+                      },
+                    },
+                  }}
+                >
+                  {tags.slice(1).map((tag) => (
+                    <Box
+                      key={tag}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setTagsAnchor(null);
+                        navigate(`/search?q=${encodeURIComponent(tag)}`);
+                      }}
+                      sx={{
+                        backgroundColor: 'rgba(233,52,52,0.08)',
+                        borderRadius: '6px',
+                        px: 1,
+                        py: '2px',
+                        cursor: 'pointer',
+                        '&:hover': { backgroundColor: 'rgba(233,52,52,0.16)' },
+                      }}
+                    >
+                      <Typography variant="caption" color="primary" sx={{ fontWeight: 600, fontSize: '0.72rem' }}>
+                        #{tag}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Popover>
               </Box>
             </Box>
           </Box>

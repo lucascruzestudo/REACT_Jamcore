@@ -8,6 +8,7 @@ interface UserProfile {
   bio: string;
   location: string;
   profilePictureUrl: string;
+  volume: number;
   updatedAt: string;
 }
 

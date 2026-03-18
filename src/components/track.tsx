@@ -11,6 +11,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Popover,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -111,6 +112,7 @@ const Track: React.FC<TrackProps> = ({
   const [isPosting, setIsPosting] = useState(false);
   const [commentSent, setCommentSent] = useState(false);
   const [contextMenu, setContextMenu] = useState<{ mouseX: number; mouseY: number } | null>(null);
+  const [tagsAnchor, setTagsAnchor] = useState<HTMLElement | null>(null);
   const { user, userProfile } = useUser();
   const { addComment, getComments } = useCommentContext();
   const navigate = useNavigate();
@@ -274,11 +276,14 @@ const Track: React.FC<TrackProps> = ({
               {tags.length > 0 && (
                 <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
                   <Box
+                    onClick={(e) => { e.stopPropagation(); navigate(`/search?q=${encodeURIComponent(tags[0])}`); }}
                     sx={{
                       backgroundColor: 'rgba(233,52,52,0.08)',
                       borderRadius: '6px',
                       px: 1,
                       py: '2px',
+                      cursor: 'pointer',
+                      '&:hover': { backgroundColor: 'rgba(233,52,52,0.16)' },
                     }}
                   >
                     <Typography
@@ -291,24 +296,53 @@ const Track: React.FC<TrackProps> = ({
                     </Typography>
                   </Box>
                   {tags.length > 1 && (
-                    <Tooltip title={tags.slice(1).join(', ')} arrow>
-                      <Box
-                        sx={{
-                          backgroundColor: '#F0F0F0',
-                          borderRadius: '6px',
-                          px: 1,
-                          py: '2px',
-                          cursor: 'default',
-                        }}
-                      >
-                        <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.68rem' }}>
-                          +{tags.length - 1}
-                        </Typography>
-                      </Box>
-                    </Tooltip>
+                    <Box
+                      onClick={(e) => { e.stopPropagation(); setTagsAnchor(e.currentTarget); }}
+                      sx={{
+                        backgroundColor: '#F0F0F0',
+                        borderRadius: '6px',
+                        px: 1,
+                        py: '2px',
+                        cursor: 'pointer',
+                        '&:hover': { backgroundColor: '#E0E0E0' },
+                      }}
+                    >
+                      <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.68rem' }}>
+                        +{tags.length - 1}
+                      </Typography>
+                    </Box>
                   )}
                 </Box>
               )}
+
+              {/* Popover with remaining tags */}
+              <Popover
+                open={Boolean(tagsAnchor)}
+                anchorEl={tagsAnchor}
+                onClose={() => setTagsAnchor(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                slotProps={{ paper: { sx: { borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', p: 1.5, display: 'flex', flexWrap: 'wrap', gap: 0.75, maxWidth: 240 } } }}
+              >
+                {tags.slice(1).map((tag) => (
+                  <Box
+                    key={tag}
+                    onClick={(e) => { e.stopPropagation(); setTagsAnchor(null); navigate(`/search?q=${encodeURIComponent(tag)}`); }}
+                    sx={{
+                      backgroundColor: 'rgba(233,52,52,0.08)',
+                      borderRadius: '6px',
+                      px: 1,
+                      py: '2px',
+                      cursor: 'pointer',
+                      '&:hover': { backgroundColor: 'rgba(233,52,52,0.16)' },
+                    }}
+                  >
+                    <Typography variant="caption" color="primary" sx={{ fontWeight: 600, fontSize: '0.72rem' }}>
+                      #{tag}
+                    </Typography>
+                  </Box>
+                ))}
+              </Popover>
             </Box>
           </Box>
 

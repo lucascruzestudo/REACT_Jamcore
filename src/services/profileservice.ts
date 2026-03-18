@@ -6,6 +6,7 @@ interface UserProfile {
     bio: string;
     location: string;
     profilePictureUrl: string;
+    volume: number;
 }
 
 export const getUserProfile = async (): Promise<UserProfile> => {
