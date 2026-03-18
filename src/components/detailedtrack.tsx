@@ -344,7 +344,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 
           {/* Top row: play + info block */}
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: { xs: 1, sm: 1.5 }, flex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: { xs: 1, sm: 1.5 } }}>
 
             {/* Play button */}
             <IconButton
@@ -494,7 +494,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
           </Box>
 
           {/* Waveform */}
-          <Box sx={{ mt: { xs: 0.5, sm: 1 } }}>
+          <Box sx={{ mt: { xs: 2, sm: 4 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
             <WaveformVisualizer
               audioUrl={audioFileUrl}
               currentTime={isActiveTrack ? currentTime : 0}
@@ -504,10 +504,10 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
                 if (isActiveTrack) { updateTime(time); return; }
                 playWithContext(trackData, [trackData], 0);
               }}
-              height={100}
+              height={120}
               unplayedColor="rgba(0,0,0,0.12)"
             />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: { xs: 0.5, sm: 1.5 }, pb: 1.5 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 'auto', pt: { xs: 0.5, sm: 1.5 }, pb: 1.5 }}>
               <Typography variant="caption" sx={{ fontSize: '0.65rem', color: '#888' }}>{displayCurrentTime}</Typography>
               <Typography variant="caption" sx={{ fontSize: '0.65rem', color: '#888' }}>{originalDuration}</Typography>
             </Box>
@@ -518,7 +518,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
         <Box
           sx={{
             flexShrink: 0,
-            width: { xs: '100%', sm: 225 },
+            width: { xs: '100%', sm: 275 },
             alignSelf: 'stretch',
             borderRadius: '8px',
             overflow: 'hidden',
@@ -526,7 +526,7 @@ const DetailedTrack: React.FC<DetailedTrackProps> = ({
             cursor: 'pointer',
             mb: 1,
             display: 'flex',
-            height: { xs: 'auto', sm: 225 },
+            height: { xs: 'auto', sm: 275 },
           }}
           onClick={() => setModalOpen(true)}
         >
