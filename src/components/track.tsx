@@ -237,7 +237,7 @@ const Track: React.FC<TrackProps> = ({
                   letterSpacing: '0.02em',
                   fontWeight: 600,
                   cursor: 'pointer',
-                  display: 'block',
+                  width: 'fit-content',
                   '&:hover': { color: 'primary.main' },
                 }}
                 onClick={(e) => {
@@ -257,6 +257,7 @@ const Track: React.FC<TrackProps> = ({
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
+                  width: 'fit-content',
                   '&:hover': { color: 'primary.main' },
                 }}
                 onClick={(e) => {
