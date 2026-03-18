@@ -1,4 +1,5 @@
 import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import ScrollToTop from './components/scrolltotop'
 import { ToastContainer } from 'react-toastify'
 import Login from './pages/login.tsx'
 import PrivateRoute from './routes/private-route'
@@ -110,6 +111,7 @@ export default function App() {
           <TrackInteractionProvider>
             <CommentProvider>
               <Router>
+                <ScrollToTop />
                 <AppContent />
                 <ToastContainer />
               </Router>
