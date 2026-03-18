@@ -25,8 +25,8 @@ const CompactTrackSkeleton: React.FC = () => (
 
     {/* Counts */}
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, flexShrink: 0 }}>
-      <Skeleton variant="rounded" width={32} height={18} sx={{ borderRadius: '5px' }} />
-      <Skeleton variant="rounded" width={32} height={18} sx={{ borderRadius: '5px' }} />
+      <Skeleton variant="rounded" width={42} height={22} sx={{ borderRadius: '5px' }} />
+      <Skeleton variant="rounded" width={42} height={22} sx={{ borderRadius: '5px' }} />
     </Box>
   </Box>
 );

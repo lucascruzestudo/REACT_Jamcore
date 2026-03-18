@@ -4,6 +4,8 @@ import { useForm, Controller } from "react-hook-form";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import EditIcon from '@mui/icons-material/Edit';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 
 import TrackCover from "../components/trackcover";
 import { useUser } from "../contexts/usercontext";
@@ -12,7 +14,7 @@ import api from "../services/api";
 import { motion } from "framer-motion";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { cropToSquare, publicUrl } from "../utils/imageUtils";
-import { useQuery, useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useInfiniteQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import Track from "../components/track";
 import TrackSkeleton from "../components/trackskeleton";
 import UserComments from "../components/usercomments";
@@ -21,6 +23,7 @@ import RecentLikes from "../components/userlikes";
 import CompactTrackSkeleton from "../components/compacttrackskeleton";
 import UserProfileSkeleton from "./userskeleton";
 import ProfileCommentsPanel from "../components/profilecommentspanel";
+import UserFollowPanel from "../components/userfollowpanel";
 import type { Track as TrackItem } from '../contexts/trackcontext';
 
 interface UserProfile {
@@ -31,6 +34,8 @@ interface UserProfile {
     location: string;
     profilePictureUrl: string;
     updatedAt: string;
+    followerCount?: number;
+    followingCount?: number;
 }
 
 const UserProfilePage: React.FC = () => {
@@ -44,7 +49,7 @@ const UserProfilePage: React.FC = () => {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [avatarModalOpen, setAvatarModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'jams' | 'comments'>('jams');
+    const [activeTab, setActiveTab] = useState<'jams' | 'comments' | 'following' | 'followers'>('jams');
     const [profileCommentsCount, setProfileCommentsCount] = useState(0);
     const loaderRef = useRef(null);
 
@@ -72,7 +77,14 @@ const UserProfilePage: React.FC = () => {
         queryKey: ['userProfile', id],
         queryFn: async () => {
             const response = await api.get(`Profile/${id}`);
-            return response.data.data.userProfile;
+            const profile = response.data.data.userProfile;
+            console.log('Profile response:', profile);
+            return {
+                ...profile,
+                // Handle both camelCase and PascalCase
+                followerCount: profile.followerCount ?? profile.FollowerCount ?? 0,
+                followingCount: profile.followingCount ?? profile.FollowingCount ?? 0,
+            };
         },
         enabled: !!id,
     });
@@ -145,6 +157,38 @@ const UserProfilePage: React.FC = () => {
         enabled: !!userProfile?.id,
     });
 
+    // Follow/Unfollow queries and mutations
+    const { data: isFollowingData, refetch: refetchIsFollowing } = useQuery({
+        queryKey: ['isFollowing', id],
+        queryFn: () => api.get('UserFollow/isFollowing', { params: { followedUserId: id } }).then((r) => r.data.data.isFollowing),
+        enabled: !!id && user?.id !== id,
+    });
+
+    const followMutation = useMutation({
+        mutationFn: () => api.post('UserFollow', { followedUserId: id }),
+        onMutate: () => {
+            queryClient.setQueryData(['isFollowing', id], true);
+        },
+        onSuccess: () => {
+            refetchIsFollowing();
+            queryClient.invalidateQueries({ queryKey: ['userProfile', id] });
+        },
+    });
+
+    const unfollowMutation = useMutation({
+        mutationFn: () => api.delete('UserFollow', { data: { followedUserId: id } }),
+        onMutate: () => {
+            queryClient.setQueryData(['isFollowing', id], false);
+        },
+        onSuccess: () => {
+            refetchIsFollowing();
+            queryClient.invalidateQueries({ queryKey: ['userProfile', id] });
+        },
+    });
+
+    const isFollowing = isFollowingData ?? false;
+    const isCurrentUser = user?.id === userProfile?.id;
+
     useEffect(() => {
         if (userProfile) {
             reset({
@@ -216,8 +260,6 @@ const UserProfilePage: React.FC = () => {
 
         return !hasChanges;
     };
-
-    const isCurrentUser = user?.id === userProfile?.id;
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -341,7 +383,7 @@ const UserProfilePage: React.FC = () => {
                 </Box>
 
                 <Box sx={{ flex: 1, width: '100%' }}>
-                    <form onSubmit={handleSubmit(onSubmit)}>
+                    <form id="profile-form" onSubmit={handleSubmit(onSubmit)}>
                         {/* Nome */}
                         {isEditing ? (
                             <Controller
@@ -407,6 +449,8 @@ const UserProfilePage: React.FC = () => {
                                         fullWidth
                                         multiline
                                         placeholder="escreva sua bio..."
+                                        helperText={`${bioLength}/500`}
+                                        FormHelperTextProps={{ sx: { textAlign: 'right', color: '#bbb', mt: 0.5 } }}
                                         inputProps={{ maxLength: 500, style: { fontSize: '1rem', color: '#444', lineHeight: 1.65 } }}
                                         sx={{ mt: 0.5 }}
                                     />
@@ -421,61 +465,34 @@ const UserProfilePage: React.FC = () => {
                                 nenhuma bio ainda. clique em editar para adicionar.
                             </Typography>
                         ) : null}
-
-                        {/* Contador de bio + ações */}
-                        {isEditing && (
-                            <Box sx={{ mt: 2.5 }}>
-                                <Typography variant="caption" sx={{ color: '#bbb', display: 'block', textAlign: 'right', mb: 1.5 }}>
-                                    {bioLength}/500
-                                </Typography>
-                                <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end' }}>
-                                    <Button
-                                        variant="text"
-                                        size="small"
-                                        onClick={() => { setIsEditing(false); setImagePreview(null); setImage(null); reset({ displayName: userProfile.displayName, bio: userProfile.bio, location: userProfile.location, profilePictureUrl: userProfile.profilePictureUrl }); }}
-                                        sx={{ borderRadius: '8px', color: '#888', textTransform: 'none' }}
-                                    >
-                                        cancelar
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        variant="contained"
-                                        size="small"
-                                        disabled={isSaving || isButtonDisabled()}
-                                        sx={{ borderRadius: '8px', boxShadow: 'none', fontWeight: 700, px: 3, textTransform: 'none' }}
-                                    >
-                                        {isSaving ? 'salvando...' : 'salvar'}
-                                    </Button>
-                                </Box>
-                            </Box>
-                        )}
-
-                        {/* Botão editar (modo view) */}
-                        {isCurrentUser && !isEditing && (
-                            <Box sx={{ mt: 2 }}>
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    startIcon={<EditIcon />}
-                                    onClick={() => setIsEditing(true)}
-                                    sx={{ borderRadius: '8px', borderColor: '#E93434', color: '#E93434', textTransform: 'none', '&:hover': { borderColor: '#c62828', backgroundColor: 'rgba(233,52,52,0.04)' } }}
-                                >
-                                    editar perfil
-                                </Button>
-                            </Box>
-                        )}
                     </form>
                 </Box>
             </Box>
 
 
-            <Box sx={{ mb: 2 }}>
+            <Box
+                sx={{
+                    mb: 2,
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    alignItems: { xs: 'stretch', md: 'center' },
+                    justifyContent: 'space-between',
+                    gap: { xs: 1.5, md: 0 },
+                }}
+            >
                 <Tabs
                     value={activeTab}
-                    onChange={(_, value: 'jams' | 'comments') => setActiveTab(value)}
+                    onChange={(_, value: 'jams' | 'comments' | 'following' | 'followers') => setActiveTab(value)}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    allowScrollButtonsMobile
                     sx={{
                         minHeight: 40,
                         '& .MuiTabs-indicator': { backgroundColor: '#E93434', height: 2 },
+                        flex: 1,
+                        width: { xs: '100%', md: 'auto' },
+                        overflowX: { xs: 'auto', md: 'visible' },
+                        '& .MuiTab-root': { minWidth: { xs: 140, md: 120 } },
                     }}
                 >
                     <Tab
@@ -500,7 +517,113 @@ const UserProfilePage: React.FC = () => {
                             '&.Mui-selected': { color: '#E93434' },
                         }}
                     />
+                    <Tab
+                        value="following"
+                        label={`seguindo (${userProfile.followingCount ?? 0})`}
+                        sx={{
+                            textTransform: 'none',
+                            fontWeight: 700,
+                            minHeight: 40,
+                            color: '#666',
+                            '&.Mui-selected': { color: '#E93434' },
+                        }}
+                    />
+                    <Tab
+                        value="followers"
+                        label={`seguidores (${userProfile.followerCount ?? 0})`}
+                        sx={{
+                            textTransform: 'none',
+                            fontWeight: 700,
+                            minHeight: 40,
+                            color: '#666',
+                            '&.Mui-selected': { color: '#E93434' },
+                        }}
+                    />
                 </Tabs>
+
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        gap: 1,
+                        alignItems: { xs: 'stretch', sm: 'center' },
+                        justifyContent: 'flex-end',
+                        width: { xs: '100%', sm: 'auto' },
+                    }}
+                >
+                    {isEditing && (
+                        <>
+                            <Button
+                                variant="text"
+                                size="small"
+                                onClick={() => { setIsEditing(false); setImagePreview(null); setImage(null); reset({ displayName: userProfile.displayName, bio: userProfile.bio, location: userProfile.location, profilePictureUrl: userProfile.profilePictureUrl }); }}
+                                sx={{ borderRadius: '8px', color: '#888', textTransform: 'none', width: { xs: '100%', sm: 'auto' } }}
+                            >
+                                cancelar
+                            </Button>
+                            <Button
+                                form="profile-form"
+                                type="submit"
+                                variant="contained"
+                                size="small"
+                                disabled={isSaving || isButtonDisabled()}
+                                sx={{ borderRadius: '8px', boxShadow: 'none', fontWeight: 700, px: 3, textTransform: 'none', width: { xs: '100%', sm: 'auto' } }}
+                            >
+                                {isSaving ? 'salvando...' : 'salvar'}
+                            </Button>
+                        </>
+                    )}
+
+                    {isCurrentUser && !isEditing && (
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            startIcon={<EditIcon />}
+                            onClick={() => setIsEditing(true)}
+                            sx={{
+                                borderRadius: '8px',
+                                borderColor: '#E93434',
+                                color: '#E93434',
+                                textTransform: 'none',
+                                '&:hover': { borderColor: '#c62828', backgroundColor: 'rgba(233,52,52,0.04)' },
+                                width: { xs: '100%', sm: 'auto' },
+                            }}
+                        >
+                            editar perfil
+                        </Button>
+                    )}
+
+                    {!isCurrentUser && (
+                        <Button
+                            variant={isFollowing ? "outlined" : "contained"}
+                            size="small"
+                            startIcon={isFollowing ? <PersonRemoveIcon /> : <PersonAddIcon />}
+                            onClick={() => {
+                                isFollowing ? unfollowMutation.mutate() : followMutation.mutate();
+                            }}
+                            disabled={followMutation.isPending || unfollowMutation.isPending}
+                            sx={{
+                                borderRadius: '8px',
+                                textTransform: 'none',
+                                fontWeight: 700,
+                                width: { xs: '100%', sm: 'auto' },
+                                ...(isFollowing && {
+                                    borderColor: '#E93434',
+                                    color: '#E93434',
+                                    '&:hover': { borderColor: '#c62828', backgroundColor: 'rgba(233,52,52,0.04)' },
+                                }),
+                                ...(!isFollowing && {
+                                    backgroundColor: '#E93434',
+                                    '&:hover': { backgroundColor: '#c62828' },
+                                }),
+                            }}
+                        >
+                            {followMutation.isPending || unfollowMutation.isPending
+                                ? isFollowing ? 'deixando...' : 'seguindo...'
+                                : isFollowing ? 'deixar de seguir' : 'seguir'}
+                        </Button>
+                    )}
+                </Box>
             </Box>
 
             <Grid container spacing={3}>
@@ -553,12 +676,16 @@ const UserProfilePage: React.FC = () => {
                                 </Typography>
                             )}
                         </>
-                    ) : (
+                    ) : activeTab === 'comments' ? (
                         <ProfileCommentsPanel
                             userProfileId={userProfile.id}
                             profileOwnerUserId={userProfile.id}
                             onCountChange={setProfileCommentsCount}
                         />
+                    ) : activeTab === 'following' ? (
+                        <UserFollowPanel userId={id!} type="following" />
+                    ) : (
+                        <UserFollowPanel userId={id!} type="followers" />
                     )}
                 </Grid>
 
