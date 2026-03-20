@@ -296,6 +296,126 @@ export const TrackProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
     }, [volume]);
 
+    // ── Media Session API ─────────────────────────────────────────────────────
+    // Updates the OS/browser media overlay (iOS lock screen, Android notification,
+    // Windows / macOS media center) whenever the active track changes.
+    useEffect(() => {
+        if (!('mediaSession' in navigator) || !currentTrack) return;
+
+        // imageUrl is an absolute Supabase URL; pass it directly as artwork.
+        const artworkUrl = currentTrack.imageUrl || '';
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: currentTrack.title,
+            artist: currentTrack.username,
+            album: 'Jamcore',
+            artwork: artworkUrl
+                ? [
+                      { src: artworkUrl, sizes: '96x96',   type: 'image/jpeg' },
+                      { src: artworkUrl, sizes: '128x128', type: 'image/jpeg' },
+                      { src: artworkUrl, sizes: '192x192', type: 'image/jpeg' },
+                      { src: artworkUrl, sizes: '256x256', type: 'image/jpeg' },
+                      { src: artworkUrl, sizes: '384x384', type: 'image/jpeg' },
+                      { src: artworkUrl, sizes: '512x512', type: 'image/jpeg' },
+                  ]
+                : [],
+        });
+    }, [currentTrack]);
+
+    // Sync playback state so the overlay shows the correct play/pause icon.
+    useEffect(() => {
+        if (!('mediaSession' in navigator)) return;
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }, [isPlaying]);
+
+    // Keep the lock-screen progress bar in sync.
+    useEffect(() => {
+        if (!('mediaSession' in navigator) || !duration) return;
+        try {
+            navigator.mediaSession.setPositionState({
+                duration,
+                playbackRate: audioRef.current?.playbackRate ?? 1,
+                position: Math.min(currentTime, duration),
+            });
+        } catch {
+            // setPositionState is not supported on all browsers — fail silently.
+        }
+    }, [currentTime, duration]);
+
+    // Register hardware/OS media-key handlers once on mount.
+    useEffect(() => {
+        if (!('mediaSession' in navigator)) return;
+
+        navigator.mediaSession.setActionHandler('play', () => {
+            audioRef.current?.play().catch(console.error);
+            setIsPlaying(true);
+        });
+
+        navigator.mediaSession.setActionHandler('pause', () => {
+            audioRef.current?.pause();
+            setIsPlaying(false);
+        });
+
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+            const nextIndex = playlistIndexRef.current + 1;
+            if (nextIndex < playlistRef.current.length) {
+                playlistIndexRef.current = nextIndex;
+                setPlaylistIndex(nextIndex);
+                _startTrack(playlistRef.current[nextIndex]);
+            }
+        });
+
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+            if (audioRef.current && audioRef.current.currentTime > 3) {
+                audioRef.current.currentTime = 0;
+                setCurrentTime(0);
+            } else {
+                const prevIndex = playlistIndexRef.current - 1;
+                if (prevIndex >= 0) {
+                    playlistIndexRef.current = prevIndex;
+                    setPlaylistIndex(prevIndex);
+                    _startTrack(playlistRef.current[prevIndex]);
+                } else if (audioRef.current) {
+                    audioRef.current.currentTime = 0;
+                    setCurrentTime(0);
+                }
+            }
+        });
+
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+            if (details.seekTime !== undefined && audioRef.current) {
+                audioRef.current.currentTime = details.seekTime;
+                setCurrentTime(details.seekTime);
+            }
+        });
+
+        navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+            if (audioRef.current) {
+                const skip = details.seekOffset ?? 10;
+                audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - skip);
+                setCurrentTime(audioRef.current.currentTime);
+            }
+        });
+
+        navigator.mediaSession.setActionHandler('seekforward', (details) => {
+            if (audioRef.current) {
+                const skip = details.seekOffset ?? 10;
+                const next = Math.min(audioRef.current.duration || Infinity, audioRef.current.currentTime + skip);
+                audioRef.current.currentTime = next;
+                setCurrentTime(next);
+            }
+        });
+
+        return () => {
+            (
+                ['play', 'pause', 'nexttrack', 'previoustrack', 'seekto', 'seekbackward', 'seekforward'] as MediaSessionAction[]
+            ).forEach((action) => {
+                try { navigator.mediaSession.setActionHandler(action, null); } catch { /* unsupported */ }
+            });
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+    // ─────────────────────────────────────────────────────────────────────────
+
     return (
         <TrackContext.Provider value={{ isPlaying, currentTime, duration, volume, currentTrack, togglePlayPause, playWithContext, updateTime, setCurrentTime, setVolume, setIsPlaying, setCurrentTrack, audioRef, playlist, playlistIndex, setPlaylist, playNext, playPrevious, addToQueue, addAfterCurrent, playTrackAtIndex }}>
             {children}

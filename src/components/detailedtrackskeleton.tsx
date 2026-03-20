@@ -17,7 +17,7 @@ const DetailedTrackSkeleton: React.FC = () => (
     <Box sx={{ px: { xs: 2, sm: 3 }, pt: { xs: 2.5, sm: 3 }, pb: 0, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'stretch', gap: { xs: 1.5, sm: 2 } }}>
 
       {/* Left: play + [title | date+tags] + waveform */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
+      <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 
         {/* Top row: play + info */}
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: { xs: 1, sm: 1.5 } }}>
@@ -37,9 +37,9 @@ const DetailedTrackSkeleton: React.FC = () => (
         </Box>
 
         {/* Waveform */}
-        <Box sx={{ mt: 1.5 }}>
-          <Skeleton variant="rounded" width="100%" height={52} sx={{ borderRadius: '6px' }} />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.25, pb: 1.5 }}>
+        <Box sx={{ mt: { xs: 2, sm: 4 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Skeleton variant="rounded" width="100%" height={120} sx={{ borderRadius: '6px' }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 'auto', pt: { xs: 0.5, sm: 1.5 }, pb: 1.5 }}>
             <Skeleton variant="text" width={28} height={12} />
             <Skeleton variant="text" width={28} height={12} />
           </Box>
@@ -49,7 +49,7 @@ const DetailedTrackSkeleton: React.FC = () => (
       {/* Right: square cover only (desktop column, mobile full-width) */}
       <Skeleton
         variant="rounded"
-        sx={{ flexShrink: 0, width: { xs: '100%', sm: 150 }, alignSelf: 'stretch', height: { xs: 'auto', sm: 150 }, borderRadius: '8px', mb: 1 }}
+        sx={{ flexShrink: 0, width: { xs: '100%', sm: 275 }, alignSelf: 'stretch', height: { xs: 'auto', sm: 275 }, borderRadius: '8px', mb: 1 }}
       />
     </Box>
 

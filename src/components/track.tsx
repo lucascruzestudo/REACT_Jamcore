@@ -190,9 +190,7 @@ const Track: React.FC<TrackProps> = ({
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        maxWidth: { xs: 600, sm: 700 },
-        width: { xs: '100%', sm: 700 },
-        m: 'auto',
+        width: '100%',
         backgroundColor: '#fff',
         borderRadius: '14px',
         border: '1px solid rgba(0,0,0,0.07)',
@@ -203,17 +201,33 @@ const Track: React.FC<TrackProps> = ({
       }}
     >
       {/* Main content row */}
-      <Box sx={{ display: 'flex', p: 2, gap: 2, alignItems: 'flex-start' }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '90px 1fr', sm: '175px 1fr' },
+          gridTemplateAreas: {
+            xs: '"photo meta" "wave wave" "comm comm"',
+            sm: '"photo meta" "photo wave" "photo comm"',
+          },
+          p: { xs: 1, sm: 2 },
+          columnGap: { xs: 1.5, sm: 2 },
+          rowGap: { xs: 1, sm: 1 },
+          alignItems: 'start',
+          width: '100%',
+        }}
+      >
         {/* Cover image */}
         <Box
           sx={{
-            width: 120,
-            height: 120,
+            gridArea: 'photo',
+            width: { xs: 90, sm: 175 },
+            height: { xs: 90, sm: 175 },
             flexShrink: 0,
             borderRadius: '8px',
             overflow: 'hidden',
             border: '1px solid rgba(0,0,0,0.08)',
             cursor: 'pointer',
+            alignSelf: 'start',
           }}
           onClick={(e) => {
             e.stopPropagation();
@@ -227,129 +241,146 @@ const Track: React.FC<TrackProps> = ({
           />
         </Box>
 
-        {/* Right content */}
-        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {/* Top row: artist / title :: date / tag */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Box sx={{ minWidth: 0, flex: 1, pr: 1 }}>
-              <Typography
-                variant="caption"
-                sx={{
-                  color: '#888',
-                  letterSpacing: '0.02em',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'block',
-                  '&:hover': { color: 'primary.main' },
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/user/${userId}`);
-                }}
-                noWrap
-              >
-                {username || ''}
-              </Typography>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 700,
-                  lineHeight: 1.25,
-                  cursor: 'pointer',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  '&:hover': { color: 'primary.main' },
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/track/${id}`);
-                }}
-              >
-                {title || ''}
-              </Typography>
-            </Box>
-
-            {/* Date + tag */}
-            <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
-              <Typography variant="caption" color="textSecondary" noWrap sx={{ display: 'block' }}>
-                {formatTimeAgo(createdAt)}
-              </Typography>
-              {tags.length > 0 && (
-                <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, justifyContent: 'flex-end' }}>
-                  <Box
-                    onClick={(e) => { e.stopPropagation(); navigate(`/search?q=${encodeURIComponent(tags[0])}`); }}
-                    sx={{
-                      backgroundColor: 'rgba(233,52,52,0.08)',
-                      borderRadius: '6px',
-                      px: 1,
-                      py: '2px',
-                      cursor: 'pointer',
-                      '&:hover': { backgroundColor: 'rgba(233,52,52,0.16)' },
-                    }}
-                  >
-                    <Typography
-                      variant="caption"
-                      color="primary"
-                      sx={{ fontWeight: 600, fontSize: '0.68rem' }}
-                      noWrap
-                    >
-                      #{tags[0]}
-                    </Typography>
-                  </Box>
-                  {tags.length > 1 && (
-                    <Box
-                      onClick={(e) => { e.stopPropagation(); setTagsAnchor(e.currentTarget); }}
-                      sx={{
-                        backgroundColor: '#F0F0F0',
-                        borderRadius: '6px',
-                        px: 1,
-                        py: '2px',
-                        cursor: 'pointer',
-                        '&:hover': { backgroundColor: '#E0E0E0' },
-                      }}
-                    >
-                      <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.68rem' }}>
-                        +{tags.length - 1}
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              )}
-
-              {/* Popover with remaining tags */}
-              <Popover
-                open={Boolean(tagsAnchor)}
-                anchorEl={tagsAnchor}
-                onClose={() => setTagsAnchor(null)}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                slotProps={{ paper: { sx: { borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', p: 1.5, display: 'flex', flexWrap: 'wrap', gap: 0.75, maxWidth: 240 } } }}
-              >
-                {tags.slice(1).map((tag) => (
-                  <Box
-                    key={tag}
-                    onClick={(e) => { e.stopPropagation(); setTagsAnchor(null); navigate(`/search?q=${encodeURIComponent(tag)}`); }}
-                    sx={{
-                      backgroundColor: 'rgba(233,52,52,0.08)',
-                      borderRadius: '6px',
-                      px: 1,
-                      py: '2px',
-                      cursor: 'pointer',
-                      '&:hover': { backgroundColor: 'rgba(233,52,52,0.16)' },
-                    }}
-                  >
-                    <Typography variant="caption" color="primary" sx={{ fontWeight: 600, fontSize: '0.72rem' }}>
-                      #{tag}
-                    </Typography>
-                  </Box>
-                ))}
-              </Popover>
-            </Box>
+        {/* Meta */}
+        <Box sx={{ gridArea: 'meta', minWidth: 0, display: 'flex', flexDirection: 'column', gap: { xs: 0.25, sm: 0.35 }, justifyContent: 'flex-start', alignItems: 'stretch' }}>
+          {/* Line 1: Author + Time */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1, width: '100%' }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: '#888',
+                letterSpacing: '0.02em',
+                fontWeight: 600,
+                cursor: 'pointer',
+                minWidth: 0,
+                '&:hover': { color: 'primary.main' },
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/user/${userId}`);
+              }}
+            >
+              {username || ''}
+            </Typography>
+            <Typography variant="caption" color="textSecondary" sx={{ fontSize: { xs: '0.65rem', sm: '0.75rem' }, flexShrink: 0, whiteSpace: 'nowrap' }}>
+              {formatTimeAgo(createdAt)}
+            </Typography>
           </Box>
 
-          {/* Waveform row */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* Line 2: Title + Tags */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1, width: '100%' }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 700,
+                lineHeight: 1.2,
+                cursor: 'pointer',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0,
+                flex: 1,
+                fontSize: { xs: '0.85rem', sm: '1rem' },
+                color: '#000',
+                transition: 'color 0.15s',
+                '&:hover': { color: 'primary.main' },
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/track/${id}`);
+              }}
+            >
+              {title || ''}
+            </Typography>
+
+            {/* Tags */}
+            {tags.length > 0 && (
+              <Box sx={{ display: 'flex', gap: 0.5, flexShrink: 0, justifyContent: 'flex-end', alignItems: 'center' }}>
+                <Box
+                  onClick={(e) => { e.stopPropagation(); navigate(`/search?q=${encodeURIComponent(tags[0])}`); }}
+                  sx={{
+                    backgroundColor: 'rgba(233,52,52,0.08)',
+                    borderRadius: '4px',
+                    px: 0.75,
+                    py: '1px',
+                    cursor: 'pointer',
+                    '&:hover': { backgroundColor: 'rgba(233,52,52,0.16)' },
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    color="primary"
+                    sx={{ fontWeight: 600, fontSize: { xs: '0.6rem', sm: '0.68rem' } }}
+                    noWrap
+                  >
+                    #{tags[0]}
+                  </Typography>
+                </Box>
+                {tags.length > 1 && (
+                  <Box
+                    onClick={(e) => { e.stopPropagation(); setTagsAnchor(e.currentTarget); }}
+                    sx={{
+                      backgroundColor: '#F0F0F0',
+                      borderRadius: '4px',
+                      px: 0.75,
+                      py: '1px',
+                      cursor: 'pointer',
+                      '&:hover': { backgroundColor: '#E0E0E0' },
+                    }}
+                  >
+                    <Typography variant="caption" color="textSecondary" sx={{ fontSize: { xs: '0.6rem', sm: '0.68rem' } }}>
+                      +{tags.length - 1}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            )}
+          </Box>
+
+          {/* Popover with remaining tags */}
+          <Popover
+            open={Boolean(tagsAnchor)}
+            anchorEl={tagsAnchor}
+            onClose={() => setTagsAnchor(null)}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            slotProps={{ paper: { sx: { borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', p: 1.5, display: 'flex', flexWrap: 'wrap', gap: 0.75, maxWidth: 240 } } }}
+          >
+            {tags.slice(1).map((tag) => (
+              <Box
+                key={tag}
+                onClick={(e) => { e.stopPropagation(); setTagsAnchor(null); navigate(`/search?q=${encodeURIComponent(tag)}`); }}
+                sx={{
+                  backgroundColor: 'rgba(233,52,52,0.08)',
+                  borderRadius: '6px',
+                  px: 1,
+                  py: '2px',
+                  cursor: 'pointer',
+                  '&:hover': { backgroundColor: 'rgba(233,52,52,0.16)' },
+                }}
+              >
+                <Typography variant="caption" color="primary" sx={{ fontWeight: 600, fontSize: '0.72rem' }}>
+                  #{tag}
+                </Typography>
+              </Box>
+            ))}
+          </Popover>
+        </Box>
+
+        {/* Waveform row */}
+        <Box
+          sx={{
+            gridArea: 'wave',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            minWidth: 0,
+          }}
+        >
             <IconButton
               size="small"
               onClick={(e) => { e.stopPropagation(); playWithContext(trackData, playlist && playlistIndex !== undefined ? playlist : [trackData], playlist && playlistIndex !== undefined ? playlistIndex : 0); incrementPlay(); }}
@@ -357,8 +388,8 @@ const Track: React.FC<TrackProps> = ({
               sx={{
                 bgcolor: 'primary.main',
                 color: '#fff',
-                width: 32,
-                height: 32,
+                width: { xs: 40, sm: 32 },
+                height: { xs: 40, sm: 32 },
                 flexShrink: 0,
                 '&:hover': { bgcolor: 'primary.dark' },
               }}
@@ -409,13 +440,14 @@ const Track: React.FC<TrackProps> = ({
           {user && (
             <Box
               sx={{
+                gridArea: 'comm',
                 border: '1px solid rgba(0,0,0,0.10)',
                 borderRadius: '24px',
-                px: 1.5,
-                py: 0.5,
+                px: { xs: 1, sm: 1.5 },
+                py: { xs: 0.75, sm: 0.5 },
                 bgcolor: '#FAFAFA',
                 overflow: 'hidden',
-                minHeight: 36,
+                minHeight: { xs: 40, sm: 36 },
                 display: 'flex',
                 alignItems: 'center',
               }}
@@ -479,7 +511,6 @@ const Track: React.FC<TrackProps> = ({
               </AnimatePresence>
             </Box>
           )}
-        </Box>
       </Box>
 
       {/* Divider */}
