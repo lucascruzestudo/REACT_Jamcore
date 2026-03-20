@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Box, CircularProgress, useMediaQuery, useTheme } from '@mui/material';
 import { resolveAudioUrl } from '../utils/resolveAudioUrl';
 
-// Global peak cache so we only decode each audio URL once
+// Global peak cache so we only decode each audio URL once per bar count
 const peakCache = new Map<string, Float32Array>();
 const pendingCache = new Map<string, Promise<Float32Array>>();
 
@@ -30,6 +30,7 @@ async function extractPeaks(url: string, bars: number): Promise<Float32Array> {
       const max = Math.max(...peaks);
       if (max > 0) peaks.forEach((_, idx) => (peaks[idx] /= max));
       peakCache.set(cacheKey, peaks);
+      pendingCache.delete(cacheKey);
       return peaks;
     })();
     pendingCache.set(cacheKey, promise);
@@ -69,13 +70,28 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   const BAR_COUNT = isMobile ? BAR_COUNT_MOBILE : BAR_COUNT_DESKTOP;
   const BAR_GAP = isMobile ? BAR_GAP_MOBILE : BAR_GAP_DESKTOP;
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [peaks, setPeaks] = useState<Float32Array | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // Load + analyze audio
+  // Observe visibility — start loading peaks only when the component enters the viewport
   useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setIsVisible(true); },
+      { rootMargin: '100px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Load + analyze audio — gated on visibility
+  useEffect(() => {
+    if (!isVisible || !audioUrl) return;
     let cancelled = false;
     const resolvedUrl = resolveAudioUrl(audioUrl);
     const cacheKey = `${resolvedUrl}:${BAR_COUNT}`;
@@ -99,7 +115,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
         }
       });
     return () => { cancelled = true; };
-  }, [audioUrl, BAR_COUNT]);
+  }, [audioUrl, BAR_COUNT, isVisible]);
 
   // Draw waveform
   useEffect(() => {
@@ -161,7 +177,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   );
 
   return (
-    <Box sx={{ position: 'relative', width: '100%', height }}>
+    <Box ref={containerRef} sx={{ position: 'relative', width: '100%', height }}>
       {loading && (
         <Box
           sx={{
