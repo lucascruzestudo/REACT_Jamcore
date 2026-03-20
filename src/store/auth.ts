@@ -18,7 +18,8 @@ interface AuthState {
 }
 
 export const useAuthStore = create<AuthState>((set) => {
-  const token = localStorage.getItem('user.token') || Cookies.get('token') || null;
+  // Token is stored only in cookie (secure + sameSite in production)
+  const token = Cookies.get('token') || null;
   const user = token ? JSON.parse(localStorage.getItem('user') || 'null') : null;
 
   return {
@@ -31,7 +32,11 @@ export const useAuthStore = create<AuthState>((set) => {
         const token = response.data.data.token;
         const user = response.data.data;
 
-        Cookies.set('token', token, { expires: 7 });
+        Cookies.set('token', token, {
+          expires: 7,
+          secure: import.meta.env.PROD,
+          sameSite: 'strict',
+        });
         localStorage.setItem('user', JSON.stringify(user));
 
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -49,7 +54,6 @@ export const useAuthStore = create<AuthState>((set) => {
 
     logout: () => {
       Cookies.remove('token');
-      localStorage.removeItem('token');
       localStorage.removeItem('user');
       delete api.defaults.headers.common['Authorization'];
       queryClient.clear();
