@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Box, CircularProgress, useMediaQuery, useTheme } from '@mui/material';
+import { resolveAudioUrl } from '../utils/resolveAudioUrl';
 
 // Global peak cache so we only decode each audio URL once
 const peakCache = new Map<string, Float32Array>();
@@ -76,14 +77,15 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   // Load + analyze audio
   useEffect(() => {
     let cancelled = false;
-    const cacheKey = `${audioUrl}:${BAR_COUNT}`;
+    const resolvedUrl = resolveAudioUrl(audioUrl);
+    const cacheKey = `${resolvedUrl}:${BAR_COUNT}`;
     if (peakCache.has(cacheKey)) {
       setPeaks(peakCache.get(cacheKey)!);
       return;
     }
     setLoading(true);
     setError(false);
-    extractPeaks(audioUrl, BAR_COUNT)
+    extractPeaks(resolvedUrl, BAR_COUNT)
       .then((p) => {
         if (!cancelled) {
           setPeaks(p);
